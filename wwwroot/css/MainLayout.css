@@ -46,6 +46,7 @@
         border-radius: 100%;
         border: 2px solid #fff;
         overflow: hidden;
+        cursor: pointer;
     }
     .sidebar .user p {
         font-size: 17px;
@@ -54,6 +55,8 @@
         color: white;
         margin-left: 15px;
         overflow: hidden;
+        cursor: pointer;
+            
     }
     .sidebar .bottom-list {
         position: absolute;
@@ -105,7 +108,7 @@
             color: white;
             white-space: nowrap;
             font-size: 15px;
-            font-weight: 300px;
+            font-weight: 300;
         }
 
 
