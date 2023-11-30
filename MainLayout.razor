@@ -1,0 +1,58 @@
+﻿@inherits LayoutComponentBase
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<link rel="stylesheet" href="/css/MainLayout.css">
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<div class="sidebar">
+    <div class="user">
+        <img src="/Images/anh-meo-cute-de-thuong-34.jpg" class="user-img" />
+        <div>
+            <p>Nhi Huỳnh</p>
+        </div>
+    </div>
+    <ul>
+        <li>
+            <a href="#">
+                <i class='bx bxs-message-rounded-detail icon'></i>
+                <p>Trò chuyện</p>
+            </a>
+        </li>
+        <li>
+            <NavLink clas="nav-link" href="counter">
+                <i class='bx bxs-contact icon'></i>
+                <p>Danh bạ</p>
+            </NavLink>
+        </li>
+        <li>
+            <a href="#">
+                <i class='bx bx-cog icon'></i>
+                <p>Cài đặt</p>
+            </a>
+        </li>
+    </ul>
+    <div class="bottom-list">
+        <ul>
+            <li>
+                <a href="#">
+                    <i class='bx bx-moon icon icon'></i>
+                    <p>Chế độ</p>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class='bx bx-log-out icon'></i>
+                    <p>Đăng xuất</p>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="page">
+    <div class="square"></div>
+    <div class="main">
+        @Body
+    </div>
+</div>
