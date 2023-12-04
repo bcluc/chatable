@@ -7,13 +7,14 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    
 }
 
 .main {
     flex: 1; 
 }
 .sidebar {
-    background: #4267b2;
+    background: #0091ff;
     width: 80px;
     height: 100%;
     position: fixed;
@@ -112,7 +113,7 @@
         }
 
 
-@media (min-width: 641px) {
+@media (min-width: 64px) {
     .page {
         flex-direction: row;
     }

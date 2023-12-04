@@ -1,0 +1,129 @@
+﻿@page "/chat"
+@using Chatable.Data.Components
+@using Chatable.Data.Entitles;
+@using Microsoft.AspNetCore.SignalR.Client
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@inject IJSRuntime JSRuntime
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager Navigation
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+
+<!-- Your Blazor component -->
+
+<div class="container-fluid"
+    
+        
+        <div class="card-body">
+            <div class="row" style="flex: 1">
+                <div class="col-md-3 col-3" style="margin-top:0px">
+                <div class="row-sm" style="flex: 1">
+                    <MudItem>
+                        <MudAutocomplete T="string" Label="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
+                                         AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+                    </MudItem>
+                    <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt" Color="Color.Tertiary" aria-label="add person"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Tertiary" aria-label="add group"></MudIconButton>
+
+                </div>
+                    <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />
+                </div>
+                @*<div class="col-sm-8 col-6 d-flex justify-content-center align-items-center" style="background-color: #f4ecff;">*@
+                <div class="col-sm-9 col-9" >
+                    <ChatDetail SelectedUser="_selectedUser" 
+                        NewIncomingMessage="@_newIncomingMessage"
+                        OnIncomingMessageRecieved = "()=> _newIncomingMessage = null"
+                        OnCancel="HandleChatDetailsCancel" />
+                </div>
+                
+            </div>
+        </div>
+   
+</div>
+
+@code {
+    private string value2;
+    private bool _loadingUsers = false;
+    private User? _selectedUser = null;
+    private Message? _newIncomingMessage = null;
+    private HubConnection? hubConnection;
+    public IList<User> Chats { get; set; } = new List<User>
+    {
+    new User("1", "mr a", " ambar", "null", DateTime.Now.ToString()),
+    new User("2", "mr b", " bmbar", "null", DateTime.Now.ToString()),
+    };
+    private string[] states =
+    {
+        "Alabama", "Alaska", "American Samoa", "Arizona",
+        "Arkansas", "California", "Colorado", "Connecticut",
+        "Delaware", "District of Columbia", "Federated States of Micronesia",
+        "Florida", "Georgia", "Guam", "Hawaii", "Idaho",
+        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
+        "Louisiana", "Maine", "Marshall Islands", "Maryland",
+        "Massachusetts", "Michigan", "Minnesota", "Mississippi",
+        "Missouri", "Montana", "Nebraska", "Nevada",
+        "New Hampshire", "New Jersey", "New Mexico", "New York",
+        "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio",
+        "Oklahoma", "Oregon", "Palau", "Pennsylvania", "Puerto Rico",
+        "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
+        "Texas", "Utah", "Vermont", "Virgin Island", "Virginia",
+        "Washington", "West Virginia", "Wisconsin", "Wyoming",
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+       
+    }
+
+
+
+    private async Task<IEnumerable<string>> Search2(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+        await Task.Delay(5);
+
+        // if text is null or empty, don't return values (drop-down will not open)
+        if (string.IsNullOrEmpty(value))
+            return new string[0];
+        // return chat room
+        return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task OnUserSelected(User user)
+    {
+        _selectedUser = user;
+
+        var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
+        if (selectedChatUser is not null)
+        {
+            selectedChatUser.IsSelected = false;
+        }
+
+        var chatUser = Chats.FirstOrDefault(c => c.UserId == user.UserId);
+        if (chatUser is null)
+        {
+            user.IsSelected = true;
+            Chats.Add(user);
+        }
+        else
+        {
+            chatUser.IsSelected = true;
+        }
+    }
+    // Delete the conversation visually, not in the data
+    private async Task HandleChatDetailsCancel(bool shouldRemoveFromChatsList)
+    {
+        if (shouldRemoveFromChatsList)
+        {
+            Chats.Remove(_selectedUser);
+        }
+        _selectedUser = null;
+    }
+    private void ConfigureConnection()
+    {
+        //Tạo hub connection, listen
+
+    }
+}

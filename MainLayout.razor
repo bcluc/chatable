@@ -1,5 +1,5 @@
-﻿@inherits LayoutComponentBase
-@inject NavigationManager NavigationManager
+﻿@using Chatable.Dialog.Profile;
+@inherits LayoutComponentBase
 @inject IDialogService DialogService
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <link rel="stylesheet" href="/css/MainLayout.css">
@@ -17,7 +17,7 @@
         </div>
         <ul>
             <li>
-                <a href="login">
+                <a href="chat">
                     <i class='bx bxs-message-rounded-detail icon'></i>
                     <p>Trò chuyện</p>
                 </a>
@@ -58,14 +58,9 @@
 </div>
 @code 
 {
-    // protected override void OnInitialized()
-    // {
-    //     // Chuyển hướng người dùng đến trang đăng nhập
-    //     NavigationManager.NavigateTo("/login", forceLoad: true);
-    // }
     private void OpenDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<Dialogs.Profile.DialogProfile>("Thông tin cá nhân", options);
+        DialogService.Show<DialogProfile>("Thông tin cá nhân", options);
     }
 }
