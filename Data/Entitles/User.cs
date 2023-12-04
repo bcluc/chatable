@@ -16,5 +16,6 @@
             Avatar = avatar;
             LastTimeOnline = lastTimeOnline;
         }
+        public bool IsSelected { get; set; }
     }
 }

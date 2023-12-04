@@ -1,0 +1,9 @@
+﻿.user-img {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+    border-radius: 100%;
+    border: 2px solid #fff;
+    overflow: hidden;
+}

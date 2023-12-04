@@ -1,0 +1,43 @@
+﻿@using Chatable.Data.Entitles;
+<link rel="stylesheet" href="/css/ChatList.css">
+
+<div class="list-group list-group-flush">
+      
+    @if (Loading)
+    {
+        <li class="list-group-item">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...
+        </li>
+    }
+    else
+    {
+        @foreach (var chat in Chats)
+        {
+            <li class="list-group-item @(chat.IsSelected ? "bg-success text-white" : "")" @onclick="() => HandleUserClick(chat)">
+                <MudAvatar>
+                    <MudImage Src="/Images/anh-meo-cute-de-thuong-34.jpg"></MudImage>
+                </MudAvatar>
+                <class=""></class>@chat.FullName
+                </li>
+        }
+    }
+</div>
+
+@code {
+
+    private String avatar = "/Images/anh-meo-cute-de-thuong-34.jpg";
+    [Parameter]
+    public IEnumerable<User> Chats { get; set; } = Enumerable.Empty<User>(); 
+
+    [Parameter]
+    public bool Loading { get; set; }
+
+    [Parameter]
+    public EventCallback<User> OnUserSelected { get; set; }
+
+    private async Task HandleUserClick(User chat)
+    {
+        await OnUserSelected.InvokeAsync(chat);
+    }
+}
