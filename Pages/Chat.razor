@@ -13,23 +13,21 @@
 
 <!-- Your Blazor component -->
 
-<div class="container-fluid">
-    <div class="card br-0 mt-1">
-        <div class="card-header bg-main br-0 text-white d-flex">
+<div class="container-fluid"
+    
+        
+        <div class="card-body">
             <div class="row" style="flex: 1">
-                
+                <div class="col-md-3 col-3" style="margin-top:0px">
+                <div class="row-sm" style="flex: 1">
                     <MudItem>
                         <MudAutocomplete T="string" Label="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
                                          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
                     </MudItem>
                     <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt" Color="Color.Tertiary" aria-label="add person"></MudIconButton>
-                    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Tertiary"  aria-label="add group"></MudIconButton>
-                    
-            </div>
-        </div>
-        <div class="card-body messages-window bg-light d-flex">
-            <div class="row" style="flex: 1">
-                <div class="col-sm-3 col-3">
+                    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Tertiary" aria-label="add group"></MudIconButton>
+
+                </div>
                     <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />
                 </div>
                 @*<div class="col-sm-8 col-6 d-flex justify-content-center align-items-center" style="background-color: #f4ecff;">*@
@@ -42,7 +40,7 @@
                 
             </div>
         </div>
-    </div>
+   
 </div>
 
 @code {
@@ -114,6 +112,7 @@
             chatUser.IsSelected = true;
         }
     }
+    // Delete the conversation visually, not in the data
     private async Task HandleChatDetailsCancel(bool shouldRemoveFromChatsList)
     {
         if (shouldRemoveFromChatsList)

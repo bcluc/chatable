@@ -7,3 +7,15 @@
     border: 2px solid #fff;
     overflow: hidden;
 }
+.user-select {
+    border-radius: 15px;
+    background-color: #0091ff;
+    color: white;
+}
+.user-name {
+    padding-left: 10px;
+    font-size: 16px;
+    text-align: center;
+    font-weight:450;
+    white-space: nowrap;
+}

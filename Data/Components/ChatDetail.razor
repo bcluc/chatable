@@ -4,13 +4,15 @@
 
 @if (SelectedUser is null)
 {
-    <h2>Chào mừng đến với Chatable, hãy bắt đầu cuộc trò chuyện của bạn ngay</h2>
+    <div class="d-flex justify-content-center align-items-center">
+        <h2>Chào mừng đến với Chatable, hãy bắt đầu cuộc trò chuyện của bạn ngay</h2>
+       </div>
 }
 else
 {
-    <div class="flex-grow-1 d-flex flex-column">
+    <div class="d-flex flex-column align-items-strech" style="margin-top:5px">
         <div class="header d-flex justify-content-between bg-main">
-            <div class="d-flex justify-content-around">
+            <div class="d-flex align-items-center">
                 <MudAvatar>
                     <MudImage Src="/Images/anh-meo-cute-de-thuong-34.jpg"></MudImage>
                 </MudAvatar>
@@ -19,8 +21,8 @@ else
                 
             </div>
             <div class="d-flex justify-content-around">
-                <MudIconButton Icon="@Icons.Material.Filled.Call" Color="Color.Tertiary" aria-label="call"></MudIconButton>
-                <MudIconButton Icon="@Icons.Material.Filled.VideoCall" Color="Color.Tertiary" aria-label="video call"></MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.Call" Color= "Color.Primary" aria-label="call"></MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.VideoCall" Color="Color.Primary" aria-label="video call"></MudIconButton>
             </div>
         </div>
         
@@ -80,8 +82,8 @@ else
             <EditForm Model="_newMessage" OnValidSubmit="HandleSendMessageSubmit">
                 <div class="">
                     <div class="input-group">
-                        <InputText @bind-Value="_newMessage" placeholder="Enter message here..." class="form-control" />
-                        <button class="btn btn-success " type="submit">Send</button>
+                        <InputText @bind-Value="_newMessage" placeholder="Nhập tin nhắn..." class="form-control" />
+                        <button class="btn-send" type="submit">Gửi</button>
                     </div>
                 </div>
             </EditForm>
@@ -155,7 +157,17 @@ else
             var allMessages = new List<Message>
             {
                 new Message("1","1","2",new DateTime(2022, 12, 25,10,30,12),"Text","How r u"),
-                 new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1","1","2",DateTime.Now,"Text","How d u"),
             };
             //var allMessages = await GetClient().GetFromJsonAsync<IEnumerable<Message>>($"api/messages/{SelectedUser.UserId}", JsonConverter.JsonSerializerOptions);
 
