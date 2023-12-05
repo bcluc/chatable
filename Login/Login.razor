@@ -1,6 +1,5 @@
 ﻿@layout LoginLayout
 @page "/"
-@page "/login"
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Net.Http
@@ -22,11 +21,13 @@
                               @bind-Value="model.userName" For="@(() => model.userName)" />
                 <MudTextField Label="Mật khẩu" Class="mt-3"
                               @bind-Value="model.password" For="@(() => model.password)" InputType="InputType.Password" />
+                              <p class="erro" >@erroMessage</p>
             </MudCardContent>
             <MudCardActions>
                 <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Đăng nhập</MudButton>
                 <a href="signup" class="toSignUp">Đăng ký</a>
             </MudCardActions>
+
         </MudCard>
     </EditForm>
 </div>
@@ -51,6 +52,14 @@
     .container {
         background: white;
     }
+    .erro{
+        display: flex;
+        width: 100%;
+        margin: 10px 20px;
+        clor: red;
+        font-size: 14px;
+
+    }
 </style>
 @code {
     LoginForm model = new LoginForm();
@@ -60,7 +69,6 @@
     public class LoginForm
     {
         [Required]
-        [StringLength(8, ErrorMessage = "Tên đăng nhập không vượt quá 8 kí tự.")]
 
         public string userName { get; set; }
 
@@ -70,28 +78,29 @@
     }
     private async Task<bool> LoginUser(EditContext context)
     {
+        Http = new HttpClient();
         try
         {
-            // string serializedUser = JsonConvert.SerializeObject(model);
-            // HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-            // httpRequestMessage.Method = new HttpMethod("POST");
-            // httpRequestMessage.RequestUri = new Uri("https://localhost:7154/api/v1/Auth/login");
-            // httpRequestMessage.Content = new StringContent(serializedUser);
+            string serializedUser = JsonConvert.SerializeObject(model);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Auth/login");
+            httpRequestMessage.Content = new StringContent(serializedUser);
 
-            // httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-            // var response = await Http.SendAsync(httpRequestMessage);
-            // if (response.IsSuccessStatusCode)
-            // {
-            //     success = true;
-            // }
-            // else
-            // {
-            //     success = false;
-            //     erroMessage = await response.Content.ReadAsStringAsync();
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await Http.SendAsync(httpRequestMessage);
+            if (response.IsSuccessStatusCode)
+            {
+                success = true;
+            }
+            else
+            {
+                success = false;
+                string resBody = await response.Content.ReadAsStringAsync();
+                dynamic result = JsonConvert.DeserializeObject(resBody);
+                erroMessage = result.message;
+            }
 
-            // }
-
-            success = true;
             if (success)
             {
                 NavigationManager.NavigateTo("/chat");

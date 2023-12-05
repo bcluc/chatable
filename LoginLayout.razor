@@ -1,18 +1,30 @@
 ﻿@inherits LayoutComponentBase
-<div class="wrapper">
-    <div class="col-12 ">
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<div class="page">
+    <div class="main">
         <br /><br />
         @Body
     </div>
 </div>
 
 <style>
-    .wrapper {
-        width: 100%;
-        height:100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #B9D6F3;
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
+
+    .page {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background: #9FD7F9;
+    }
+
+    .main {
+        flex: 1;
+    }
+    
 </style>
