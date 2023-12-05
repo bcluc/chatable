@@ -1,5 +1,6 @@
 ﻿@using Chatable.Dialog.Profile;
 @inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <link rel="stylesheet" href="/css/MainLayout.css">
@@ -53,14 +54,24 @@
         </div>
     </div>
     <div class="main">
-        @Body
+        @* @Body *@
+        @* <AuthorizeView>
+            <NotAuthorized>
+                <a href="/login">Login</a>
+            </NotAuthorized>
+        </AuthorizeView> *@
     </div>
 </div>
 @code 
 {
+  
+    public async Task Logout()
+    {
+        NavigationManager.NavigateTo("");
+    }
     private void OpenDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<DialogProfile>("Thông tin cá nhân", options);
+        DialogService.Show<Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
     }
 }

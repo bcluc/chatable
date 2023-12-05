@@ -1,0 +1,113 @@
+﻿@layout LoginLayout
+@page "/signup"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http
+@using Newtonsoft.Json
+@inject HttpClient Http
+<div class="title">
+    @{
+        <h1>Chatable</h1>
+        <h2>Hãy tạo tài khoản của bạn</h2>
+    }
+</div>
+<div Class="body">
+    <EditForm Model="@model" OnValidSubmit="ResigterUser">
+        <DataAnnotationsValidator />
+        <MudCard Style="width:350px" Class="container">
+            <MudCardContent>
+                <MudTextField Label="Tên nguời dùng"
+                              @bind-Value="model.userName" For="@(() => model.userName)" />
+                <MudTextField Label="Họ tên người dùng"
+                              @bind-Value="model.fullName" For="@(() => model.fullName)" />
+                <MudTextField Label="Mật khẩu" Class="mt-3"
+                              @bind-Value="model.password" For="@(() => model.password)" InputType="InputType.Password" />
+                <MudTextField Label="Nhập lại mật khẩu" Class="mt-3"
+                              @bind-Value="model.confirmPassword" For="@(() => model.confirmPassword)" InputType="InputType.Password" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Đăng ký</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </EditForm>
+</div>
+<style>
+    .title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 0;
+    }
+
+    .body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 0;
+    }
+
+    .toSignUp {
+        margin-left: 40px
+    }
+
+    .container {
+        background: white;
+    }
+</style>
+@code {
+    RegisterAccountForm model = new RegisterAccountForm();
+    bool success;
+    string erroMessage;
+
+    public class RegisterAccountForm
+    {
+        [Required]
+        [StringLength(8, ErrorMessage = "Tên người dùng không được ít hơn 8 kí tự")]
+        public string userName { get; set; }
+
+        [Required]
+        public string fullName { get; set; }
+
+        [Required]
+        [StringLength(30, ErrorMessage = "Mật khẩu phải có ít nhất 8 kí tự", MinimumLength = 8)]
+        public string password { get; set; }
+
+        [Required]
+        [Compare(nameof(password))]
+        public string confirmPassword { get; set; }
+
+    }
+
+    private async Task <bool> ResigterUser(EditContext context)
+    {
+        try
+        {
+            string serializedUser = JsonConvert.SerializeObject(model);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri("https://localhost:7154/api/v1/Auth/register");
+            httpRequestMessage.Content = new StringContent(serializedUser);
+
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await Http.SendAsync(httpRequestMessage);
+            if (response.IsSuccessStatusCode)
+            {
+                success = true;
+
+            }
+            else
+            {
+                success = false;
+                erroMessage = await response.Content.ReadAsStringAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        return await Task.FromResult(true);
+
+    }
+}

@@ -9,11 +9,10 @@
         public string Avatar { get; set; }
         public string LastTimeOnline { get; set; }
         public User() { }
-        public User(string userId, string userName, string password, string fullName, string avatar, string lastTimeOnline)
+        public User(string userId, string userName, string fullName, string avatar, string lastTimeOnline)
         {
             UserId = userId;
             UserName = userName;
-            Password = password;
             FullName = fullName;
             Avatar = avatar;
             LastTimeOnline = lastTimeOnline;

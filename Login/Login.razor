@@ -1,0 +1,101 @@
+﻿@layout LoginLayout
+@page "/"
+@page "/login"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http
+@using Newtonsoft.Json
+@inject HttpClient Http
+<div class="title">
+    @{
+        <h1>Chatable</h1>
+        <h2>Hãy đăng nhập tài khoản của bạn</h2>
+    }
+</div>
+<div Class="body">
+    <EditForm Model="@model" OnValidSubmit="LoginUser">
+        <DataAnnotationsValidator/>
+        <MudCard Style="width:350px" Class="container">
+            <MudCardContent>
+                <MudTextField Label="Tên đăng nhập" 
+                              @bind-Value="model.userName" For="@(() => model.userName)" />
+                <MudTextField Label="Mật khẩu" Class="mt-3"
+                              @bind-Value="model.password" For="@(() => model.password)" InputType="InputType.Password" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Đăng nhập</MudButton>
+                <a href="signup" class="toSignUp">Đăng ký</a>
+            </MudCardActions>
+        </MudCard>
+    </EditForm>
+</div>
+<style>
+    .title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 0;
+    }
+
+    .body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 0;
+    }
+    .toSignUp {
+        margin-left: 40px
+    }
+    .container {
+        background: white;
+    }
+</style>
+@code {
+    LoginForm model = new LoginForm();
+    bool success;
+    String erroMessage;
+
+    public class LoginForm
+    {
+        [Required]
+        [StringLength(8, ErrorMessage = "Tên đăng nhập không vượt quá 8 kí tự.")]
+
+        public string userName { get; set; }
+
+        [Required]
+        public string password { get; set; }
+
+    }
+    private async Task<bool> LoginUser(EditContext context)
+    {
+        try
+        {
+            string serializedUser = JsonConvert.SerializeObject(model);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri("https://localhost:7154/api/v1/Auth/login");
+            httpRequestMessage.Content = new StringContent(serializedUser);
+
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await Http.SendAsync(httpRequestMessage);
+            if (response.IsSuccessStatusCode)
+            {
+                success = true;
+            }
+            else
+            {
+                success = false;
+                erroMessage = await response.Content.ReadAsStringAsync();
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        return await Task.FromResult(true);
+    }
+
+}
