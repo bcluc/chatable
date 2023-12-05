@@ -16,7 +16,7 @@
         <DataAnnotationsValidator />
         <MudCard Style="width:350px" Class="container">
             <MudCardContent>
-                <MudTextField Label="Tên nguời dùng"
+                <MudTextField T="string" Label="Tên người dùng" Required="true" RequiredError="User name is required!"
                               @bind-Value="model.userName" For="@(() => model.userName)" />
                 <MudTextField Label="Họ tên người dùng"
                               @bind-Value="model.fullName" For="@(() => model.fullName)" />
@@ -83,6 +83,7 @@
     {
         try
         {
+
             string serializedUser = JsonConvert.SerializeObject(model);
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("POST");
@@ -94,12 +95,12 @@
             if (response.IsSuccessStatusCode)
             {
                 success = true;
-
             }
             else
             {
                 success = false;
                 erroMessage = await response.Content.ReadAsStringAsync();
+               
             }
         }
         catch (Exception ex)

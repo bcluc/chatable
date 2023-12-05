@@ -6,6 +6,7 @@
 @using System.Net.Http
 @using Newtonsoft.Json
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 <div class="title">
     @{
         <h1>Chatable</h1>
@@ -71,23 +72,29 @@
     {
         try
         {
-            string serializedUser = JsonConvert.SerializeObject(model);
-            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-            httpRequestMessage.Method = new HttpMethod("POST");
-            httpRequestMessage.RequestUri = new Uri("https://localhost:7154/api/v1/Auth/login");
-            httpRequestMessage.Content = new StringContent(serializedUser);
+            // string serializedUser = JsonConvert.SerializeObject(model);
+            // HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            // httpRequestMessage.Method = new HttpMethod("POST");
+            // httpRequestMessage.RequestUri = new Uri("https://localhost:7154/api/v1/Auth/login");
+            // httpRequestMessage.Content = new StringContent(serializedUser);
 
-            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-            var response = await Http.SendAsync(httpRequestMessage);
-            if (response.IsSuccessStatusCode)
-            {
-                success = true;
-            }
-            else
-            {
-                success = false;
-                erroMessage = await response.Content.ReadAsStringAsync();
+            // httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            // var response = await Http.SendAsync(httpRequestMessage);
+            // if (response.IsSuccessStatusCode)
+            // {
+            //     success = true;
+            // }
+            // else
+            // {
+            //     success = false;
+            //     erroMessage = await response.Content.ReadAsStringAsync();
 
+            // }
+
+            success = true;
+            if (success)
+            {
+                NavigationManager.NavigateTo("/chat");
             }
         }
         catch (Exception ex)
