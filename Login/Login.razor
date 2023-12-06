@@ -1,5 +1,7 @@
 ﻿@layout LoginLayout
 @page "/"
+@page "/login"
+
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Net.Http
@@ -24,8 +26,19 @@
                               <p class="erro" >@erroMessage</p>
             </MudCardContent>
             <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Đăng nhập</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Disabled="@_processing" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">
+                    @if (_processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <MudText Class="ms-2">Đang xử lý</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Đăng nhập</MudText>
+                    }
+                </MudButton>
                 <a href="signup" class="toSignUp">Đăng ký</a>
+                
             </MudCardActions>
 
         </MudCard>
@@ -47,7 +60,8 @@
         padding: 50px 0;
     }
     .toSignUp {
-        margin-left: 40px
+        margin-left: 40px;
+        margin-right: 30px;
     }
     .container {
         background: white;
@@ -55,8 +69,8 @@
     .erro{
         display: flex;
         width: 100%;
-        margin: 10px 20px;
-        clor: red;
+        margin: 10px 0px;
+        color: red;
         font-size: 14px;
 
     }
@@ -64,21 +78,22 @@
 @code {
     LoginForm model = new LoginForm();
     bool success;
+    private bool _processing = false;
     String erroMessage;
 
     public class LoginForm
     {
-        [Required]
-
+        
+        [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
         public string userName { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
         public string password { get; set; }
 
     }
     private async Task<bool> LoginUser(EditContext context)
     {
-        Http = new HttpClient();
+        _processing = true;
         try
         {
             string serializedUser = JsonConvert.SerializeObject(model);
@@ -89,6 +104,7 @@
 
             httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
             var response = await Http.SendAsync(httpRequestMessage);
+
             if (response.IsSuccessStatusCode)
             {
                 success = true;
@@ -100,6 +116,7 @@
                 dynamic result = JsonConvert.DeserializeObject(resBody);
                 erroMessage = result.message;
             }
+            _processing = false;
 
             if (success)
             {

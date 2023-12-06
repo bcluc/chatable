@@ -1,30 +1,21 @@
-﻿@inherits LayoutComponentBase
+﻿
+@using Chatable.Dialog.Profile;
+@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<link rel="stylesheet" href="/css/LoginLayout.css">
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 <div class="page">
     <div class="main">
-        <br /><br />
         @Body
     </div>
 </div>
-
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    .page {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        background: #9FD7F9;
-    }
-
-    .main {
-        flex: 1;
-    }
-    
-</style>
+@code 
+{
+  
+   
+}
