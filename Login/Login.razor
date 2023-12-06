@@ -1,0 +1,134 @@
+﻿@layout LoginLayout
+@page "/"
+@page "/login"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http
+@using Newtonsoft.Json
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+<div class="title">
+    @{
+        <h1>Chatable</h1>
+        <h2>Hãy đăng nhập tài khoản của bạn</h2>
+    }
+</div>
+<div Class="body">
+    <EditForm Model="@model" OnValidSubmit="LoginUser">
+        <DataAnnotationsValidator/>
+        <MudCard Style="width:350px" Class="container">
+            <MudCardContent>
+                <MudTextField Label="Tên đăng nhập" 
+                              @bind-Value="model.userName" For="@(() => model.userName)" />
+                <MudTextField Label="Mật khẩu" Class="mt-3"
+                              @bind-Value="model.password" For="@(() => model.password)" InputType="InputType.Password" />
+                              <p class="erro" >@erroMessage</p>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Disabled="@_processing" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">
+                    @if (_processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <MudText Class="ms-2">Đang xử lý</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Đăng nhập</MudText>
+                    }
+                </MudButton>
+                <a href="signup" class="toSignUp">Đăng ký</a>
+                
+            </MudCardActions>
+
+        </MudCard>
+    </EditForm>
+</div>
+<style>
+    .title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 0;
+    }
+
+    .body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 0;
+    }
+    .toSignUp {
+        margin-left: 40px;
+        margin-right: 30px;
+    }
+    .container {
+        background: white;
+    }
+    .erro{
+        display: flex;
+        width: 100%;
+        margin: 10px 0px;
+        color: red;
+        font-size: 14px;
+
+    }
+</style>
+@code {
+    LoginForm model = new LoginForm();
+    bool success;
+    private bool _processing = false;
+    String erroMessage;
+
+    public class LoginForm
+    {
+        
+        [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
+        public string userName { get; set; }
+
+        [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
+        public string password { get; set; }
+
+    }
+    private async Task<bool> LoginUser(EditContext context)
+    {
+        _processing = true;
+        try
+        {
+            string serializedUser = JsonConvert.SerializeObject(model);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Auth/login");
+            httpRequestMessage.Content = new StringContent(serializedUser);
+
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await Http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                success = true;
+            }
+            else
+            {
+                success = false;
+                string resBody = await response.Content.ReadAsStringAsync();
+                dynamic result = JsonConvert.DeserializeObject(resBody);
+                erroMessage = result.message;
+            }
+            _processing = false;
+
+            if (success)
+            {
+                NavigationManager.NavigateTo("/chat");
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        return await Task.FromResult(true);
+    }
+
+}
