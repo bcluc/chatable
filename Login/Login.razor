@@ -3,11 +3,14 @@
 @page "/login"
 
 @using System.ComponentModel.DataAnnotations
+@using Chatable.Data.Entitles;
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Net.Http
 @using Newtonsoft.Json
-@inject HttpClient Http
-@inject NavigationManager NavigationManager
+
+@inject Blazored.LocalStorage.ILocalStorageService _localStorageService
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
 <div class="title">
     @{
         <h1>Chatable</h1>
@@ -83,7 +86,7 @@
 
     public class LoginForm
     {
-        
+
         [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
         public string userName { get; set; }
 
@@ -103,11 +106,17 @@
             httpRequestMessage.Content = new StringContent(serializedUser);
 
             httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-            var response = await Http.SendAsync(httpRequestMessage);
+            var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)
             {
                 success = true;
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var user = JsonConvert.DeserializeObject<LoginRespond>(responseContent);
+                if(user.Token.ToString() != string.Empty)
+                {
+                    await _localStorageService.SetItemAsync("jwt_token", user.Token);
+                }
             }
             else
             {
@@ -120,7 +129,7 @@
 
             if (success)
             {
-                NavigationManager.NavigateTo("/chat");
+                _navigationManager.NavigateTo("/chat");
             }
         }
         catch (Exception ex)
@@ -130,5 +139,6 @@
         }
         return await Task.FromResult(true);
     }
+
 
 }
