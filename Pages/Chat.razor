@@ -50,28 +50,8 @@
     private User? _selectedUser = null;
     private Message? _newIncomingMessage = null;
     private HubConnection? hubConnection;
-    public IList<User> Chats { get; set; } = new List<User>
-    {
-    new User("mra", " ambar", "null", DateTime.Now.ToString()),
-    new User("mrb", " bmbar", "null", DateTime.Now.ToString()),
-    };
-    private string[] states =
-    {
-        "Alabama", "Alaska", "American Samoa", "Arizona",
-        "Arkansas", "California", "Colorado", "Connecticut",
-        "Delaware", "District of Columbia", "Federated States of Micronesia",
-        "Florida", "Georgia", "Guam", "Hawaii", "Idaho",
-        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
-        "Louisiana", "Maine", "Marshall Islands", "Maryland",
-        "Massachusetts", "Michigan", "Minnesota", "Mississippi",
-        "Missouri", "Montana", "Nebraska", "Nevada",
-        "New Hampshire", "New Jersey", "New Mexico", "New York",
-        "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio",
-        "Oklahoma", "Oregon", "Palau", "Pennsylvania", "Puerto Rico",
-        "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
-        "Texas", "Utah", "Vermont", "Virgin Island", "Virginia",
-        "Washington", "West Virginia", "Wisconsin", "Wyoming",
-    };
+    public IList<User> Chats  = new Constant().Chats;
+    private string[] states = new Constant().states;
 
     protected override async Task OnInitializedAsync()
     {

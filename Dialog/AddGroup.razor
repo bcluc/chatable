@@ -55,30 +55,10 @@
     </DialogActions>
 </MudDialog>
 @code {
-        // test
-    private User currentUser = new User("bc", " ambar", "null", DateTime.Now.ToString());
-    private string[] states =
-    {
-        "Alabama", "Alaska", "American Samoa", "Arizona",
-        "Arkansas", "California", "Colorado", "Connecticut",
-        "Delaware", "District of Columbia", "Federated States of Micronesia",
-        "Florida", "Georgia", "Guam", "Hawaii", "Idaho",
-        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
-        "Louisiana", "Maine", "Marshall Islands", "Maryland",
-        "Massachusetts", "Michigan", "Minnesota", "Mississippi",
-        "Missouri", "Montana", "Nebraska", "Nevada",
-        "New Hampshire", "New Jersey", "New Mexico", "New York",
-        "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio",
-        "Oklahoma", "Oregon", "Palau", "Pennsylvania", "Puerto Rico",
-        "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
-        "Texas", "Utah", "Vermont", "Virgin Island", "Virginia",
-        "Washington", "West Virginia", "Wisconsin", "Wyoming",
-    };
-    public IList<User> Chats { get; set; } = new List<User>
-    {
-    new User("mra", " ambar", "null", DateTime.Now.ToString()),
-    new User("mrb", " bmbar", "null", DateTime.Now.ToString()),
-    };
+    // test
+    private User currentUser = new Constant().currentUser;
+    public IList<User> Chats = new Constant().Chats;
+    private string[] states = new Constant().states;
 
     // variable
     bool success;
@@ -141,57 +121,56 @@
     private async Task<bool> HandleUserClick(List<User> users)
     {
         var memberList = users.Select(l => l.UserName).ToList();
-        string res="";
+        string res = "";
         memberList.Add(currentUser.UserName);
         if (groupName == "")
         {
             groupName = currentUser.FullName + ", " + _selectedUsers[0].FullName + ", " + _selectedUsers[1].FullName;
         }
-        //await jsRuntime.InvokeAsync<string>("console.log","This is group name", groupName);
+        await jsRuntime.InvokeAsync<string>("console.log","This is group name", memberList.ToString());
         //Console.WriteLine(groupName);
         Group group = new Group(groupName, memberList);
 
         // with the server
-        //try
-        //{
-        //    string groupInitialize = JsonConvert.SerializeObject(group);
-        //    HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-        //    httpRequestMessage.Method = new HttpMethod("POST");
-        //    httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Group");
-        //    httpRequestMessage.Content = new StringContent(groupInitialize);
+        try
+        {
+            string groupInitialize = JsonConvert.SerializeObject(group);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Group");
+            httpRequestMessage.Content = new StringContent(groupInitialize);
 
-        //    httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-        //    var response = await _http.SendAsync(httpRequestMessage);
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await _http.SendAsync(httpRequestMessage);
 
-        //    if (response.IsSuccessStatusCode)
-        //    {
-        //        var responseContent = await response.Content.ReadAsStringAsync();
-        //        var user = JsonConvert.DeserializeObject<LoginRespond>(responseContent);
-        //        success = true;
-        //    }
-        //    else
-        //    {
-        //        success = false;
-        //        string resBody = await response.Content.ReadAsStringAsync();
-        //        dynamic result = JsonConvert.DeserializeObject(resBody);
-        //        erroMessage = result.message;
-        //    }
-        //    _processing = false;
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var user = JsonConvert.DeserializeObject<LoginRespond>(responseContent);
+                success = true;
+            }
+            else
+            {
+                success = false;
+                string resBody = await response.Content.ReadAsStringAsync();
+                dynamic result = JsonConvert.DeserializeObject(resBody);
+                erroMessage = result.message;
+            }
+            _processing = false;
 
-        //    if (success)
-        //    {
-        //        _navigationManager.NavigateTo("/chat");
-        //    }
-        //}
-
-
-        //catch (Exception ex)
-        //{
-        //    success = false;
-        //    erroMessage = ex.Message;
-        //}
-        //await jsRuntime.InvokeAsync<string>("console.log", "Error", erroMessage);
-        //Close();
+            if (success)
+            {
+                _navigationManager.NavigateTo("/chat");
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+    
+        await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
+        Close();
 
         return await Task.FromResult(true);
     }
