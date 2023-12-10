@@ -130,9 +130,9 @@ else
             _scrollToBottom = true;
         }
 
-        if(SelectedUser is not null && SelectedUser.UserId != previousSelectedUserId)
+        if(SelectedUser is not null && SelectedUser.UserName != previousSelectedUserId)
         {
-            previousSelectedUserId = SelectedUser.UserId;
+            previousSelectedUserId = SelectedUser.UserName;
             await LoadMessagesAsync();
             _scrollToBottom = true;
         }
@@ -202,7 +202,7 @@ else
     {
         if (!string.IsNullOrWhiteSpace(_newMessage))
         {
-            var sendMessageDto = new Message(Guid.NewGuid().ToString(), "1", SelectedUser!.UserId, DateTime.Now, "Text", _newMessage);
+            var sendMessageDto = new Message(Guid.NewGuid().ToString(), "1", SelectedUser!.UserName, DateTime.Now, "Text", _newMessage);
             //var response = await GetClient().PostAsJsonAsync("api/messages", sendMessageDto, JsonConverter.JsonSerializerOptions);
             
             // ADD Message

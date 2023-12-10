@@ -30,4 +30,9 @@ app.UseAuthorization();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
+//app.UseEndpoints(endpoints =>
+//{
+//    endpoints.MapControllers();
+//});
+
 app.Run();

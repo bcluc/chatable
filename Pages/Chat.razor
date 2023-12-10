@@ -6,6 +6,7 @@
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Navigation
 
@@ -24,8 +25,8 @@
                         <MudAutocomplete T="string" Label="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
                                          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
                     </MudItem>
-                    <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt" Color="Color.Tertiary" aria-label="add person"></MudIconButton>
-                    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Tertiary" aria-label="add group"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt" Color="Color.Tertiary" aria-label="add person" ></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Tertiary" aria-label="add group" OnClick="OpenAddGroupDialog"></MudIconButton>
 
                 </div>
                     <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />
@@ -51,8 +52,8 @@
     private HubConnection? hubConnection;
     public IList<User> Chats { get; set; } = new List<User>
     {
-    new User("1", "mr a", " ambar", "null", DateTime.Now.ToString()),
-    new User("2", "mr b", " bmbar", "null", DateTime.Now.ToString()),
+    new User("mra", " ambar", "null", DateTime.Now.ToString()),
+    new User("mrb", " bmbar", "null", DateTime.Now.ToString()),
     };
     private string[] states =
     {
@@ -77,7 +78,7 @@
        
     }
 
-
+    //private async Task<bool> 
 
     private async Task<IEnumerable<string>> Search2(string value)
     {
@@ -101,7 +102,7 @@
             selectedChatUser.IsSelected = false;
         }
 
-        var chatUser = Chats.FirstOrDefault(c => c.UserId == user.UserId);
+        var chatUser = Chats.FirstOrDefault(c => c.UserName == user.UserName);
         if (chatUser is null)
         {
             user.IsSelected = true;
@@ -125,5 +126,11 @@
     {
         //Tạo hub connection, listen
 
+    }
+
+    private void OpenAddGroupDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<Dialog.AddGroup>("Tạo nhóm",options);
     }
 }

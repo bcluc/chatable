@@ -113,9 +113,15 @@
                 success = true;
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var user = JsonConvert.DeserializeObject<LoginRespond>(responseContent);
-                if(user.Token.ToString() != string.Empty)
+                try{
+                    if(user.Token != null)
+                    {
+                        await _localStorageService.SetItemAsync("jwt_token", user.Token);
+                    }
+                }
+                catch(Exception e)
                 {
-                    await _localStorageService.SetItemAsync("jwt_token", user.Token);
+                    erroMessage = e.Message;
                 }
             }
             else

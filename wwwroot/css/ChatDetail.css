@@ -1,4 +1,5 @@
-﻿
+﻿@import "Theme.css";
+
 .messages-list {
     height: calc(100vh - 105px - 26px);
     overflow-y: auto;
