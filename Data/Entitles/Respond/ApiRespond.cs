@@ -1,6 +1,6 @@
-﻿namespace Chatable.Data.Entitles
+﻿namespace Chatable.Data.Entitles.Respond
 {
-    public class LoginRespond
+    public class ApiRespond
     {
         public bool Success { get; set; }
         public string Message { get; set; }

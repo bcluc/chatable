@@ -1,5 +1,10 @@
-﻿@using Chatable.Data.Entitles;
+﻿@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles;
 @using Microsoft.AspNetCore.Components.Forms
+
+@inject HttpClient Client
+@inject IJSRuntime JsRuntime
+
 <link rel="stylesheet" href="/css/ChatDetail.css">
 
 @if (SelectedUser is null)
@@ -16,7 +21,7 @@ else
                 <MudAvatar>
                     <MudImage Src=@SelectedUser.Avatar></MudImage>
                 </MudAvatar>
-                <h4 class="user-p">@SelectedUser.FullName</h4>
+                <h4 class="user-p">@SelectedUser.Name</h4>
 
                 
             </div>
@@ -51,10 +56,12 @@ else
                 }
                 else
                 {
-                    @foreach (var msg in _messages)
+                    @for (int i=0; i< _messages.Count()-1; i++)
                     {
+                        var msg = _messages[i];
                         var incoming = msg.SenderId == currentUser.UserName;
-
+                        //var nextMsg = _messages[i + 1];
+                        
                         var cls = $"justify-content-{(incoming ? "start" : "end")}";
 
                         <li class="d-flex @cls">
@@ -98,11 +105,11 @@ else
 
     //private int CurrentUserId => AuthenticationState?.User.UserId ?? 0;
 
-    private User currentUser = new Constant().currentUser;
+    private User currentUser = Constant.currentUser;
    
 
     [Parameter]
-    public User? SelectedUser { get; set; }
+    public Conversation? SelectedUser { get; set; }
 
     [Parameter]
     public EventCallback<bool> OnCancel { get; set; }
@@ -131,9 +138,9 @@ else
             _scrollToBottom = true;
         }
 
-        if(SelectedUser is not null && SelectedUser.UserName != previousSelectedUserId)
+        if(SelectedUser is not null && SelectedUser.Id != previousSelectedUserId)
         {
-            previousSelectedUserId = SelectedUser.UserName;
+            previousSelectedUserId = SelectedUser.Id;
             await LoadMessagesAsync();
             _scrollToBottom = true;
         }
@@ -165,6 +172,10 @@ else
                 new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
                 new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
                 new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
             };
             //var allMessages = await GetClient().GetFromJsonAsync<IEnumerable<Message>>($"api/messages/{SelectedUser.UserId}", JsonConverter.JsonSerializerOptions);
 
@@ -176,7 +187,7 @@ else
             }
             else
             {
-                _infoMessage = $"There is no message between you and {SelectedUser.FullName}";
+                _infoMessage = $"Không có cuộc trò chuyện nào giữa bạn và {SelectedUser.Name}";
             }
         }
         finally
@@ -199,7 +210,9 @@ else
     {
         if (!string.IsNullOrWhiteSpace(_newMessage))
         {
-            var sendMessageDto = new Message(Guid.NewGuid().ToString(), "1", SelectedUser!.UserName, DateTime.Now, "Text", _newMessage);
+            //var sendMessageDto = new Message(Guid.NewGuid().ToString(), "1", SelectedUser!.UserName, DateTime.Now, "Text", _newMessage);
+            
+            
             //var response = await GetClient().PostAsJsonAsync("api/messages", sendMessageDto, JsonConverter.JsonSerializerOptions);
             
             // ADD Message

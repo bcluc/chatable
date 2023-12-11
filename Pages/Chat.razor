@@ -1,10 +1,11 @@
 ﻿@page "/chat"
-@using Chatable.Data.Components
+@using Chatable.Data.Components;
 @using Chatable.Data.Entitles;
-@using Microsoft.AspNetCore.SignalR.Client
-@using System.Net.Http.Headers
-@using System.Text.Json
-@using System.Text.Json.Serialization
+@using Chatable.Data.Entitles.Model;
+@using Microsoft.AspNetCore.SignalR.Client;
+@using System.Net.Http.Headers;
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
 @inject IJSRuntime JSRuntime
 @inject IDialogService DialogService
 @inject IHttpClientFactory ClientFactory
@@ -47,11 +48,11 @@
 @code {
     private string value2;
     private bool _loadingUsers = false;
-    private User? _selectedUser = null;
+    private Conversation? _selectedUser = null;
     private Message? _newIncomingMessage = null;
     private HubConnection? hubConnection;
-    public IList<User> Chats  = new Constant().Chats;
-    private string[] states = new Constant().states;
+    public IList<Conversation> Chats  = Constant.chats;
+    private IList<String> states = Constant.states;
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,7 +73,7 @@
         return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private async Task OnUserSelected(User user)
+    private async Task OnUserSelected(Conversation user)
     {
         _selectedUser = user;
 
@@ -82,7 +83,7 @@
             selectedChatUser.IsSelected = false;
         }
 
-        var chatUser = Chats.FirstOrDefault(c => c.UserName == user.UserName);
+        var chatUser = Chats.FirstOrDefault(c => c.Id == user.Id);
         if (chatUser is null)
         {
             user.IsSelected = true;

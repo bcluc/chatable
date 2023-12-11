@@ -1,7 +1,10 @@
-﻿@using Chatable.Data.Components
-@using System.ComponentModel.DataAnnotations
+﻿@using Chatable.Data.Components;
+@using System.ComponentModel.DataAnnotations;
+@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles.Request;
+@using Chatable.Data.Entitles.Respond;
 @using Chatable.Data.Entitles;
-@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Forms;
 @using System.Diagnostics;
 @using System.Net.Http
 @using Newtonsoft.Json
@@ -17,11 +20,10 @@
 
     <DialogContent>
         <div>
-            <link href="./component.css" rel="stylesheet" />
             <div class="app-component-container">
                 <div class="app-component-container1">
                     <div class="app-component-container3">
-                        <img src="/Images/anh-meo-cute-de-thuong-34.jpg" class="group-img" />
+                        <img src="@Constant.defaultImgGroup" class="group-img" />
                         <input type="text"
                             
                             @bind="@groupName"
@@ -36,7 +38,7 @@
                                      AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Default" Class="app-component-textinput" />
                 </MudItem>
                 
-                    <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />
+                    <UserList Loading="_loadingUsers" Chats="userList" OnUserSelected="OnUserSelected" />
                 </div>
                 <div class="app-component-container4">
                     <span class="app-component-text3">Đã chọn</span>
@@ -49,7 +51,7 @@
     <DialogActions>
         <div class="app-component-container5">
             <button type="button" class="app-component-button1 button" @onclick="() => Close()" >Hủy</button>
-            <button type="button" disabled="@isDisable" class="button @(count > 1 ? "app-component-button2-activate" :"app-component-button2" )" @onclick="() => HandleUserClick(_selectedUsers)">
+            <button type="button" disabled="@isDisable" class="button @(count > 1 ? "app-component-button2-activate" :"app-component-button2" )" @onclick="() => CreateGroup(_selectedUsers)">
                 Tạo nhóm
             </button>
         </div>
@@ -57,9 +59,9 @@
 </MudDialog>
 @code {
     // test
-    private User currentUser = new Constant().currentUser;
-    public IList<User> Chats = new Constant().Chats;
-    private string[] states = new Constant().states;
+    private User currentUser = Constant.currentUser;
+    public IList<User> userList = Constant.usersList;
+    private IList<String> states = Constant.states;
 
     // variable
     bool success;
@@ -92,13 +94,17 @@
 
     private async Task OnUserSelected(User user)
     {
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
 
-        var chatUser = Chats.FirstOrDefault(c => c.UserName == user.UserName);
+        var chatUser = userList.FirstOrDefault(c => c.Id == user.Id);
 
         if (chatUser is null)
         {
             user.IsSelected = true;
-            Chats.Add(user);
+            userList.Add(user);
         }
         else
         {
@@ -119,16 +125,16 @@
         else isDisable = true;
     }
 
-    private async Task<bool> HandleUserClick(List<User> users)
+    private async Task<bool> CreateGroup(List<User> users)
     {
         var memberList = users.Select(l => l.UserName).ToList();
         string res = "";
         if (groupName == "")
         {
-            groupName = currentUser.FullName + "," + _selectedUsers[0].FullName + ", " + _selectedUsers[1].FullName;
+            groupName = currentUser.Name + "," + _selectedUsers[0].Name + ", " + _selectedUsers[1].Name;
         }
-        await jsRuntime.InvokeAsync<string>("console.log","This is group member", memberList.ToString());
-        Group group = new Group(groupName, memberList);
+        //await jsRuntime.InvokeAsync<string>("console.log","This is group member", memberList.ToString());
+        GroupRequest group = new GroupRequest(groupName, memberList);
 
         // with the server
         try
@@ -145,7 +151,7 @@
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<LoginRespond>(responseContent);
+                var user = JsonConvert.DeserializeObject<ApiRespond>(responseContent);
                 success = true;
             }
             else
@@ -168,7 +174,7 @@
             erroMessage = ex.Message;
         }
     
-        await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
+        //await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
         Close();
         return await Task.FromResult(true);
     }

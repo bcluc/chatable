@@ -1,4 +1,4 @@
-﻿namespace Chatable.Data.Entitles
+﻿namespace Chatable.Data.Entitles.Model
 {
     public class Message
     {
@@ -7,7 +7,6 @@
         public string ConversationId { get; set; }
         public DateTime SendAt { get; set; }
         public string MessageType { get; set; }
-        
         public string Content { get; set; }
         public Message() { }
 
