@@ -17,7 +17,7 @@
             <li class="list-group-item @(chat.IsSelected ? "user-select" : "")" @onclick="() => HandleUserClick(chat)">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
-                        <MudImage Src="/Images/anh-meo-cute-de-thuong-34.jpg"></MudImage>
+                        <MudImage Src=@currentUser.Avatar></MudImage>
                     </MudAvatar>
                     <h4 class="user-name">@chat.FullName</h4>
                 </div>
@@ -27,8 +27,7 @@
 </div>
 
 @code {
-
-    private String avatar = "/Images/anh-meo-cute-de-thuong-34.jpg";
+    private User currentUser = new Constant().currentUser;
     [Parameter]
     public IEnumerable<User> Chats { get; set; } = Enumerable.Empty<User>(); 
 

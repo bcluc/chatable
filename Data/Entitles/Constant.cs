@@ -1,7 +1,9 @@
 ﻿namespace Chatable.Data.Entitles
 {
+   
     public class Constant
     {
+        public const string avatar = "images/anh-meo-cute-de-thuong-34.jpg";
         public Constant() { }
         public string[] states =
     {
@@ -23,11 +25,11 @@
 
         public IList<User> Chats { get; set; } = new List<User>
     {
-    new User("nhubaole", " Lê Bảo Như", "string","2023-11-19 07:58:48.084+00"),
-    new User("nhihuynh", " Ý Nhi", "string", "2023-12-04 17:03:22.2+00"),
+    new User("nhubaole", " Lê Bảo Như", avatar,"2023-11-19 07:58:48.084+00"),
+    new User("nhihuynh", " Ý Nhi", avatar, "2023-12-04 17:03:22.2+00"),
     };
 
-        public User currentUser = new User("BC", " BC", "string", "2023-12-05 11:27:29.397+00");
-     
+        public User currentUser = new User("BC", " BC", avatar, "2023-12-05 11:27:29.397+00");
+        
     }
 }

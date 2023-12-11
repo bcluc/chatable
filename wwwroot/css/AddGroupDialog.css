@@ -17,9 +17,8 @@
 .app-component-container2 {
     width: 100%;
     height: auto;
-    display: flex;
-    align-items: flex-start;
     flex-direction: column;
+    flex: 1;
 }
 .app-component-container3 {
     width: 100%;

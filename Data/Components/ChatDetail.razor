@@ -14,7 +14,7 @@ else
         <div class="header d-flex justify-content-between bg-main">
             <div class="d-flex align-items-center">
                 <MudAvatar>
-                    <MudImage Src="/Images/anh-meo-cute-de-thuong-34.jpg"></MudImage>
+                    <MudImage Src=@SelectedUser.Avatar></MudImage>
                 </MudAvatar>
                 <h4 class="user-p">@SelectedUser.FullName</h4>
 
@@ -53,7 +53,7 @@ else
                 {
                     @foreach (var msg in _messages)
                     {
-                        var incoming = msg.ConversationId == CurrentUserId;
+                        var incoming = msg.SenderId == currentUser.UserName;
 
                         var cls = $"justify-content-{(incoming ? "start" : "end")}";
 
@@ -98,7 +98,8 @@ else
 
     //private int CurrentUserId => AuthenticationState?.User.UserId ?? 0;
 
-    private string CurrentUserId = "1";
+    private User currentUser = new Constant().currentUser;
+   
 
     [Parameter]
     public User? SelectedUser { get; set; }
@@ -147,7 +148,7 @@ else
         }
     }
 
-    private async Task LoadMessagesAsync()
+    private async Task LoadMessagesAsync() // await load mess
     {
         try
         {
@@ -156,18 +157,14 @@ else
 
             var allMessages = new List<Message>
             {
-                new Message("1","1","2",new DateTime(2022, 12, 25,10,30,12),"Text","How r u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
-                new Message("1","1","2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",new DateTime(2022, 12, 25,10,30,12),"Text","How r u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
             };
             //var allMessages = await GetClient().GetFromJsonAsync<IEnumerable<Message>>($"api/messages/{SelectedUser.UserId}", JsonConverter.JsonSerializerOptions);
 
