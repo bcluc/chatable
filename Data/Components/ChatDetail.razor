@@ -56,20 +56,20 @@ else
                 }
                 else
                 {
-                    @for (int i=0; i< _messages.Count()-1; i++)
+                    @foreach (var msg in _messages)
                     {
-                        var msg = _messages[i];
                         var incoming = msg.SenderId == currentUser.UserName;
-                        //var nextMsg = _messages[i + 1];
+                        var isToday = msg.SendAt.Date == DateTime.Today.Date;
                         
                         var cls = $"justify-content-{(incoming ? "start" : "end")}";
 
+                        
                         <li class="d-flex @cls">
                             <p class="single-msg @(incoming ? "other" : "me")">
                                 @msg.Content
                                 <br>
                                 <small class="msg-dt">
-                                    @if (msg.SendAt.Date == DateTime.Today.Date)
+                                    @if (isToday)
                                     {
                                         <span>@msg.SendAt.ToShortTimeString()</span>
                                     }

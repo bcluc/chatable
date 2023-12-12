@@ -114,9 +114,9 @@
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var user = JsonConvert.DeserializeObject<ApiRespond>(responseContent);
                 try{
-                    if(user.Token != null)
+                    if(user.Data != null)
                     {
-                        await _localStorageService.SetItemAsync("jwt_token", user.Token);
+                        await _localStorageService.SetItemAsync("jwt_token", user.Data);
                     }
                 }
                 catch(Exception e)
