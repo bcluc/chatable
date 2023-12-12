@@ -7,13 +7,14 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    
 }
 
 .main {
     flex: 1; 
 }
 .sidebar {
-    background: #4267b2;
+    background: #0091ff;
     width: 80px;
     height: 100%;
     position: fixed;
@@ -46,6 +47,7 @@
         border-radius: 100%;
         border: 2px solid #fff;
         overflow: hidden;
+        cursor: pointer;
     }
     .sidebar .user p {
         font-size: 17px;
@@ -54,6 +56,8 @@
         color: white;
         margin-left: 15px;
         overflow: hidden;
+        cursor: pointer;
+            
     }
     .sidebar .bottom-list {
         position: absolute;
@@ -105,11 +109,11 @@
             color: white;
             white-space: nowrap;
             font-size: 15px;
-            font-weight: 300px;
+            font-weight: 300;
         }
 
 
-@media (min-width: 641px) {
+@media (min-width: 64px) {
     .page {
         flex-direction: row;
     }

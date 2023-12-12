@@ -1,0 +1,223 @@
+﻿@using Chatable.Data.Entitles;
+@using Microsoft.AspNetCore.Components.Forms
+<link rel="stylesheet" href="/css/ChatDetail.css">
+
+@if (SelectedUser is null)
+{
+    <div class="d-flex justify-content-center align-items-center">
+        <h2>Chào mừng đến với Chatable, hãy bắt đầu cuộc trò chuyện của bạn ngay</h2>
+       </div>
+}
+else
+{
+    <div class="d-flex flex-column align-items-strech" style="margin-top:5px">
+        <div class="header d-flex justify-content-between bg-main">
+            <div class="d-flex align-items-center">
+                <MudAvatar>
+                    <MudImage Src=@SelectedUser.Avatar></MudImage>
+                </MudAvatar>
+                <h4 class="user-p">@SelectedUser.FullName</h4>
+
+                
+            </div>
+            <div class="d-flex justify-content-around">
+                <MudIconButton Icon="@Icons.Material.Filled.Call" Style="color:#0091ff" aria-label="call"></MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.VideoCall" Style="color:#0091ff" aria-label="video call"></MudIconButton>
+            </div>
+        </div>
+        
+        <div class="messages-list">
+            
+            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+            {
+                <div class="header d-flex justify-content-between bg-danger">
+                    <span class="text-white">@_errorMessage</span>
+                    <button class="btn btn-danger btn-sm" @onclick="() => _errorMessage = null">x</button>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(_infoMessage))
+            {
+                <div class="header d-flex justify-content-between bg-warning">
+                    <span class="text-white">@_infoMessage</span>
+                </div>
+            }
+            <ul id="messages-ul" style="padding: 5px">
+                @if (_loadingMessages)
+                {
+                    <li class="list-group-item">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Loading messages...
+                    </li>
+                }
+                else
+                {
+                    @foreach (var msg in _messages)
+                    {
+                        var incoming = msg.SenderId == currentUser.UserName;
+
+                        var cls = $"justify-content-{(incoming ? "start" : "end")}";
+
+                        <li class="d-flex @cls">
+                            <p class="single-msg @(incoming ? "other" : "me")">
+                                @msg.Content
+                                <br>
+                                <small class="msg-dt">
+                                    @if (msg.SendAt.Date == DateTime.Today.Date)
+                                    {
+                                        <span>@msg.SendAt.ToShortTimeString()</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@msg.SendAt.ToShortDateString() | @msg.SendAt.ToShortTimeString()</span>
+                                    }
+                                </small>
+                            </p>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+        <div class="message-input">
+
+            <EditForm Model="_newMessage" OnValidSubmit="HandleSendMessageSubmit">
+                <div class="">
+                    <div class="input-group">
+                        <InputText @bind-Value="_newMessage" placeholder="Nhập tin nhắn..." class="form-control" />
+                        <button class="btn-send" type="submit">Gửi</button>
+                    </div>
+                </div>
+            </EditForm>
+
+        </div>
+    </div>
+}
+
+@code {
+    //[CascadingParameter(Name = "AuthenticationState")]
+    //public AuthenticationState AuthenticationState { get; set; }
+
+    //private int CurrentUserId => AuthenticationState?.User.UserId ?? 0;
+
+    private User currentUser = new Constant().currentUser;
+   
+
+    [Parameter]
+    public User? SelectedUser { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnCancel { get; set; }
+
+    [Parameter]
+    public EventCallback OnIncomingMessageRecieved { get; set; }
+
+    [Parameter]
+    public Message? NewIncomingMessage { get; set; }
+
+    private IList<Message> _messages = new List<Message>();
+
+    private string _newMessage = "";
+    private string? _errorMessage;
+    private string? _infoMessage;
+    private string previousSelectedUserId = "";
+    private bool _scrollToBottom = false;
+    private bool _loadingMessages = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (NewIncomingMessage is not null)
+        {
+            _messages.Add(NewIncomingMessage);
+            await OnIncomingMessageRecieved.InvokeAsync();
+            _scrollToBottom = true;
+        }
+
+        if(SelectedUser is not null && SelectedUser.UserName != previousSelectedUserId)
+        {
+            previousSelectedUserId = SelectedUser.UserName;
+            await LoadMessagesAsync();
+            _scrollToBottom = true;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_scrollToBottom)
+        {
+            _scrollToBottom = false;
+            //await JsRuntime.InvokeVoidAsync("window.scrollToLastMessage");
+        }
+    }
+
+    private async Task LoadMessagesAsync() // await load mess
+    {
+        try
+        {
+            _loadingMessages = true;
+            _messages.Clear();
+
+            var allMessages = new List<Message>
+            {
+                new Message("1",currentUser.UserName,"2",new DateTime(2022, 12, 25,10,30,12),"Text","How r u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+            };
+            //var allMessages = await GetClient().GetFromJsonAsync<IEnumerable<Message>>($"api/messages/{SelectedUser.UserId}", JsonConverter.JsonSerializerOptions);
+
+            if (allMessages?.Any() == true)
+            {
+                _messages = allMessages.ToList();
+                _errorMessage = null;
+                _infoMessage = null;
+            }
+            else
+            {
+                _infoMessage = $"There is no message between you and {SelectedUser.FullName}";
+            }
+        }
+        finally
+        {
+            _loadingMessages = false;
+        }
+
+    }
+
+    private async Task HandleCancelClick()
+    {
+        var isUserHasMessages = _messages.Any();
+        var shouldRemoveFromChatsList = !isUserHasMessages;
+        await OnCancel.InvokeAsync(shouldRemoveFromChatsList);
+    }
+
+    
+
+    private async Task HandleSendMessageSubmit()
+    {
+        if (!string.IsNullOrWhiteSpace(_newMessage))
+        {
+            var sendMessageDto = new Message(Guid.NewGuid().ToString(), "1", SelectedUser!.UserName, DateTime.Now, "Text", _newMessage);
+            //var response = await GetClient().PostAsJsonAsync("api/messages", sendMessageDto, JsonConverter.JsonSerializerOptions);
+            
+            // ADD Message
+            /*
+            if (response.IsSuccessStatusCode)
+            {
+                var messageDto = new MessageDto(SelectedUser!.Id, AuthenticationState.User.Id, _newMessage, DateTime.Now);
+                _messages.Add(messageDto);
+                _scrollToBottom = true;
+                _newMessage = "";
+                _errorMessage = null;
+                _infoMessage = null;
+            }
+           else
+            {
+                _errorMessage = "Error sending message";
+            }
+            */
+        }
+    }
+}

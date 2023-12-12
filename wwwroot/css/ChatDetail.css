@@ -1,0 +1,51 @@
+﻿@import "Theme.css";
+
+.messages-list {
+    height: calc(100vh - 105px - 26px);
+    overflow-y: auto;
+    background-color: #eef0f1;
+}
+
+.single-msg {
+    padding: 4px 10px;
+    border-radius: 5px;
+}
+
+.me {
+    border-bottom-right-radius: 0;
+    color:white;
+    background-color: #0091ff;
+}
+
+.other {
+    border-bottom-left-radius: 0;
+    color:black;
+    background-color: white;
+}
+
+.msg-dt {
+    font-size: 11px;
+    color: white;
+}
+
+.me .msg-dt {
+    display: block;
+    width: 100%;
+    text-align: right;
+}
+.user-p {
+    font-size: 17px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: black;
+    align-items: center;
+    margin-left: 15px;
+    overflow: hidden;
+    
+}
+.btn-send {
+    border-radius: 5px;
+    background-color: #0091ff;
+    padding: 4px 15px;
+    color:white;
+}

@@ -1,0 +1,116 @@
+﻿@page "/chat"
+@using Chatable.Data.Components
+@using Chatable.Data.Entitles;
+@using Microsoft.AspNetCore.SignalR.Client
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager Navigation
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+
+<!-- Your Blazor component -->
+
+<div class="container-fluid"
+    
+        
+        <div class="card-body">
+            <div class="row" style="flex: 1">
+                <div class="col-md-3 col-3" style="margin-top:0px">
+                <div class="row-sm" style="flex: 1">
+                    <MudItem>
+                        <MudAutocomplete T="string" Label="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
+                                         AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+                    </MudItem>
+                    <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt" Color="Color.Tertiary" aria-label="add person" ></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Tertiary" aria-label="add group" OnClick="OpenAddGroupDialog"></MudIconButton>
+
+                </div>
+                    <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />
+                </div>
+                @*<div class="col-sm-8 col-6 d-flex justify-content-center align-items-center" style="background-color: #f4ecff;">*@
+                <div class="col-sm-9 col-9" >
+                    <ChatDetail SelectedUser="_selectedUser" 
+                        NewIncomingMessage="@_newIncomingMessage"
+                        OnIncomingMessageRecieved = "()=> _newIncomingMessage = null"
+                        OnCancel="HandleChatDetailsCancel" />
+                </div>
+                
+            </div>
+        </div>
+   
+</div>
+
+@code {
+    private string value2;
+    private bool _loadingUsers = false;
+    private User? _selectedUser = null;
+    private Message? _newIncomingMessage = null;
+    private HubConnection? hubConnection;
+    public IList<User> Chats  = new Constant().Chats;
+    private string[] states = new Constant().states;
+
+    protected override async Task OnInitializedAsync()
+    {
+       
+    }
+
+    //private async Task<bool> 
+
+    private async Task<IEnumerable<string>> Search2(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+        await Task.Delay(5);
+
+        // if text is null or empty, don't return values (drop-down will not open)
+        if (string.IsNullOrEmpty(value))
+            return new string[0];
+        // return chat room
+        return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task OnUserSelected(User user)
+    {
+        _selectedUser = user;
+
+        var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
+        if (selectedChatUser is not null)
+        {
+            selectedChatUser.IsSelected = false;
+        }
+
+        var chatUser = Chats.FirstOrDefault(c => c.UserName == user.UserName);
+        if (chatUser is null)
+        {
+            user.IsSelected = true;
+            Chats.Add(user);
+        }
+        else
+        {
+            chatUser.IsSelected = true;
+        }
+    }
+    // Delete the conversation visually, not in the data
+    private async Task HandleChatDetailsCancel(bool shouldRemoveFromChatsList)
+    {
+        if (shouldRemoveFromChatsList)
+        {
+            Chats.Remove(_selectedUser);
+        }
+        _selectedUser = null;
+    }
+    private void ConfigureConnection()
+    {
+        //Tạo hub connection, listen
+
+    }
+
+    private void OpenAddGroupDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<Dialog.AddGroup>("Tạo nhóm",options);
+    }
+}

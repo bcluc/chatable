@@ -1,0 +1,17 @@
+﻿@inject NavigationManager NavigationManager
+<MudDialog>
+    <DialogContent>
+        Bạn đã đăng ký thành công! 
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="toLogin">Đăng nhập</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    public void toLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+}

@@ -1,0 +1,31 @@
+﻿.user-img {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+    border-radius: 100%;
+    border: 2px solid #fff;
+    overflow: hidden;
+}
+.user-select {
+    border-radius: 15px;
+    background-color: #0091ff;
+    color: white;
+}
+.user-name {
+    font-size: 16px;
+    text-align: left;
+    white-space: nowrap;
+    width: 100%;
+    height: auto;
+    align-self: center;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.container {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: flex-start;
+}

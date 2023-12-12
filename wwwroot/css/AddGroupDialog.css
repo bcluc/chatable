@@ -1,0 +1,110 @@
+﻿.app-component-container {
+    width: 421px;
+    height: auto;
+    display: flex;
+    position: relative;
+    align-items: center;
+    flex-direction: column;
+}
+
+.app-component-container1 {
+    flex: 0 0 auto;
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}
+.app-component-container2 {
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+    flex: 1;
+}
+.app-component-container3 {
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: flex-start;
+}
+.app-component-textinput {
+    flex: 1;
+    height: 100%;
+    padding: 15px;
+    margin-left: 10px;
+    margin-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    
+}
+
+.app-component-ul {
+    height: 313px;
+}
+.group-img {
+    width: 48px;
+    height: 48px;
+    min-width: 56px;
+    min-height: 56px;
+    border-radius: 100%;
+    border: 2px solid #fff;
+    overflow: hidden;
+    cursor: pointer;
+}
+.app-component-container4 {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    display: flex;
+    margin-top: 10px;
+    align-items: flex-start;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    padding-right: 10px;
+    justify-content: flex-end;
+}
+
+.app-component-text3 {
+    padding-right: 20px;
+}
+
+.app-component-text4 {
+    width:60px;
+    text-align: right;
+}
+.list-select {
+    width: 100%;
+    height: 400px;
+    overflow-y: hidden;
+    
+}
+.app-component-container5 {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 100px;
+    display: flex;
+    align-items: flex-start;
+    padding-right: 10px;
+    justify-content: flex-end;
+}
+.app-component-button1 {
+    border-width: 0px;
+    background-color: #eaedf0;
+    padding: 10px;
+    border-radius: 5%;
+}
+.app-component-button2 {
+    margin-left: 10px;
+    background-color: #abcdff;
+    color: #e0ebfd;
+    padding: 10px;
+    border-radius:5%;
+}
+.app-component-button2-activate {
+    margin-left: 10px;
+    background-color: #0091ff;
+    color: white;
+    padding: 10px;
+    border-radius: 5%;
+}
+

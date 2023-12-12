@@ -1,21 +1,24 @@
-﻿@inherits LayoutComponentBase
+﻿@using Chatable.Dialog.Profile;
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <link rel="stylesheet" href="/css/MainLayout.css">
 
-<MudThemeProvider />
+<MudThemeProvider @bind-IsDarkMode="@themeOn" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <div class="page">
     <div class="sidebar">
-        <div class="user">
-            <img src="/Images/anh-meo-cute-de-thuong-34.jpg" class="user-img" />
+        <div class="user" title="Click để xem thông tin">
+            <img src="/Images/anh-meo-cute-de-thuong-34.jpg" class="user-img" @onclick="OpenDialog" />
             <div>
                 <p>Nhi Huỳnh</p>
             </div>
         </div>
         <ul>
             <li>
-                <a href="#">
+                <a href="chat">
                     <i class='bx bxs-message-rounded-detail icon'></i>
                     <p>Trò chuyện</p>
                 </a>
@@ -54,3 +57,16 @@
         @Body
     </div>
 </div>
+@code 
+{
+    bool themeOn = false;
+    public async Task Logout()
+    {
+        NavigationManager.NavigateTo("");
+    }
+    private void OpenDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+    }
+}

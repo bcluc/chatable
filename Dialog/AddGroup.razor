@@ -1,0 +1,177 @@
+﻿@using Chatable.Data.Components
+@using System.ComponentModel.DataAnnotations
+@using Chatable.Data.Entitles;
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Diagnostics;
+@using System.Net.Http
+@using Newtonsoft.Json
+
+@inject IJSRuntime jsRuntime
+@inject IDialogService DialogService
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+
+<link rel="stylesheet" href="/css/AddGroupDialog.css">
+
+<MudDialog class="custom-dialog-content" >
+
+    <DialogContent>
+        <div>
+            <link href="./component.css" rel="stylesheet" />
+            <div class="app-component-container">
+                <div class="app-component-container1">
+                    <div class="app-component-container3">
+                        <img src="/Images/anh-meo-cute-de-thuong-34.jpg" class="group-img" />
+                        <input type="text"
+                            
+                            @bind="@groupName"
+                               @oninput="@((e) => { groupName=(string)e.Value;})"
+                               placeholder="Nhập tên nhóm"
+                               class="app-component-textinput input"/>
+                    </div>
+                </div>
+                <div class="app-component-container2">
+                <MudItem>
+                    <MudAutocomplete T="string" Label="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
+                                     AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Default" Class="app-component-textinput" />
+                </MudItem>
+                
+                    <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />
+                </div>
+                <div class="app-component-container4">
+                    <span class="app-component-text3">Đã chọn</span>
+                    <span class="app-component-text4">@count /100</span>
+                </div>
+
+            </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <div class="app-component-container5">
+            <button type="button" class="app-component-button1 button" @onclick="() => Close()" >Hủy</button>
+            <button type="button" disabled="@isDisable" class="button @(count > 1 ? "app-component-button2-activate" :"app-component-button2" )" @onclick="() => HandleUserClick(_selectedUsers)">
+                Tạo nhóm
+            </button>
+        </div>
+    </DialogActions>
+</MudDialog>
+@code {
+    // test
+    private User currentUser = new Constant().currentUser;
+    public IList<User> Chats = new Constant().Chats;
+    private string[] states = new Constant().states;
+
+    // variable
+    bool success;
+    private string value2;
+    private string groupName = "";
+    private int count = 0;
+    private bool isDisable = true;
+    private bool _loadingUsers = false;
+    private bool _processing = false;
+    String erroMessage;
+
+    private List<User> _selectedUsers = new List<User> ();
+
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    private async Task<IEnumerable<string>> Search2(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+        await Task.Delay(5);
+
+        // if text is null or empty, don't return values (drop-down will not open)
+        if (string.IsNullOrEmpty(value))
+            return new string[0];
+        // return chat room
+        return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task OnUserSelected(User user)
+    {
+
+        var chatUser = Chats.FirstOrDefault(c => c.UserName == user.UserName);
+
+        if (chatUser is null)
+        {
+            user.IsSelected = true;
+            Chats.Add(user);
+        }
+        else
+        {
+            if (chatUser.IsSelected == true) 
+            {
+                chatUser.IsSelected = false;
+                var itemToRemove = _selectedUsers.SingleOrDefault(r => r.UserName == chatUser.UserName);
+                if (itemToRemove != null)
+                    _selectedUsers.Remove(itemToRemove);
+            }
+            else {
+                chatUser.IsSelected = true;
+                _selectedUsers.Add(chatUser);
+            }
+        }
+        count = _selectedUsers.Count;
+        if (count > 1) isDisable = false;
+        else isDisable = true;
+    }
+
+    private async Task<bool> HandleUserClick(List<User> users)
+    {
+        var memberList = users.Select(l => l.UserName).ToList();
+        string res = "";
+        if (groupName == "")
+        {
+            groupName = currentUser.FullName + "," + _selectedUsers[0].FullName + ", " + _selectedUsers[1].FullName;
+        }
+        await jsRuntime.InvokeAsync<string>("console.log","This is group member", memberList.ToString());
+        Group group = new Group(groupName, memberList);
+
+        // with the server
+        try
+        {
+            string groupInitialize = JsonConvert.SerializeObject(group);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Group");
+            httpRequestMessage.Content = new StringContent(groupInitialize);
+
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var user = JsonConvert.DeserializeObject<LoginRespond>(responseContent);
+                success = true;
+            }
+            else
+            {
+                success = false;
+                string resBody = await response.Content.ReadAsStringAsync();
+                dynamic result = JsonConvert.DeserializeObject(resBody);
+                erroMessage = result.message;
+            }
+            _processing = false;
+
+            if (success)
+            {
+                _navigationManager.NavigateTo("/chat");
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+    
+        await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
+        Close();
+        return await Task.FromResult(true);
+    }
+
+    
+}
