@@ -1,4 +1,5 @@
-﻿@using Chatable.Data.Entitles.Model;
+﻿@page "/chat/{conversationId}"
+@using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles;
 @using Microsoft.AspNetCore.Components.Forms
 
@@ -23,7 +24,6 @@ else
     <div class="chat-container">
         <div class="chat-page-cont">
 
-        
         <div class="chat-header-container">
             <div class="chat-user-container">
                 <MudAvatar>
@@ -110,13 +110,13 @@ else
 @code {
 
     private User currentUser = Constant.currentUser;
-   
+
+    [Parameter]
+    public String ConversationId { get; set; }
 
     [Parameter]
     public Conversation? SelectedUser { get; set; }
 
-    [Parameter]
-    public EventCallback<bool> OnCancel { get; set; }
 
     [Parameter]
     public EventCallback OnIncomingMessageRecieved { get; set; }
@@ -201,14 +201,6 @@ else
 
     }
 
-    private async Task HandleCancelClick()
-    {
-        var isUserHasMessages = _messages.Any();
-        var shouldRemoveFromChatsList = !isUserHasMessages;
-        await OnCancel.InvokeAsync(shouldRemoveFromChatsList);
-    }
-
-    
 
     private async Task HandleSendMessageSubmit()
     {
