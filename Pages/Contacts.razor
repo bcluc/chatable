@@ -1,0 +1,10 @@
+﻿@page "/contact"
+<MudIconButton Icon="@Icons.Material.Filled.Call" Style="color:#0091ff" aria-label="call" OnClick="goToSomeChat"></MudIconButton>
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+@code {
+	private void goToSomeChat()
+	{
+		_navigationManager.NavigateTo("/chat");
+	}
+}

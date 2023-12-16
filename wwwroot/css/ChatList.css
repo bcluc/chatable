@@ -7,23 +7,35 @@
     border: 2px solid #fff;
     overflow: hidden;
 }
+
+li {
+    margin: 10px 0;
+}
+.list-group-item {
+    list-style-type: none;
+    padding: 10px 5px 10px 5px;
+    margin: 5px 5px 5px 5px;
+    border-radius: 5px;
+}
 .user-select {
-    border-radius: 15px;
     background-color: #0091ff;
     color: white;
-   
+    list-style-type: none;
+    padding: 10px 5px 10px 5px;
+    margin: 5px 5px 5px 5px;
+    border-radius: 5px;
 }
-.user-unselect {
-    border-radius: 15px;
-    background-color: white;
-    color: black;
-   
-}
+    .list-group-item .user-unselect {
+        background-color: white;
+        color: black;
+        list-style-type: none;
+    }
 .user-name {
-    font-size: 16px;
+    font-size: 14px;
     text-align: left;
     width: 100%;
     height: auto;
+    font-weight: 500;
     align-self: center;
     margin-left: 10px;
     margin-right: 10px;

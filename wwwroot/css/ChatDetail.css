@@ -1,11 +1,15 @@
 ﻿@import "Theme.css";
 
 .messages-list {
-    height: calc(100vh - 105px - 26px);
-    overflow-y: auto;
+    height: calc(100vh - 115px);
+    
+    overflow-y: scroll;
     background-color: #eef0f1;
 }
-
+.message-ul {
+    padding: 5px;
+    margin-bottom: 1rem;
+}
 .single-msg {
     padding: 4px 10px;
     border-radius: 5px;
@@ -41,11 +45,97 @@
     align-items: center;
     margin-left: 15px;
     overflow: hidden;
-    
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width:100%;
 }
 .btn-send {
     border-radius: 5px;
     background-color: #0091ff;
     padding: 4px 15px;
-    color:white;
+    color: white;
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 5px;
 }
+
+.chat-container {
+    /*flex: 0 0 auto;
+    padding-right: 0!important;
+    padding-left: 0!important;
+    display: flex!important;
+    width:100%;*/
+    flex: 1;
+    width: auto;
+    height: auto;
+    display: flex!;
+    position: relative;
+    align-self: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+.chat-page-cont{
+    flex-grow: 1!important;
+    flex-direction: column!important;
+    display: flex!important;
+}
+.chat-header-container {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-self: stretch;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-bottom: 5px;
+}
+
+    .chat-user-container {
+        flex: 1;
+        width: auto;
+        height: auto;
+        display: flex;
+        align-items: center;
+    }
+.chat-btn-container {
+    flex: 0 0 auto;
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    justify-content: flex-end;
+}
+.home-textinput1 {
+    flex: 1;
+    margin-left: 10px;
+}
+
+.home-button5 {
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 5px;
+}
+.message-input {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding:5px 0px 5px 0px;
+}
+.message-textinput {
+    flex: 1;
+    text-align: left;
+    margin-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+    .message-textinput:focus {
+    outline: none !important;
+
+ }

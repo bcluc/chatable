@@ -17,29 +17,32 @@
 @inject IDialogService DialogService
 @inject IHttpClientFactory ClientFactory
 
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-
+<link rel="stylesheet" href="/css/ChatLayout.css">
 <!-- Your Blazor component -->
 
-<div class="container-fluid"
-    
-        
-        <div class="card-body">
-            <div class="row" style="flex: 1">
-                <div class="col-md-3 col-3" style="margin-top:0px">
-                <div class="row-sm" style="flex: 1">
-                    <MudItem>
+        <div class="home-container">
+            <div class="home-container1">
+                <div class="home-container2">
+                    <SearchField >
+
+                    </SearchField>
+                @*<div class="home-container3">
+                    <MudItem Style="width:100px">
                         <MudAutocomplete T="string" Label="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
                                          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
                     </MudItem>
-                    <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt" Color="Color.Tertiary" aria-label="add person" ></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt" Color="Color.Tertiary" aria-label="add person" Class="home-button"></MudIconButton>
                     <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Tertiary" aria-label="add group" OnClick="OpenAddGroupDialog"></MudIconButton>
 
-                </div>
+                </div>*@
+                <div class="list-container" >
+
                     <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />
-                </div>
-                @*<div class="col-sm-8 col-6 d-flex justify-content-center align-items-center" style="background-color: #f4ecff;">*@
-                <div class="col-sm-9 col-9" >
+
+            </div>
+        </div>
+               
+                <div class="home-container4" >
                     <ChatDetail SelectedUser="_selectedUser" 
                         NewIncomingMessage="@_newIncomingMessage"
                         OnIncomingMessageRecieved = "()=> _newIncomingMessage = null"
@@ -49,7 +52,6 @@
             </div>
         </div>
    
-</div>
 
 @code {
     private string value2;
@@ -80,6 +82,11 @@
             return new string[0];
         // return chat room
         return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+    private void OpenAddGroupDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        DialogService.Show<Dialog.AddGroup>("Tạo nhóm", options);
     }
 
     private async Task OnUserSelected(Conversation user)
@@ -118,11 +125,7 @@
 
     }
 
-    private void OpenAddGroupDialog()
-    {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<Dialog.AddGroup>("Tạo nhóm",options);
-    }
+    
 
     private async Task<bool> GetGroup()
     {

@@ -79,6 +79,17 @@
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     void Close() => MudDialog.Close(DialogResult.Ok(true));
+    
+
+    // reset list khi mở dialog
+    // có thể không cần khi lấy được list từ server
+    protected override void OnInitialized()
+    {
+        foreach(User user in userList)
+        {
+            user.IsSelected = false;
+        }
+    }
 
     private async Task<IEnumerable<string>> Search2(string value)
     {

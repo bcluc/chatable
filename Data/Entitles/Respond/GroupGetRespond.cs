@@ -6,6 +6,6 @@ namespace Chatable.Data.Entitles.Respond
     {
         public bool Success { get; set; }
         public string Message { get; set; }
-        public IList<Group> Data { get; set; }
+        public List<Group> Data { get; set; }
     }
 }

@@ -9,15 +9,23 @@
 
 @if (SelectedUser is null)
 {
-    <div class="d-flex justify-content-center align-items-center">
+    <div class="waitChat-container">
+    <div class="home-text3">
         <h2>Chào mừng đến với Chatable, hãy bắt đầu cuộc trò chuyện của bạn ngay</h2>
        </div>
+    <img src="@Constant.imgWaitChat"
+         alt="image"
+         class="home-image" />
+    </div>
 }
 else
 {
-    <div class="d-flex flex-column align-items-strech" style="margin-top:5px">
-        <div class="header d-flex justify-content-between bg-main">
-            <div class="d-flex align-items-center">
+    <div class="chat-container">
+        <div class="chat-page-cont">
+
+        
+        <div class="chat-header-container">
+            <div class="chat-user-container">
                 <MudAvatar>
                     <MudImage Src=@SelectedUser.Avatar></MudImage>
                 </MudAvatar>
@@ -25,7 +33,7 @@ else
 
                 
             </div>
-            <div class="d-flex justify-content-around">
+            <div class="chat-btn-container">
                 <MudIconButton Icon="@Icons.Material.Filled.Call" Style="color:#0091ff" aria-label="call"></MudIconButton>
                 <MudIconButton Icon="@Icons.Material.Filled.VideoCall" Style="color:#0091ff" aria-label="video call"></MudIconButton>
             </div>
@@ -84,26 +92,22 @@ else
                 }
             </ul>
         </div>
-        <div class="message-input">
+        <div >
 
-            <EditForm Model="_newMessage" OnValidSubmit="HandleSendMessageSubmit">
-                <div class="">
-                    <div class="input-group">
-                        <InputText @bind-Value="_newMessage" placeholder="Nhập tin nhắn..." class="form-control" />
+                <EditForm Model="_newMessage" OnValidSubmit="HandleSendMessageSubmit" class="message-input">
+                    
+                        <InputText @bind-Value="_newMessage" placeholder="Nhập tin nhắn..." class="message-textinput" />
                         <button class="btn-send" type="submit">Gửi</button>
-                    </div>
-                </div>
+                    
+     
             </EditForm>
 
+        </div>
         </div>
     </div>
 }
 
 @code {
-    //[CascadingParameter(Name = "AuthenticationState")]
-    //public AuthenticationState AuthenticationState { get; set; }
-
-    //private int CurrentUserId => AuthenticationState?.User.UserId ?? 0;
 
     private User currentUser = Constant.currentUser;
    
