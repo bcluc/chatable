@@ -4,12 +4,12 @@
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
-<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <link rel="stylesheet" href="/css/MainLayout.css">
 
 <MudThemeProvider @bind-IsDarkMode="@themeOn" />
-<MudDialogProvider />
-<MudSnackbarProvider />
+@* <MudDialogProvider />
+<MudSnackbarProvider /> *@
+
 <div class="page">
     <div class="sidebar">
         <div class="user" title="Click để xem thông tin">
