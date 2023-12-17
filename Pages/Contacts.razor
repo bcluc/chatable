@@ -1,0 +1,86 @@
+﻿@page "/contact"
+@page "/contact/{_taskId?}"
+@using Chatable.Data.Components
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+@inject IJSRuntime JSRuntime
+
+<link rel="stylesheet" href="/css/ChatLayout.css">
+
+<style>
+	.my-button .mud-button-label {
+		justify-content: flex-start;
+		padding-left:10px;
+	}
+</style>
+
+<div class="home-container">
+	<div class="home-container1">
+		<div class="home-container2">
+			<SearchField>
+
+			</SearchField>
+
+			<div class="list-container">
+				@*<MudButtonGroup VerticalAlign="true">*@
+				<MudButton 
+						   Target="_blank"
+						   Variant="Variant.Text"
+						   StartIcon="@Icons.Material.Filled.Group"
+						   OnClick="goToFriendList"
+						   Style="text-transform:none; width:100%; height:56px"
+						   Class="my-button"
+						   Disabled=false>
+					Danh sách bạn bè
+				</MudButton>
+				<MudButton Target="_blank"
+						   Variant="Variant.Text"
+						   StartIcon="@Icons.Material.Filled.Groups"
+						   OnClick="goToGroupList"
+						   Style="text-transform:none; width:100%; height:56px"
+						   Class="my-button"
+						   Disabled=false>
+					Danh sách nhóm
+				</MudButton>
+				<MudButton Target="_blank"
+						   Variant="Variant.Text"
+						   StartIcon="@Icons.Material.Filled.Email"
+						   OnClick="goToFriendRequestList"
+						   Style="text-transform:none; width:100%; height:56px"
+						   Class="my-button"
+						   Disabled=false>
+					Danh sách lời mời kết bạn
+				</MudButton>
+				@*</MudButtonGroup>*@
+			</div>
+		</div>
+
+		<div class="home-container4">
+			<ContactDetail Id="@_taskId" />
+		</div>
+
+	</div>
+</div>
+
+
+@code {
+	[Parameter]
+	public string? _taskId { get; set; }
+
+	private string id="";
+	private void goToFriendList()
+	{
+		id = "friendList";
+		_navigationManager.NavigateTo($"/contact/{id}");
+	}
+	private void goToGroupList()
+	{
+		id = "groupList";
+		_navigationManager.NavigateTo($"/contact/{id}");
+	}
+	private void goToFriendRequestList()
+	{
+		id = "friendRequestList";
+		_navigationManager.NavigateTo($"/contact/{id}");
+	}
+}

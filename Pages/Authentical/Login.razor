@@ -2,11 +2,13 @@
 @page "/"
 @page "/login"
 
-@using System.ComponentModel.DataAnnotations
-@using Chatable.Data.Entitles;
-@using Microsoft.AspNetCore.Components.Forms
-@using System.Net.Http
-@using Newtonsoft.Json
+@using System.ComponentModel.DataAnnotations;
+@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles.Request;
+@using Chatable.Data.Entitles.Respond;
+@using Microsoft.AspNetCore.Components.Forms;
+@using System.Net.Http;
+@using Newtonsoft.Json;
 
 @inject Blazored.LocalStorage.ILocalStorageService _localStorageService
 @inject HttpClient _http
@@ -168,22 +170,22 @@
         }
     }
 
-    /* Nhi: 161 -> oo */
+    }
+</style>
+@code {
     LoginForm model = new LoginForm();
     bool success;
     private bool _processing = false;
     String erroMessage;
 
-    public class LoginForm
-    {
+    //public class LoginForm
+    //{
+    //    [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
+    //    public string userName { get; set; }
 
-        [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
-        public string userName { get; set; }
-
-        [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
-        public string password { get; set; }
-
-    }
+    //    [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
+    //    public string password { get; set; }   
+    //}
     private async Task<bool> LoginUser(EditContext context)
     {
         _processing = true;
@@ -202,11 +204,11 @@
             {
                 success = true;
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<LoginRespond>(responseContent);
+                var user = JsonConvert.DeserializeObject<ApiRespond>(responseContent);
                 try{
-                    if(user.Token != null)
+                    if(user.Data != null)
                     {
-                        await _localStorageService.SetItemAsync("jwt_token", user.Token);
+                        await _localStorageService.SetItemAsync("jwt_token", user.Data);
                     }
                 }
                 catch(Exception e)

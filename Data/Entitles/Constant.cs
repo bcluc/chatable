@@ -1,35 +1,44 @@
-﻿namespace Chatable.Data.Entitles
+﻿using System.Collections.ObjectModel;
+using Chatable.Data.Entitles.Model;
+
+namespace Chatable.Data.Entitles
 {
-   
-    public class Constant
+    public static class Constant
     {
-        public const string avatar = "images/anh-meo-cute-de-thuong-34.jpg";
-        public Constant() { }
-        public string[] states =
-    {
-        "Alabama", "Alaska", "American Samoa", "Arizona",
-        "Arkansas", "California", "Colorado", "Connecticut",
-        "Delaware", "District of Columbia", "Federated States of Micronesia",
-        "Florida", "Georgia", "Guam", "Hawaii", "Idaho",
-        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
-        "Louisiana", "Maine", "Marshall Islands", "Maryland",
-        "Massachusetts", "Michigan", "Minnesota", "Mississippi",
-        "Missouri", "Montana", "Nebraska", "Nevada",
-        "New Hampshire", "New Jersey", "New Mexico", "New York",
-        "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio",
-        "Oklahoma", "Oregon", "Palau", "Pennsylvania", "Puerto Rico",
-        "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
-        "Texas", "Utah", "Vermont", "Virgin Island", "Virginia",
-        "Washington", "West Virginia", "Wisconsin", "Wyoming",
-    };
+        public const string defaultImgMale = "images/default_male.jpg";
+        public const string defaultImgFemale = "images/default_female.jpg";
+        public const string defaultImgGroup = "images/default_group.jpg";
+        public const string defaultBg = "images/pattern_bg.jpg";
+        public const string imgWaitChat = "images/wait_chat.png";
 
-        public IList<User> Chats { get; set; } = new List<User>
-    {
-    new User("nhubaole", " Lê Bảo Như", avatar,"2023-11-19 07:58:48.084+00"),
-    new User("nhihuynh", " Ý Nhi", avatar, "2023-12-04 17:03:22.2+00"),
-    };
 
-        public User currentUser = new User("BC", " BC", avatar, "2023-12-05 11:27:29.397+00");
+        public static readonly IList<String> states = new ReadOnlyCollection<String>
+        (new List<String> 
+        {
+        "Alabama", "Alaska", "American Samoa"
+        });
+
+        public static readonly List<Conversation> chats  = new List<Conversation>
+        {
+        new User("nhubaole", " Lê Bảo Như","Nữ","2023-11-19 07:58:48.084+00","2023-11-19 07:58:48.084+00","BC_nhubaole"),
+        new User("nhihuynh", " Ý Nhi","Nữ", "2023-12-04 17:03:22.2+00","2023-12-04 17:03:22.2+00", "BC_nhihuynh"),
+        new Group("123","Group Local Test", "", "BC", "2023-12-04 17:03:22.2+00")
+        };
+
+        public static readonly IList<User> usersList = new List<User>
+        {
+        new User("nhubaole", " Lê Bảo Như","Nữ","2023-11-19 07:58:48.084+00","2023-11-19 07:58:48.084+00", "BC_nhubaole"),
+        new User("nhihuynh", " Ý Nhi","Nữ", "2023-12-04 17:03:22.2+00","2023-12-04 17:03:22.2+00", "BC_nhihuynh"),
+        };
+
+        public static readonly User currentUser = new("BC", " BC","Nam", "2023-12-05 11:27:29.397+00", "2023-12-05 11:27:29.397+00","BC");
         
+        public static readonly Message visibleMessage = new("0", "BC", "1", DateTime.Now, "Text", "Say hi");
+
+        public static readonly Group currentGroup = new Group("123", "Group Local Test", "", "BC", "2023-12-04 17:03:22.2+00");
+
+        public static readonly User oppositeUser = new User("nhubaole", " Lê Bảo Như", "Nữ", "2023-11-19 07:58:48.084+00", "2023-11-19 07:58:48.084+00", "BC_nhubaole");
     }
+
+    
 }

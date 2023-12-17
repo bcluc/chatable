@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Chatable.Data.Entitles
+namespace Chatable.Data.Entitles.Request
 {
-    public class Group
+    public class GroupRequest
     {
         [Required]
         public string groupName { get; set; }
         [Required]
         public List<string> memberList { get; set; }
 
-        public Group(string groupName, List<string> memberList)
+        public GroupRequest(string groupName, List<string> memberList)
         {
             this.groupName = groupName;
             this.memberList = memberList;

@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="/css/ChatList.css">
 
 <div class="list-group list-group-flush">
-      
+
     @if (Loading)
     {
         <li class="list-group-item">
@@ -15,14 +15,14 @@
     {
         @foreach (var chat in Chats)
         {
-            <li class="list-group-item @(chat.IsSelected ? "user-select" : "user-unselect")" @onclick="() => HandleUserClick(chat)">
+            <li class="list-group-item @(chat.IsSelected ? "user-select" : "")" @onclick="() => HandleUserClick(chat)">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
                         <MudImage Src=@chat.Avatar></MudImage>
                     </MudAvatar>
                     <h4 class="user-name">@chat.Name</h4>
                 </div>
-                </li>
+            </li>
         }
     }
 </div>
@@ -30,15 +30,15 @@
 @code {
     private User currentUser = Constant.currentUser;
     [Parameter]
-    public IEnumerable<Conversation> Chats { get; set; } = Enumerable.Empty<Conversation>(); 
+    public IEnumerable<User> Chats { get; set; } = Enumerable.Empty<User>();
 
     [Parameter]
     public bool Loading { get; set; }
 
     [Parameter]
-    public EventCallback<Conversation> OnUserSelected { get; set; }
+    public EventCallback<User> OnUserSelected { get; set; }
 
-    private async Task HandleUserClick(Conversation chat)
+    private async Task HandleUserClick(User chat)
     {
         await OnUserSelected.InvokeAsync(chat);
     }

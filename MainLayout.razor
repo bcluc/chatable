@@ -1,4 +1,6 @@
-﻿@using Chatable.Dialog.Profile;
+﻿@using Chatable.Data.Entitles;
+@using Chatable.Data.Components.Dialog.Profile;
+@using Chatable.Data.Entitles.Model;
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
@@ -11,9 +13,9 @@
 <div class="page">
     <div class="sidebar">
         <div class="user" title="Click để xem thông tin">
-            <img src="/img/anh-meo-cute-de-thuong-34.jpg" class="user-img" @onclick="OpenDialog" />
+            <img src= "@currentUser.Avatar" class="user-img" @onclick="OpenDialog" />
             <div>
-                <p>Nhi Huỳnh</p>
+                <p>@currentUser.Name</p>
             </div>
         </div>
         <ul>
@@ -24,7 +26,7 @@
                 </a>
             </li>
             <li>
-                <NavLink clas="nav-link" href="counter">
+                <NavLink clas="nav-link" href="contact">
                     <i class='bx bxs-contact icon'></i>
                     <p>Danh bạ</p>
                 </NavLink>
@@ -59,6 +61,7 @@
 </div>
 @code 
 {
+    User currentUser = Constant.currentUser;
     bool themeOn = false;
     public async Task Logout()
     {
@@ -67,6 +70,6 @@
     private void OpenDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+        DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
     }
 }

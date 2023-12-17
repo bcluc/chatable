@@ -1,6 +1,6 @@
 ﻿.app-component-container {
     width: 421px;
-    height: auto;
+    height: fit-content ;
     display: flex;
     position: relative;
     align-items: center;

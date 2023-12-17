@@ -1,116 +1,193 @@
 ﻿@page "/chat"
-@using Chatable.Data.Components
+@page "/chat/{_id?}"
+@using Chatable.Data.Components;
 @using Chatable.Data.Entitles;
-@using Microsoft.AspNetCore.SignalR.Client
-@using System.Net.Http.Headers
-@using System.Text.Json
-@using System.Text.Json.Serialization
+@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles.Respond;
+@using Microsoft.AspNetCore.SignalR.Client;
+@using System.Net.Http.Headers;
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
+@using System.Net.Http;
+@using Newtonsoft.Json;
+
+@inject Blazored.LocalStorage.ILocalStorageService _localStorageService
+@inherits LayoutComponentBase
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
 @inject IJSRuntime JSRuntime
 @inject IDialogService DialogService
 @inject IHttpClientFactory ClientFactory
-@inject NavigationManager Navigation
 
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-
+<link rel="stylesheet" href="/css/ChatLayout.css">
 <!-- Your Blazor component -->
 
-<div class="container-fluid"
-    
-        
-        <div class="card-body">
-            <div class="row" style="flex: 1">
-                <div class="col-md-3 col-3" style="margin-top:0px">
-                <div class="row-sm" style="flex: 1">
-                    <MudItem>
-                        <MudAutocomplete T="string" Label="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
-                                         AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
-                    </MudItem>
-                    <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt" Color="Color.Tertiary" aria-label="add person" ></MudIconButton>
-                    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Tertiary" aria-label="add group" OnClick="OpenAddGroupDialog"></MudIconButton>
+<div class="home-container">
+	<div class="home-container1">
+		<div class="home-container2">
+			<SearchField>
 
-                </div>
-                    <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />
-                </div>
-                @*<div class="col-sm-8 col-6 d-flex justify-content-center align-items-center" style="background-color: #f4ecff;">*@
-                <div class="col-sm-9 col-9" >
-                    <ChatDetail SelectedUser="_selectedUser" 
-                        NewIncomingMessage="@_newIncomingMessage"
-                        OnIncomingMessageRecieved = "()=> _newIncomingMessage = null"
-                        OnCancel="HandleChatDetailsCancel" />
-                </div>
-                
-            </div>
-        </div>
-   
+			</SearchField>
+
+			<div class="list-container">
+
+				@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />*@
+				<div class="list-group list-group-flush">
+
+					@if (_loadingUsers)
+					{
+						<li class="list-group-item">
+							<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+							Loading...
+						</li>
+					}
+					else
+					{
+						@foreach (var chat in Chats)
+						{
+							<li class="list-group-item @(chat.IsSelected ? "user-select" : "user-unselect")" @onclick="() => OnUserSelected(chat)">
+								@*<a href="#" @onclick="() => NavigateToChat(chat)">*@
+								<div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+									<MudAvatar>
+										<MudImage Src=@chat.Avatar></MudImage>
+									</MudAvatar>
+									<h4 class="user-name">@chat.Name</h4>
+								</div>
+								@*</a>*@
+							</li>
+						}
+					}
+				</div>
+
+			</div>
+		</div>
+
+		<div class="home-container4">
+
+			<ChatDetail Id="@_id"
+						NewIncomingMessage="@_newIncomingMessage"
+						OnIncomingMessageRecieved="()=> _newIncomingMessage = null"
+						/>
+		</div>
+
+	</div>
 </div>
 
+
 @code {
-    private string value2;
-    private bool _loadingUsers = false;
-    private User? _selectedUser = null;
-    private Message? _newIncomingMessage = null;
-    private HubConnection? hubConnection;
-    public IList<User> Chats  = new Constant().Chats;
-    private string[] states = new Constant().states;
+	[Parameter]
+	public string? _id { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-       
-    }
+	private string value2;
+	private bool _loadingUsers = false;
+	private Conversation? _selectedUser = null;
+	private Message? _newIncomingMessage = null;
+	private HubConnection? hubConnection;
 
-    //private async Task<bool> 
+	// Khi nào run thì đổi
+	// = IList.Empty<Conversation>();
+	public List<Conversation> Chats = Constant.chats;
+	private IList<String> states = Constant.states;
 
-    private async Task<IEnumerable<string>> Search2(string value)
-    {
-        // In real life use an asynchronous function for fetching data from an api.
-        await Task.Delay(5);
+	protected override async Task OnInitializedAsync()
+	{
+		foreach(var chat in Chats)
+		{
+			chat.IsSelected = false;
+		}
+		await GetGroup();
+	}
 
-        // if text is null or empty, don't return values (drop-down will not open)
-        if (string.IsNullOrEmpty(value))
-            return new string[0];
-        // return chat room
-        return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    }
+	//private async Task<bool>
 
-    private async Task OnUserSelected(User user)
-    {
-        _selectedUser = user;
+	private async Task<IEnumerable<string>> Search2(string value)
+	{
+		// In real life use an asynchronous function for fetching data from an api.
+		await Task.Delay(5);
 
-        var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
-        if (selectedChatUser is not null)
-        {
-            selectedChatUser.IsSelected = false;
-        }
+		// if text is null or empty, don't return values (drop-down will not open)
+		if (string.IsNullOrEmpty(value))
+			return new string[0];
+		// return chat room
+		return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+	}
+	
+	private void OpenAddGroupDialog()
+	{
+		var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+		DialogService.Show<Data.Components.Dialog.AddGroup>("Tạo nhóm", options);
+	}
 
-        var chatUser = Chats.FirstOrDefault(c => c.UserName == user.UserName);
-        if (chatUser is null)
-        {
-            user.IsSelected = true;
-            Chats.Add(user);
-        }
-        else
-        {
-            chatUser.IsSelected = true;
-        }
-    }
-    // Delete the conversation visually, not in the data
-    private async Task HandleChatDetailsCancel(bool shouldRemoveFromChatsList)
-    {
-        if (shouldRemoveFromChatsList)
-        {
-            Chats.Remove(_selectedUser);
-        }
-        _selectedUser = null;
-    }
-    private void ConfigureConnection()
-    {
-        //Tạo hub connection, listen
+	private async Task OnUserSelected(Conversation user)
+	{
+		_selectedUser = user;
 
-    }
+		var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
+		if (selectedChatUser is not null)
+		{
+			selectedChatUser.IsSelected = false;
+		}
 
-    private void OpenAddGroupDialog()
-    {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<Dialog.AddGroup>("Tạo nhóm",options);
-    }
+		var chatUser = Chats.FirstOrDefault(c => c.Id == user.Id);
+		//Truong hop Chats null, user dau tien
+		if (chatUser is null)
+		{
+			user.IsSelected = true;
+			Chats.Add(user);
+		}
+		else
+		{
+			chatUser.IsSelected = true;
+		}
+		_navigationManager.NavigateTo($"/chat/{user.Id}");
+	}
+	
+	private void ConfigureConnection()
+	{
+		//Tạo hub connection, listen
+
+	}
+
+	private async Task<bool> GetGroup()
+	{
+		bool success;
+		string erroMessage;
+		List<Group> groups = new List<Group>();
+		try
+		{
+			HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+			httpRequestMessage.Method = new HttpMethod("GET");
+			httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Group");
+			var response = await _http.SendAsync(httpRequestMessage);
+
+			if (response.IsSuccessStatusCode)
+			{
+				var responseContent = await response.Content.ReadAsStringAsync();
+				var respond = JsonConvert.DeserializeObject<GroupGetRespond>(responseContent);
+				success = true;
+				try
+				{
+					if (respond.Data != null)
+					{
+						foreach (var group in respond.Data)
+						{
+							Chats.Add(group);
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					erroMessage = e.Message;
+				}
+
+				//await JSRuntime.InvokeAsync<string>("console.log", "group get", respond.ListGroup);
+			}
+		}
+		catch (Exception ex)
+		{
+			success = false;
+			erroMessage = ex.Message;
+		}
+		return await Task.FromResult(true);
+	}
 }

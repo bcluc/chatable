@@ -1,0 +1,97 @@
+﻿@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles;
+@using Chatable.Data.Entitles.Respond;
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
+@using System.Net.Http;
+@using Newtonsoft.Json;
+
+@inject HttpClient Client
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+@inject IJSRuntime JSRuntime
+
+<link rel="stylesheet" href="/css/ContactDetail.css">
+
+@if(Id == null){
+    <div class="waitChat-container">
+        <div class="home-text3">
+            <h2>Hiển thị danh sách bạn bè và nhóm của bạn</h2>
+        </div>
+        <img src="@Constant.imgWaitChat"
+             alt="image"
+             class="home-image" />
+    </div>
+}
+else
+{
+    <div class="contact-container">
+        <div class="contact-page-cont">
+
+            <div class="contact-header-container">
+                <div class="contact-user-container">
+                    <MudIcon Icon=@_titleIcon Disabled="true" aria-label="@_titleIcon" Style="margin:5px" />
+
+                    <h4 class="contact-p">@Id</h4>
+
+
+                </div>
+                
+            </div>
+            <div class="userlist">
+                <UserList Loading="@_loadingUsers" Chats="@userList" OnUserSelected="OnUserSelected" />
+            </div>
+            </div>
+    </div>
+}
+
+@code{
+    [Parameter]
+    public String? Id{ get; set; }
+    //Chia ra cac TH cua danh bạ dựa vào Id
+
+    private string _titleText = "";
+    private string _titleIcon = "";
+
+
+    private bool _loadingUsers = false;
+    public IList<User> userList = Constant.usersList;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await getContentType();
+    }
+
+    private async Task<bool> getContentType()
+    {
+        if(Id == "friendList")
+        {
+            _titleText = "Danh sách bạn bè";
+            _titleIcon = "@Icons.Material.Filled.Group";
+        }
+        else if (Id == "groupList")
+        {
+            _titleText = "Danh sách nhóm";
+            _titleIcon = "@Icons.Material.Filled.Groups";
+        }
+        else if (Id == "friendRequestList")
+        {
+            _titleText = "Danh sách lời mời kết bạn";
+            _titleIcon = "@Icons.Material.Filled.Email";
+        }
+
+        return await Task.FromResult(true);
+    }
+
+    private async Task OnUserSelected(User user)
+    {
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+        // go to conversation link với type là peer
+        _navigationManager.NavigateTo("/chat/" + user.Id);
+    }
+}

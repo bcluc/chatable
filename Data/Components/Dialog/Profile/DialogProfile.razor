@@ -1,31 +1,40 @@
-﻿@inject IDialogService DialogService
+﻿@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles;
+@using System.Globalization;
+@using Chatable.Data.Entitles.Model;
+@inject IDialogService DialogService
+
+<link rel="stylesheet" href="/css/AddGroupDialog.css">
 
 <MudDialog class="custom-dialog-content">
-
     <DialogContent>
-        <div Class="photos">
-            <MudImage Src="images/forest.jpg" Alt="Ảnh nền" Height="150" Style="width: 100%"></MudImage>
+        <div>
+        <div class="app-component-container">
+            <div Class="photos">
+                    <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
             <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
-                <MudImage Src="images/anh-meo-cute-de-thuong-34.jpg"></MudImage>
+                <MudImage Src="@currentUser.Avatar"></MudImage>
             </MudAvatar>
             <MudIconButton Icon="@Icons.Material.Filled.CameraAlt" Style="position: absolute; width: 15px; height:12px; left: 57%; margin-top: 160px;" />
-            <p style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@userName</p>
-        </div>
+            <p style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.UserName</p>
+            </div>
         
         <div class ="infor">
             <p style=" font-size: 15px; font-weight: 500;"> Thông tin cá nhân </p>
             <div class="phone">
-                <p class="title">Điện thoại</p>
-                <p>@userPhone</p>
+                <p class="title">Họ tên</p>
+                <p>@currentUser.Name</p>
             </div>
             <div class="sex">
                 <p class ="title">Giới tính</p>
-                <p>@userSex</p>
+                <p>@currentUser.Gender</p>
             </div>
             <div class="dob">
                 <p class ="title">Ngày sinh</p>
-                <p>@userDOB</p>
+                <p>@currentUser.DateOfBirth.ToString("dd/M/yyyy", CultureInfo.InvariantCulture)</p>
             </div>
+            </div>
+        </div>
         </div>
     </DialogContent>
     <DialogActions >
@@ -41,7 +50,6 @@
         padding 0;
         margin: 0;
         align-content: center;
-
     }
     .nopadding{
         padding: 0;
@@ -61,7 +69,7 @@
         display: flex;
         width: 100%;
         align-items: center;
-        margin-top: 15px;
+        margin-top: 10px;
     }
 
     .sex {
@@ -79,7 +87,7 @@
     }
 
     .title {
-        font-size: 13px;
+        font-size: 16px;
         font-weight: 500;
         width: 40%; 
 
@@ -94,10 +102,8 @@
 
 </style>
 @code {
-    private string userName = "Nhi Huỳnh";
-    private string userPhone = "012334455667";
-    private string userSex = "Nữ";
-    private string userDOB = "1/1/20000";
+    User currentUser = Constant.currentUser;
+    
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
 
