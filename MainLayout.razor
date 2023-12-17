@@ -1,5 +1,5 @@
 ﻿@using Chatable.Data.Entitles;
-@using Chatable.Dialog.Profile;
+@using Chatable.Data.Components.Dialog.Profile;
 @using Chatable.Data.Entitles.Model;
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
@@ -70,6 +70,6 @@
     private void OpenDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+        DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
     }
 }

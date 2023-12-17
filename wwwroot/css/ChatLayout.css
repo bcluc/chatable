@@ -24,6 +24,7 @@
     align-self: flex-start;
     flex-direction: column;
     justify-content: flex-start;
+    margin-left:5px
 }
 
 .home-container3 {
@@ -75,7 +76,6 @@
     justify-content: center;
 }
 .home-image {
-    width: 319px;
     height: 312px;
     align-self: center;
     object-fit: cover;

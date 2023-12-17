@@ -1,3 +1,42 @@
-﻿element {
-    --bg-color: #405580;
+﻿:root {
+    --bg-color: #0091ff;
+    --bg-conversation-color: #eef0f1;
+    --main-font: 'SVN-Poppins',sans-serif;
+
+}
+@font-face {
+    font-family: 'SVN-Poppins';
+    src: url('../Font/SVN-Poppins/SVN-Poppins-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'SVN-Poppins';
+    src: url('../Font/SVN-Poppins/SVN-Poppins-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'SVN-Poppins';
+    src: url('../Font/SVN-Poppins/SVN-Poppins-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'SVN-Poppins';
+    src: url('../Font/SVN-Poppins/SVN-Poppins-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'SVN-Poppins';
+    src: url('../Font/SVN-Poppins/SVN-Poppins-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'SVN-Poppins';
+    src: url('../Font/SVN-Poppins/SVN-Poppins-Bold.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
 }

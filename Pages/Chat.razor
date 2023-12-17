@@ -1,4 +1,5 @@
 ﻿@page "/chat"
+@page "/chat/{_id?}"
 @using Chatable.Data.Components;
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.Model;
@@ -45,14 +46,14 @@
 						@foreach (var chat in Chats)
 						{
 							<li class="list-group-item @(chat.IsSelected ? "user-select" : "user-unselect")" @onclick="() => OnUserSelected(chat)">
-								<a href="#" @onclick="() => NavigateToChat(chat)">
+								@*<a href="#" @onclick="() => NavigateToChat(chat)">*@
 								<div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
 									<MudAvatar>
 										<MudImage Src=@chat.Avatar></MudImage>
 									</MudAvatar>
 									<h4 class="user-name">@chat.Name</h4>
 								</div>
-								</a>
+								@*</a>*@
 							</li>
 						}
 					}
@@ -62,11 +63,11 @@
 		</div>
 
 		<div class="home-container4">
-			@Body
-			@*<ChatDetail SelectedUser="_selectedUser"
+
+			<ChatDetail Id="@_id"
 						NewIncomingMessage="@_newIncomingMessage"
 						OnIncomingMessageRecieved="()=> _newIncomingMessage = null"
-						/>*@
+						/>
 		</div>
 
 	</div>
@@ -74,6 +75,9 @@
 
 
 @code {
+	[Parameter]
+	public string? _id { get; set; }
+
 	private string value2;
 	private bool _loadingUsers = false;
 	private Conversation? _selectedUser = null;
@@ -87,14 +91,14 @@
 
 	protected override async Task OnInitializedAsync()
 	{
+		foreach(var chat in Chats)
+		{
+			chat.IsSelected = false;
+		}
 		await GetGroup();
 	}
 
 	//private async Task<bool>
-	private void NavigateToChat(Conversation conversation)
-	{
-		_navigationManager.NavigateTo($"/chat/{conversation.Id}");
-	}
 
 	private async Task<IEnumerable<string>> Search2(string value)
 	{
@@ -111,7 +115,7 @@
 	private void OpenAddGroupDialog()
 	{
 		var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
-		DialogService.Show<Dialog.AddGroup>("Tạo nhóm", options);
+		DialogService.Show<Data.Components.Dialog.AddGroup>("Tạo nhóm", options);
 	}
 
 	private async Task OnUserSelected(Conversation user)
@@ -135,6 +139,7 @@
 		{
 			chatUser.IsSelected = true;
 		}
+		_navigationManager.NavigateTo($"/chat/{user.Id}");
 	}
 	
 	private void ConfigureConnection()
@@ -142,8 +147,6 @@
 		//Tạo hub connection, listen
 
 	}
-
-
 
 	private async Task<bool> GetGroup()
 	{

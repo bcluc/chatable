@@ -34,6 +34,10 @@ namespace Chatable.Data.Entitles
         public static readonly User currentUser = new("BC", " BC","Nam", "2023-12-05 11:27:29.397+00", "2023-12-05 11:27:29.397+00","BC");
         
         public static readonly Message visibleMessage = new("0", "BC", "1", DateTime.Now, "Text", "Say hi");
+
+        public static readonly Group currentGroup = new Group("123", "Group Local Test", "", "BC", "2023-12-04 17:03:22.2+00");
+
+        public static readonly User oppositeUser = new User("nhubaole", " Lê Bảo Như", "Nữ", "2023-11-19 07:58:48.084+00", "2023-11-19 07:58:48.084+00", "BC_nhubaole");
     }
 
     
