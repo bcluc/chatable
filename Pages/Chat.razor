@@ -20,59 +20,56 @@
 @inject IHttpClientFactory ClientFactory
 
 <link rel="stylesheet" href="/css/ChatLayout.css">
-<!-- Your Blazor component -->
 
-<div class="home-container">
-	<div class="home-container1">
-		<div class="home-container2">
-			<SearchField>
+<style>
+	.mud-divider-fullwidth {
+		flex-grow: 0;
+	}
+</style>
 
-			</SearchField>
+<div class="chat-layout">
+	<div class="left-banner">
+		<SearchField>
+		</SearchField> 
 
-			<div class="list-container">
+		<MudDivider></MudDivider>
 
-				@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />*@
-				<div class="list-group list-group-flush">
+		<div class="list-conversations">
 
-					@if (_loadingUsers)
-					{
-						<li class="list-group-item">
-							<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-							Loading...
-						</li>
-					}
-					else
-					{
-						@foreach (var chat in Chats)
-						{
-							<li class="list-group-item @(chat.IsSelected ? "user-select" : "user-unselect")" @onclick="() => OnUserSelected(chat)">
-								@*<a href="#" @onclick="() => NavigateToChat(chat)">*@
-								<div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
-									<MudAvatar>
-										<MudImage Src=@chat.Avatar></MudImage>
-									</MudAvatar>
-									<h4 class="user-name">@chat.Name</h4>
-								</div>
-								@*</a>*@
-							</li>
-						}
-					}
+			@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" /> *@
+			@if (_loadingUsers)
+			{
+				<div class="coversation-container">
+					<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+					Loading...
 				</div>
+			}
+			else
+			{
+				@foreach (var chat in Chats)
+				{
+					<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
+						 @onclick="() => OnUserSelected(chat)">
+						<img class="coversation-img mr-3" src="@chat.Avatar" />
+						<div class="d-flex justify-start flex-column">
+							<p class="coversation-name">@chat.Name</p>
+							<p class="coversation-last-message">last message</p>
+						</div>
+					</div>
 
-			</div>
+				}
+			}
+
 		</div>
+	</div>
 
-		<div class="home-container4">
+	<MudDivider Vertical="true"/>
 
-			<ChatDetail Id="@_id"
-						NewIncomingMessage="@_newIncomingMessage"
-						OnIncomingMessageRecieved="()=> _newIncomingMessage = null"
-						/>
-		</div>
-
+	<div class="right-banner">
+		<ChatDetail Id="@_id" NewIncomingMessage="@_newIncomingMessage"
+			OnIncomingMessageRecieved="()=> _newIncomingMessage = null" />
 	</div>
 </div>
-
 
 @code {
 	[Parameter]

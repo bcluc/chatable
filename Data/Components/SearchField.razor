@@ -16,23 +16,68 @@
 @inject IDialogService DialogService
 @inject IHttpClientFactory ClientFactory
 
-@*<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-*@
-<link rel="stylesheet" href="/css/ChatLayout.css">
+<style>
+    .top_bar {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 16px;
+    }
 
-<div class="home-container3">
-    <MudItem Style="width:100px">
-        <MudAutocomplete T="string" Label="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
-                         AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
-    </MudItem>
-    <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt" Color="Color.Tertiary" aria-label="add person" Class="home-button"></MudIconButton>
-    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Tertiary" aria-label="add group" OnClick="OpenAddGroupDialog"></MudIconButton>
+    /* Thay đổi border-radius của Outlined MudTextField */
+    .mud-input-outlined-border {
+        border-radius: 8px !important;
+    }
+
+    /* Thay đổi margin-top mặc định 6px Outlined MudTextField thành 0px*/
+    .mud-input-control {
+        margin-top: 0px;
+    }
+
+    .mud-input.mud-input-outlined.mud-input-adorned-start {
+        padding-left: 8px;
+        padding-inline-start: 8px;
+        padding-inline-end: unset;
+    }
+
+    .mud-input > input.mud-input-root-outlined.mud-input-root-adorned-start, div.mud-input-slot.mud-input-root-outlined.mud-input-root-adorned-start {
+        padding-left: 0;
+        padding-inline-start: 0;
+        padding-inline-end: 14px;
+    }
+
+    .mud-input > input.mud-input-root-outlined, div.mud-input-slot.mud-input-root-outlined {
+        padding: 9.5px 14px;
+    }
+
+    .mud-input-outlined-border {
+        border: none !important;
+    }
+
+    .mud-input-control-input-container {
+        background-color: #ECEDF0 !important;
+        border-radius: 8px !important;
+    }
+
+</style>
+
+<div class="top_bar">
+    <MudAutocomplete Placeholder="Tìm kiếm" T="string" @bind-Value="searchText" SearchFunc="@Search"
+        Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" />
+
+    <MudIconButton Variant="Variant.Filled" DisableElevation="true" Style="padding: 9px; border-radius: 8px; background-color: #ECEDF0" Class="mx-2">
+        <i class="fa-solid fa-user-plus fa-lg"></i>
+    </MudIconButton>
+    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" OnClick="OpenAddGroupDialog" Variant="Variant.Filled" DisableElevation="true"
+        Style="padding: 7px; border-radius: 8px; background-color: #ECEDF0">
+
+    </MudIconButton>
 
 </div>
 @code {
-    private string value2;
+    private string searchText;
     private IList<String> states = Constant.states;
-    private async Task<IEnumerable<string>> Search2(string value)
+    private async Task<IEnumerable<string>> Search(string value)
     {
         // In real life use an asynchronous function for fetching data from an api.
         await Task.Delay(5);

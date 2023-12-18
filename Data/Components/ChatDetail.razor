@@ -1,5 +1,4 @@
-﻿
-@using Chatable.Data.Entitles.Model;
+﻿@using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.Respond;
 @using Microsoft.AspNetCore.Components.Forms
@@ -22,29 +21,31 @@
         <h2>Chào mừng đến với Chatable, hãy bắt đầu cuộc trò chuyện của bạn ngay</h2>
        </div>
     <img src="@Constant.imgWaitChat"
-         alt="image"
          class="home-image" />
     </div>
 }
 else
 {
-    <div class="chat-container">
-        <div class="chat-page-cont">
+    /* 
+    Chi tiết chat gồm 3 phần
+    - Header chứa Tên, Status, Voice, Video Call
+    - Danh sách tin nhắn
+    - Component dungf ddeer gửi tin nhắn 
+    */
+    <div class="container">
 
-        <div class="chat-header-container">
-            <div class="chat-user-container">
-                <MudAvatar>
-                    <MudImage Src=@SelectedUser.Avatar></MudImage>
-                </MudAvatar>
-                <h4 class="user-p">@SelectedUser.Name</h4>
-
-                
+        <div class="header">
+            <img class="coversation-img mr-3" src="@SelectedUser.Avatar" />
+            <div class="d-flex flex-column">
+                <p class="receiver-name">@SelectedUser.Name</p>
+                <p class="receiver-status">Đang hoạt động</p>
             </div>
-            <div class="chat-btn-container">
-                <MudIconButton Icon="@Icons.Material.Filled.Call" Style="color:#0091ff" aria-label="call"></MudIconButton>
-                <MudIconButton Icon="@Icons.Material.Filled.VideoCall" Style="color:#0091ff" aria-label="video call"></MudIconButton>
-            </div>
+            <MudSpacer/>
+            <MudIconButton Icon="@Icons.Material.Filled.Call" Style="color:#0091ff" aria-label="call"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.VideoCall" Style="color:#0091ff" aria-label="video call"></MudIconButton>
         </div>
+
+        <MudDivider></MudDivider>
         
         <div class="messages-list">
             
@@ -100,16 +101,11 @@ else
             </ul>
         </div>
         <div >
-
-                <EditForm Model="_newMessage" OnValidSubmit="HandleSendMessageSubmit" class="message-input">
-                    
-                        <InputText @bind-Value="_newMessage" placeholder="Nhập tin nhắn..." class="message-textinput" />
-                        <button class="btn-send" type="submit">Gửi</button>
-                    
-     
+            <EditForm class="message-input" Model="_newMessage" OnValidSubmit="HandleSendMessageSubmit">
+                <InputText @bind-Value="_newMessage" placeholder="Nhập tin nhắn..." class="message-textinput" />
+                <button class="btn-send" type="submit">Gửi</button>
             </EditForm>
 
-        </div>
         </div>
     </div>
 }

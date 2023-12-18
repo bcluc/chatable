@@ -20,9 +20,9 @@ namespace Chatable.Data.Entitles
 
         public static readonly List<Conversation> chats  = new List<Conversation>
         {
-        new User("nhubaole", " Lê Bảo Như","Nữ","2023-11-19 07:58:48.084+00","2023-11-19 07:58:48.084+00","BC_nhubaole"),
-        new User("nhihuynh", " Ý Nhi","Nữ", "2023-12-04 17:03:22.2+00","2023-12-04 17:03:22.2+00", "BC_nhihuynh"),
-        new Group("123","Group Local Test", "", "BC", "2023-12-04 17:03:22.2+00")
+            new User("nhubaole", " Lê Bảo Như","Nữ","2023-11-19 07:58:48.084+00","2023-11-19 07:58:48.084+00","BC_nhubaole"),
+            new User("nhihuynh", " Ý Nhi","Nữ", "2023-12-04 17:03:22.2+00","2023-12-04 17:03:22.2+00", "BC_nhihuynh"),
+            new Group("123","Group Local Test", "", "BC", "2023-12-04 17:03:22.2+00")
         };
 
         public static readonly IList<User> usersList = new List<User>
