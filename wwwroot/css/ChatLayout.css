@@ -1,11 +1,17 @@
-﻿.chat-layout {
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.chat-layout {
     height: 100vh;
     display: flex;
     flex-direction: row;
 }
 
 .left-banner {
-    width: 400px;
+    min-width: 300px;
     background-color: white;
     display: flex;
     flex-direction: column;
@@ -19,6 +25,44 @@
 
 .right-banner {
     width: 100%;
+}
+
+.coversation-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 14px;
+}
+
+.coversation-img {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+}
+
+.coversation-name {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.coversation-last-message {
+    font-size: 14px;
+    color: gray;
+}
+
+.user-select {
+    background-color: #0091FE33;
+    color: black;
+}
+
+.user-unselect {
+    background-color: white;
+    color: black;
+}
+
+.user-unselect:hover {
+    background-color: #F4F5F7;
 }
 
 /*.home-container2 {
@@ -98,42 +142,6 @@
 
 li {
     margin: 10px 0;
-}
-
-.list-group-item {
-    list-style-type: none;
-    padding: 10px 5px 10px 5px;
-    margin: 5px 5px 5px 5px;
-    border-radius: 5px;
-}
-
-.user-select {
-    background-color: #0091ff;
-    color: white;
-    list-style-type: none;
-    padding: 10px 5px 10px 5px;
-    margin: 5px 5px 5px 5px;
-    border-radius: 5px;
-}
-
-.list-group-item .user-unselect {
-    background-color: white;
-    color: black;
-    list-style-type: none;
-}
-
-.user-name {
-    font-size: 14px;
-    text-align: left;
-    width: 100%;
-    height: auto;
-    font-weight: 500;
-    align-self: center;
-    margin-left: 10px;
-    margin-right: 10px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
 }
 
 .container {
