@@ -1,5 +1,11 @@
 ﻿@import url('Theme.css');
 
+.home-image {
+    height: 300px;
+    align-self: center;
+    object-fit: cover;
+}
+
 .messages-list {
     height: calc(100vh - 115px);
     overflow-y: scroll;

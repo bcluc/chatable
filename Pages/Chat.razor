@@ -20,59 +20,66 @@
 @inject IHttpClientFactory ClientFactory
 
 <link rel="stylesheet" href="/css/ChatLayout.css">
-<!-- Your Blazor component -->
 
-<div class="home-container">
-	<div class="home-container1">
-		<div class="home-container2">
-			<SearchField>
+@*
+<div class="chat_layout">
+	<div class="list_conversations">
+ 		
+	</div>
 
-			</SearchField>
+<div class="home-container4">
 
-			<div class="list-container">
+		<ChatDetail Id="@_id"
+					NewIncomingMessage="@_newIncomingMessage"
+					OnIncomingMessageRecieved="()=> _newIncomingMessage = null"
+		/>
+	</div> 
 
-				@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />*@
-				<div class="list-group list-group-flush">
+</div>
+*@
 
-					@if (_loadingUsers)
-					{
-						<li class="list-group-item">
-							<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-							Loading...
-						</li>
-					}
-					else
-					{
-						@foreach (var chat in Chats)
-						{
-							<li class="list-group-item @(chat.IsSelected ? "user-select" : "user-unselect")" @onclick="() => OnUserSelected(chat)">
-								@*<a href="#" @onclick="() => NavigateToChat(chat)">*@
-								<div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
-									<MudAvatar>
-										<MudImage Src=@chat.Avatar></MudImage>
-									</MudAvatar>
-									<h4 class="user-name">@chat.Name</h4>
-								</div>
-								@*</a>*@
-							</li>
-						}
-					}
-				</div>
+<div class="chat-layout">
+	<div class="left-banner">
+		<SearchField>
+		</SearchField> 
 
-			</div>
+		<div class="list-conversations">
+
+			@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" /> *@
+			@if (_loadingUsers)
+			{
+				<li class="list-group-item">
+					<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+					Loading...
+				</li>
+			}
+			else
+			{
+				@foreach (var chat in Chats)
+				{
+					<li class="list-group-item @(chat.IsSelected ? "user-select" : "user-unselect")" @onclick="() => OnUserSelected(chat)">
+						@*<a href="#" @onclick="() => NavigateToChat(chat)"> *@
+						<div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+							<MudAvatar>
+								<MudImage Src=@chat.Avatar></MudImage>
+							</MudAvatar>
+							<h4 class="user-name">@chat.Name</h4>
+						</div>
+						@*</a> *@
+					</li>
+				}
+			}
+
 		</div>
+	</div>
 
-		<div class="home-container4">
+	<MudDivider Vertical="true"/>
 
-			<ChatDetail Id="@_id"
-						NewIncomingMessage="@_newIncomingMessage"
-						OnIncomingMessageRecieved="()=> _newIncomingMessage = null"
-						/>
-		</div>
-
+	<div class="right-banner">
+		<ChatDetail Id="@_id" NewIncomingMessage="@_newIncomingMessage"
+			OnIncomingMessageRecieved="()=> _newIncomingMessage = null" />
 	</div>
 </div>
-
 
 @code {
 	[Parameter]

@@ -1,22 +1,27 @@
-﻿.home-container {
-    width: 100%;
-    height:100%;
+﻿.chat-layout {
+    height: 100vh;
     display: flex;
-    min-height: 100vh;
-    align-items: center;
+    flex-direction: row;
+}
+
+.left-banner {
+    width: 400px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+.list-conversations {
+    display: flex;
     flex-direction: column;
 }
 
-.home-container1 {
-    flex: 1;
+.right-banner {
     width: 100%;
-    height: 100%;
-    display: flex;
-    align-self: flex-start;
-    align-items: flex-start;
 }
 
-.home-container2 {
+/*.home-container2 {
     flex: 0;
     width: auto;
     height: 100%;
@@ -24,18 +29,18 @@
     align-self: flex-start;
     flex-direction: column;
     justify-content: flex-start;
-    margin-left:5px
-}
+    margin-left: 5px
+}*/
 
-.home-container3 {
+/*.home-container3 {
     width: 100%;
     height: auto;
     display: flex;
     align-items: center;
     padding:10px;
-}
+}*/
 
-.home-button {
+/*.home-button {
     margin-left: 16px;
     margin-right: 16px;
 }
@@ -75,11 +80,7 @@
     flex-direction: column;
     justify-content: center;
 }
-.home-image {
-    height: 312px;
-    align-self: center;
-    object-fit: cover;
-}
+
 .list-container {
     flex: 1;
     height: auto;
@@ -141,4 +142,4 @@ li {
     height: auto;
     display: flex;
     align-items: flex-start;
-}
+}*/
