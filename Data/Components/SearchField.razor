@@ -65,12 +65,12 @@
     <MudAutocomplete Placeholder="Tìm kiếm" T="string" @bind-Value="searchText" SearchFunc="@Search"
         Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" />
 
-    <MudIconButton Variant="Variant.Filled" DisableElevation="true" Style="padding: 9px; border-radius: 8px; background-color: #ECEDF0" Class="mx-2">
+    <MudIconButton Variant="Variant.Text" DisableElevation="true" 
+    Style="padding: 9px; border-radius: 8px;" Class="mx-2">
         <i class="fa-solid fa-user-plus fa-lg"></i>
     </MudIconButton>
-    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" OnClick="OpenAddGroupDialog" Variant="Variant.Filled" DisableElevation="true"
-        Style="padding: 7px; border-radius: 8px; background-color: #ECEDF0">
-
+    <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" OnClick="OpenAddGroupDialog" Variant="Variant.Text" DisableElevation="true"
+        Style="padding: 7px; border-radius: 8px;">
     </MudIconButton>
 
 </div>

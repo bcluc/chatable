@@ -6,6 +6,7 @@
     box-sizing: border-box;
 }
 
+/* Layout cho màn hình Chat */
 .container {
     display: flex;
     flex-direction: column;
@@ -15,12 +16,30 @@
 .header {
     display: flex;
     align-items: center;
+    padding: 10px 16px;
+    background-color: white;
+}
+
+#back-btn {
+    display: none;
     padding: 10px;
+    border-radius: 8px;
+    width: 40px;
+}
+
+@media (max-width: 800px) {
+
+    #back-btn {
+        display: block;
+    }
 }
 
 .receiver-name {
     font-size: 16px;
     font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .receiver-status {
@@ -32,16 +51,44 @@
 .messages-list {
     flex: 1; /* expanded */
     overflow-y: scroll;
-    background-color: var(--bg-conversation-color);
+    background-color: #FAFAFA;
 }
 
-.message-input {
+#utils-message {
+    display: flex;
+    padding: 4px;
+}
+
+#utils-message > button {
+    padding: 10px;
+    border-radius: 4px;
+}
+/*-------------------------------------------------------------------------------------*/
+#message-input {
     display: flex;
     align-items: center;
 }
 
-.message-textinput {
-    padding: 10px;
+.mud-input-control > .mud-input-control-input-container > div.mud-input.mud-input-text {
+    margin-top: 0;
+}
+
+#message-input .mud-input > input.mud-input-root, div.mud-input-slot.mud-input-root {
+    padding: 20px 14px;
+}
+
+#message-input > .mud-input-control > .mud-input-control-input-container {
+    background-color: white !important;
+    border-radius: 0px !important;
+}
+
+.btn-send {
+    border-radius: 6px;
+    background-color: var(--bg-color);
+    padding: 6px 15px;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
 }
 
 /*
