@@ -190,7 +190,7 @@ else
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var respond = JsonConvert.DeserializeObject<ConversationGetRespond>(responseContent);
+                var respond = JsonConvert.DeserializeObject<ConversationGetResponse>(responseContent);
                 success = true;
                 try
                 {
@@ -229,7 +229,7 @@ else
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var respond = JsonConvert.DeserializeObject<ApiRespond>(responseContent);
+                var respond = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
                 success = true;
                 try
                 {

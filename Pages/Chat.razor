@@ -163,7 +163,7 @@
 			if (response.IsSuccessStatusCode)
 			{
 				var responseContent = await response.Content.ReadAsStringAsync();
-				var respond = JsonConvert.DeserializeObject<GroupGetRespond>(responseContent);
+				var respond = JsonConvert.DeserializeObject<GroupGetResponse>(responseContent);
 				success = true;
 				try
 				{

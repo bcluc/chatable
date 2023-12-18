@@ -5,7 +5,7 @@
 @using System.ComponentModel.DataAnnotations;
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
-@using Chatable.Data.Entitles.Respond;
+@using Chatable.Data.Entitles.Response;
 @using Microsoft.AspNetCore.Components.Forms;
 @using System.Net.Http;
 @using Newtonsoft.Json;
@@ -148,8 +148,13 @@
     </div>
 </div>
 
+@* 
+nhubaole
+LeBaoNhu71!
+*@
+
 @code {
-    /* Lâm: 106 -> 125*/
+    /* Lâm: 106 -> 125 */
     bool isShow;
     InputType PasswordInput = InputType.Password;
     string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
@@ -170,22 +175,22 @@
         }
     }
 
-    }
-</style>
-@code {
+    /* Nhi: 161 -> oo */
     LoginForm model = new LoginForm();
     bool success;
     private bool _processing = false;
     String erroMessage;
 
-    //public class LoginForm
-    //{
-    //    [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
-    //    public string userName { get; set; }
+    public class LoginForm
+    {
 
-    //    [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
-    //    public string password { get; set; }   
-    //}
+        [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
+        public string userName { get; set; }
+
+        [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
+        public string password { get; set; }
+
+    }
     private async Task<bool> LoginUser(EditContext context)
     {
         _processing = true;
@@ -195,6 +200,8 @@
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("POST");
             httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Auth/login");
+            // httpRequestMessage.RequestUri = new Uri("http://localhost:5275/api/v1/Auth/login");
+
             httpRequestMessage.Content = new StringContent(serializedUser);
 
             httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
@@ -204,14 +211,15 @@
             {
                 success = true;
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<ApiRespond>(responseContent);
-                try{
-                    if(user.Data != null)
+                var user = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
+                try
+                {
+                    if (user.Token != null)
                     {
-                        await _localStorageService.SetItemAsync("jwt_token", user.Data);
+                        await _localStorageService.SetItemAsync("jwt_token", user.Token);
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     erroMessage = e.Message;
                 }

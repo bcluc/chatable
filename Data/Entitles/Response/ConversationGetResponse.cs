@@ -2,10 +2,10 @@
 
 namespace Chatable.Data.Entitles.Respond
 {
-    public class GroupGetRespond
+    public class ConversationGetResponse
     {
         public bool Success { get; set; }
         public string Message { get; set; }
-        public List<Group> Data { get; set; }
+        public Conversation Data { get; set; }
     }
 }

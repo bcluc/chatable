@@ -6,61 +6,99 @@
 @inject IDialogService DialogService
 <link rel="stylesheet" href="/css/MainLayout.css">
 
-<MudThemeProvider @bind-IsDarkMode="@themeOn" />
-@* <MudDialogProvider />
-<MudSnackbarProvider /> *@
+@* <MudThemeProvider @bind-IsDarkMode="@themeOn" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+ *@
 
-<div class="page">
-    <div class="sidebar">
-        <div class="user" title="Click để xem thông tin">
-            <img src= "@currentUser.Avatar" class="user-img" @onclick="OpenDialog" />
-            <div>
-                <p>@currentUser.Name</p>
-            </div>
-        </div>
+<div class="sidebar">
+    <div class="user">
+        <img src="@currentUser.Avatar" class="user_img" @onclick="OpenDialog" />
+        <p>@currentUser.Name</p>
+    </div>
+    <ul>
+        @for (int i = 0; i <= 2; ++i)
+        {
+            var currentIndex = i;
+            <li class="@(currentPageIndex == i ? "current-page" : "")"
+                @onclick="() => changeCurrentPageIndex(currentIndex)">
+                <a href="@menuItems[i].page" >
+                    <i class="@menuItems[i].icon"></i>
+                    <p>@menuItems[i].title</p>
+                </a>
+            </li>
+        }
+    </ul>
+        
+    <div class="bottom-list">
         <ul>
-            <li>
-                <a href="chat">
-                    <i class='bx bxs-message-rounded-detail icon'></i>
-                    <p>Trò chuyện</p>
-                </a>
-            </li>
-            <li>
-                <NavLink clas="nav-link" href="contact">
-                    <i class='bx bxs-contact icon'></i>
-                    <p>Danh bạ</p>
-                </NavLink>
-            </li>
-            <li>
-                <a href="#">
-                    <i class='bx bx-cog icon'></i>
-                    <p>Cài đặt</p>
-                </a>
-            </li>
+            @for (int i = 3; i <= 4; ++i)
+            {
+                var currentIndex = i;
+                <li class="@(currentPageIndex == i ? "current-page" : "")"
+                    @onclick="() => changeCurrentPageIndex(currentIndex)">
+                    <a href="@menuItems[i].page">
+                        <i class="@menuItems[i].icon"></i>
+                        <p>@menuItems[i].title</p>
+                    </a>
+                </li>
+            }
         </ul>
-        <div class="bottom-list">
-            <ul>
-                <li>
-                    <a href="#">
-                        <i class='bx bx-moon icon icon'></i>
-                        <p>Chế độ</p>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class='bx bx-log-out icon'></i>
-                        <p>Đăng xuất</p>
-                    </a>
-                </li>
-            </ul>
-        </div>
     </div>
-    <div class="main">
-        @Body
-    </div>
+       
 </div>
-@code 
-{
+<div class="main_container">
+@Body
+</div>
+
+@* Code của Lâm *@
+@code {
+    private class MenuItem
+    {
+        public string? page { get; set; }
+        public string? icon { get; set; }
+        public string? title { get; set; }
+    }
+
+    private MenuItem[] menuItems = new MenuItem[]
+    {
+        new MenuItem {
+            page = "chat",
+            icon = "fa-solid fa-comments",
+            title = "Trò chuyện",
+        },
+        new MenuItem {
+            page = "contact",
+            icon = "fa-solid fa-address-book",
+            title = "Danh bạ",
+        },
+        new MenuItem {
+            page = "chat",
+            icon = "fa-solid fa-gear",
+            title = "Cài đặt",
+        },
+        new MenuItem {
+            page = "contact",
+            icon = "fa-solid fa-moon",
+            title = "Chế độ",
+        },
+        new MenuItem {
+            page = "chat",
+            icon = "bx bx-log-out",
+            title = "Đăng xuất",
+        },
+    };
+
+    private int currentPageIndex = 0;
+
+    private void changeCurrentPageIndex(int index)
+    {
+        currentPageIndex = index;
+    }
+}
+
+@code {
+
     User currentUser = Constant.currentUser;
     bool themeOn = false;
     public async Task Logout()
