@@ -4,27 +4,61 @@
     box-sizing: border-box;
 }
 
+/*
+    Bố cục tổng quá
+    chat-layout là div cha
+    chứa 2 div con: #left-banner và #right-banner
+*/
+
 .chat-layout {
     height: 100vh;
     display: flex;
     flex-direction: row;
 }
 
-.left-banner {
-    min-width: 300px;
+#left-banner {
+    min-width: 310px;
+    width: 310px;
+    height: 100%;
     background-color: white;
     display: flex;
     flex-direction: column;
     justify-content: start;
 }
 
+#right-banner {
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 800px) {
+
+    .chat-layout {
+        display: block;
+        position: relative;
+    }
+
+    #v-divider {
+        display: none;
+    }
+
+    #left-banner {
+        width: 100%;
+        height: 100%;
+    }
+
+    #right-banner {
+        position: fixed;
+        top: 0px;
+        left: 80px;
+        width: calc(100% - 80px);
+        /*display: none;*/
+    }
+}
+
 .list-conversations {
     display: flex;
     flex-direction: column;
-}
-
-.right-banner {
-    width: 100%;
 }
 
 .coversation-container {
@@ -65,89 +99,24 @@
     background-color: #F4F5F7;
 }
 
-/*.home-container2 {
-    flex: 0;
-    width: auto;
+/* Layout cho màn hình đợi */
+.wait-chat {
     height: 100%;
-    display: flex;
-    align-self: flex-start;
-    flex-direction: column;
-    justify-content: flex-start;
-    margin-left: 5px
-}*/
-
-/*.home-container3 {
     width: 100%;
-    height: auto;
     display: flex;
+    justify-content: center;
     align-items: center;
-    padding:10px;
-}*/
-
-/*.home-button {
-    margin-left: 16px;
-    margin-right: 16px;
-}
-
-.home-ul {
-    height: 100%;
-}
-.ul {
-    list-style-type: none;
-}
-.home-container4 {
-    width: auto;
-    height: 100%;
-    flex: 1;
-    flex-direction: row;
-    padding: 10px 10px 0px 10px;
-    justify-content: center;
-    display: flex;
-    position: relative;
-    align-self: center;
-    align-items: flex-start;
-}
-.home-text3 {
-    width: 100%;
-    height: auto;
-    align-self: center;
-    text-align: center;
-}
-.waitChat-container {
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    position: relative;
-    align-self: center;
-    align-items: flex-start;
     flex-direction: column;
-    justify-content: center;
+    padding: 20px;
 }
 
-.list-container {
-    flex: 1;
-    height: auto;
-    flex-direction: column
-}
-.user-img {
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
-    min-height: 56px;
-    border-radius: 100%;
-    border: 2px solid #fff;
-    overflow: hidden;
+.wait-chat-title {
+    font-size: 20px;
+    text-align: center
 }
 
-li {
-    margin: 10px 0;
+.wait-chat-img {
+    width: 70%;
+    min-width: 300px;
+    max-width: max(600px, 40%);
 }
-
-.container {
-    flex: 0 0 auto;
-    width: 100%;
-    height: auto;
-    display: flex;
-    align-items: flex-start;
-}*/

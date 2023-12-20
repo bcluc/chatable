@@ -6,6 +6,7 @@
     box-sizing: border-box;
 }
 
+/* Layout cho màn hình Chat */
 .container {
     display: flex;
     flex-direction: column;
@@ -15,12 +16,30 @@
 .header {
     display: flex;
     align-items: center;
+    padding: 10px 16px;
+    background-color: white;
+}
+
+#back-btn {
+    display: none;
     padding: 10px;
+    border-radius: 8px;
+    width: 40px;
+}
+
+@media (max-width: 800px) {
+
+    #back-btn {
+        display: block;
+    }
 }
 
 .receiver-name {
     font-size: 16px;
     font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .receiver-status {
@@ -32,44 +51,69 @@
 .messages-list {
     flex: 1; /* expanded */
     overflow-y: scroll;
-    background-color: var(--bg-conversation-color);
+    background-color: #F2F2FA;
 }
 
-.message-input {
+#utils-message {
+    display: flex;
+    padding: 4px;
+}
+
+#utils-message > button {
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/*-------------------------------------------------------------------------------------*/
+#message-input {
     display: flex;
     align-items: center;
 }
 
-.message-textinput {
-    padding: 10px;
+.mud-input-control > .mud-input-control-input-container > div.mud-input.mud-input-text {
+    margin-top: 0;
 }
 
-/*
-
-.home-image {
-    height: 300px;
-    align-self: center;
-    object-fit: cover;
+#message-input .mud-input > input.mud-input-root, div.mud-input-slot.mud-input-root {
+    padding: 20px 14px;
 }
+
+#message-input > .mud-input-control > .mud-input-control-input-container {
+    background-color: white !important;
+    border-radius: 0px !important;
+}
+
+.btn-send {
+    border-radius: 6px;
+    background-color: var(--bg-color);
+    padding: 6px 15px;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Message Style */
 
 .message-ul {
-    padding: 5px;
+    padding: 6px;
     margin-bottom: 1rem;
 }
+
 .single-msg {
-    padding: 4px 10px;
-    border-radius: 5px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 16px;
+    margin-bottom: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .me {
-    border-bottom-right-radius: 0;
     color: white;
     background-color: var(--bg-color);
 }
 
 .other {
-    border-bottom-left-radius: 0;
-    color:black;
+    color: black;
     background-color: white;
 }
 
@@ -83,6 +127,16 @@
     width: 100%;
     text-align: right;
 }
+
+/*
+
+.home-image {
+    height: 300px;
+    align-self: center;
+    object-fit: cover;
+}
+
+
 .user-p {
     font-size: 17px;
     font-weight: 500;

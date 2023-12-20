@@ -14,104 +14,131 @@
 
 <link rel="stylesheet" href="/css/ChatDetail.css">
 
-@if (Id is null)
-{
-    <div class="waitChat-container">
-    <div class="home-text3">
-        <h2>Chào mừng đến với Chatable, hãy bắt đầu cuộc trò chuyện của bạn ngay</h2>
-       </div>
-    <img src="@Constant.imgWaitChat"
-         class="home-image" />
-    </div>
-}
-else
-{
-    /* 
-    Chi tiết chat gồm 3 phần
-    - Header chứa Tên, Status, Voice, Video Call
-    - Danh sách tin nhắn
-    - Component dungf ddeer gửi tin nhắn 
-    */
-    <div class="container">
+@*
+Chi tiết chat gồm 3 phần
+- Header chứa Tên, Status, Voice, Video Call
+- Danh sách tin nhắn
+- Component dungf ddeer gửi tin nhắn
+*@
+<div class="container">
 
-        <div class="header">
-            <img class="coversation-img mr-3" src="@SelectedUser.Avatar" />
-            <div class="d-flex flex-column">
-                <p class="receiver-name">@SelectedUser.Name</p>
-                <p class="receiver-status">Đang hoạt động</p>
-            </div>
-            <MudSpacer/>
-            <MudIconButton Icon="@Icons.Material.Filled.Call" Style="color:#0091ff" aria-label="call"></MudIconButton>
-            <MudIconButton Icon="@Icons.Material.Filled.VideoCall" Style="color:#0091ff" aria-label="video call"></MudIconButton>
+    <div class="header">
+        <MudIconButton id="back-btn" Class="mr-3" OnClick="BackToConversationList">
+            <i class="fa-solid fa-chevron-left fa-lg"></i>
+        </MudIconButton>
+        <img class="coversation-img mr-3" src="@SelectedUser.Avatar" />
+        <div class="d-flex flex-column" style="width: 160px">
+            <p class="receiver-name">@SelectedUser.Name</p>
+            <p class="receiver-status">Đang hoạt động</p>
         </div>
+        <MudSpacer />
+        <MudIconButton Class="mr-2" Style="border-radius: 8px">
+            <i class="fa-solid fa-phone fa-xl" style="color: #0091ff;"></i>
+        </MudIconButton>
+        <MudIconButton Style="border-radius: 8px">
+            <i class="fa-solid fa-video fa-xl" style="color: #0091ff;"></i>
+        </MudIconButton>
+    </div>
 
-        <MudDivider></MudDivider>
-        
-        <div class="messages-list">
-            
-            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    <MudDivider></MudDivider>
+
+    <div class="messages-list">
+
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="header d-flex justify-content-between bg-danger">
+                <span class="text-white">@_errorMessage</span>
+                <button class="btn btn-danger btn-sm" @onclick="() => _errorMessage = null">x</button>
+            </div>
+        }
+        @if (!string.IsNullOrWhiteSpace(_infoMessage))
+        {
+            <div class="header d-flex justify-content-between bg-warning">
+                <span class="text-white">@_infoMessage</span>
+            </div>
+        }
+        <ul id="messages-ul" style="padding: 5px">
+            @if (_loadingMessages)
             {
-                <div class="header d-flex justify-content-between bg-danger">
-                    <span class="text-white">@_errorMessage</span>
-                    <button class="btn btn-danger btn-sm" @onclick="() => _errorMessage = null">x</button>
-                </div>
+                <li class="list-group-item">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Loading messages...
+                </li>
             }
-            @if (!string.IsNullOrWhiteSpace(_infoMessage))
+            else
             {
-                <div class="header d-flex justify-content-between bg-warning">
-                    <span class="text-white">@_infoMessage</span>
-                </div>
-            }
-            <ul id="messages-ul" style="padding: 5px">
-                @if (_loadingMessages)
+                @foreach (var msg in _messages)
                 {
-                    <li class="list-group-item">
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        Loading messages...
+                    var incoming = msg.SenderId == currentUser.UserName;
+                    var isToday = msg.SendAt.Date == DateTime.Today.Date;
+
+                    var cls = $"justify-content-{(incoming ? "start" : "end")}";
+
+
+                    <li class="d-flex @cls">
+                        <p class="single-msg @(incoming ? "other" : "me")">
+                            @msg.Content
+                            <br>
+                            <small class="msg-dt">
+                                @if (isToday)
+                                {
+                                    <span>@msg.SendAt.ToShortTimeString()</span>
+                                }
+                                else
+                                {
+                                    <span>@msg.SendAt.ToShortDateString() | @msg.SendAt.ToShortTimeString()</span>
+                                }
+                            </small>
+                        </p>
                     </li>
                 }
-                else
-                {
-                    @foreach (var msg in _messages)
-                    {
-                        var incoming = msg.SenderId == currentUser.UserName;
-                        var isToday = msg.SendAt.Date == DateTime.Today.Date;
-                        
-                        var cls = $"justify-content-{(incoming ? "start" : "end")}";
+            }
+        </ul>
+    </div>
 
-                        
-                        <li class="d-flex @cls">
-                            <p class="single-msg @(incoming ? "other" : "me")">
-                                @msg.Content
-                                <br>
-                                <small class="msg-dt">
-                                    @if (isToday)
-                                    {
-                                        <span>@msg.SendAt.ToShortTimeString()</span>
-                                    }
-                                    else
-                                    {
-                                        <span>@msg.SendAt.ToShortDateString() | @msg.SendAt.ToShortTimeString()</span>
-                                    }
-                                </small>
-                            </p>
-                        </li>
-                    }
-                }
-            </ul>
+    <div>
+
+        <MudDivider />
+
+        <div id="utils-message">
+            <MudIconButton DisableElevation="true">
+                <i class="fa-regular fa-image fa-xl"></i>
+            </MudIconButton>
+            <MudIconButton DisableElevation="true"
+                           Style=" margin-left: 2px">
+                <i class="fa-solid fa-paperclip fa-xl"></i>
+            </MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.ScreenshotMonitor" DisableElevation="true"
+                           Style=" margin-left: 2px">
+            </MudIconButton>
+            <MudIconButton DisableElevation="true"
+                           Style=" margin-left: 2px">
+                <i class="fa-regular fa-calendar-plus fa-xl"></i>
+            </MudIconButton>
         </div>
-        <div >
-            <EditForm class="message-input" Model="_newMessage" OnValidSubmit="HandleSendMessageSubmit">
-                <InputText @bind-Value="_newMessage" placeholder="Nhập tin nhắn..." class="message-textinput" />
-                <button class="btn-send" type="submit">Gửi</button>
-            </EditForm>
 
+        <MudDivider />
+
+        @*
+        Không được xóa id="message-input",
+        nó dùng để phân biệt với các MudTextField khác để style
+        *@
+        <div id="message-input">
+            <MudTextField Placeholder="Nhập tin nhắn" @bind-Value="_newMessage" Variant="Variant.Text" DisableUnderLine="true"></MudTextField>
+            <button class="btn-send mx-4" type="submit">Gửi</button>
         </div>
     </div>
-}
+
+</div>
 
 @code {
 
+    /* Code của Lâm */
+    [Parameter]
+    public EventCallback BackToConversationList { get; set; }
+
+
+    /* Code của Cường */
     private User currentUser = Constant.currentUser;
 
     [Parameter]
@@ -258,18 +285,18 @@ else
 
             var allMessages = new List<Message>
             {
-                new Message("1",currentUser.UserName,"2",new DateTime(2022, 12, 25,10,30,12),"Text","How r u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                // new Message("1",currentUser.UserName,"2",new DateTime(2022, 12, 25,10,30,12),"Text","How r u"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Hiii"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Chào bạn"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Cho mình làm quen được không"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Mình tên là Hoàng Lâm"),
+                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Rất vui được gặp bạn"),
+                // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
+                // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
             };
             //var allMessages = await GetClient().GetFromJsonAsync<IEnumerable<Message>>($"api/messages/{SelectedUser.UserId}", JsonConverter.JsonSerializerOptions);
 

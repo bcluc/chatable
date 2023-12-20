@@ -4,6 +4,7 @@
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
+
 <link rel="stylesheet" href="/css/MainLayout.css">
 
 @* <MudThemeProvider @bind-IsDarkMode="@themeOn" />
@@ -48,7 +49,7 @@
        
 </div>
 <div class="main_container">
-@Body
+    @Body
 </div>
 
 @* Code của Lâm *@
@@ -68,7 +69,7 @@
             title = "Trò chuyện",
         },
         new MenuItem {
-            page = "contact",
+            page = "contact/friendList",
             icon = "fa-solid fa-address-book",
             title = "Danh bạ",
         },

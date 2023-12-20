@@ -6,7 +6,6 @@
 
 .sidebar {
     position: fixed;
-    /* default top, left */
     top: 0;
     left: 0;
     background: #0091FE;
@@ -21,7 +20,7 @@
     transition: all 0.3s linear;
 }
 
-@media (min-width: 500px) {
+@media (min-width: 950px) {
     .sidebar:hover {
         width: 240px;
         transition: all 0.3s linear;
@@ -74,13 +73,14 @@
 .sidebar .user {
     display: flex;
     align-items: center;
-    padding: 30px 10px;
+    
 }
 
 .sidebar .user_img {
+    margin: 30px 10px;
     width: 60px;
     height: 60px;
-    padding: 1px;
+    padding: 2px;
     border-radius: 100%;
     border: 2px solid #fff;
     cursor: pointer;
