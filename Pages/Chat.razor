@@ -79,7 +79,7 @@
 	} 
 	else
 	{
-		<div id="right-banner" style="display: @(isShowChat ? "block" : "none")">
+		<div id="right-banner">
 			<ChatDetail Id="@_id"
 						BackToConversationList="BackToConversationList"
 				NewIncomingMessage="@_newIncomingMessage"
@@ -93,12 +93,11 @@
 @code {
 
 	/* Code của Lâm */
-	bool isShowChat = false;
-
 	void BackToConversationList()
 	{
-		isShowChat = false;
-		_id = null;
+		// isShowChat = false;
+		Chats.ForEach(e => e.IsSelected = false);
+		_navigationManager.NavigateTo($"/chat");
 	}
 
 	/* TODO: Thay đổi cách code chỗ _selectedUser */
@@ -149,8 +148,6 @@
 
 	private async Task OnUserSelected(Conversation user)
 	{
-
-
 		/* Code của BC*/
 		_selectedUser = user;
 
@@ -174,7 +171,7 @@
 		_navigationManager.NavigateTo($"/chat/{user.Id}");
 
 		/* Code của Lâm */
-		isShowChat = true;
+		// isShowChat = true;
 	}
 	
 	private void ConfigureConnection()
