@@ -31,7 +31,7 @@ namespace Chatable.Data.Entitles
         new User("nhihuynh", " Ý Nhi","Nữ", "2023-12-04 17:03:22.2+00","2023-12-04 17:03:22.2+00", "BC_nhihuynh"),
         };
 
-        public static readonly User currentUser = new("BC", " BC","Nam", "2023-12-05 11:27:29.397+00", "2023-12-05 11:27:29.397+00","BC");
+        public static readonly User currentUser = new("BC", " BC","Nữ", "2023-12-05 11:27:29.397+00", "2023-12-05 11:27:29.397+00","BC");
         
         public static readonly Message visibleMessage = new("0", "BC", "1", DateTime.Now, "Text", "Say hi");
     }
