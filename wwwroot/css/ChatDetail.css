@@ -11,6 +11,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+   
 }
 
 .header {
@@ -47,12 +48,30 @@
     color: gray;
 }
 
+.chat-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    flex: 1;
+    position: relative;
+    z-index: -2;
+    background-color: #F2F2FA;
+}
+.water-mark-img {
+    position: fixed;
+    height: 60%;
+    z-index: -1;
+}
+
 
 .messages-list {
     flex: 1; /* expanded */
     overflow-y: scroll;
-    background-color: #F2F2FA;
 }
+
 
 #utils-message {
     display: flex;

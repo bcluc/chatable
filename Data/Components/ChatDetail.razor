@@ -41,60 +41,63 @@ Chi tiết chat gồm 3 phần
     </div>
 
     <MudDivider></MudDivider>
-
-    <div class="messages-list">
-
-        @if (!string.IsNullOrWhiteSpace(_errorMessage))
-        {
-            <div class="header d-flex justify-content-between bg-danger">
-                <span class="text-white">@_errorMessage</span>
-                <button class="btn btn-danger btn-sm" @onclick="() => _errorMessage = null">x</button>
-            </div>
-        }
-        @if (!string.IsNullOrWhiteSpace(_infoMessage))
-        {
-            <div class="header d-flex justify-content-between bg-warning">
-                <span class="text-white">@_infoMessage</span>
-            </div>
-        }
-        <ul id="messages-ul" style="padding: 5px">
-            @if (_loadingMessages)
+    <div class="chat-container">
+        <img src="@Constant.waterMark" class="water-mark-img" />
+        <div class="messages-list">
+            @if (!string.IsNullOrWhiteSpace(_errorMessage))
             {
-                <li class="list-group-item">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    Loading messages...
-                </li>
+                <div class="header d-flex justify-content-between bg-danger">
+                    <span class="text-white">@_errorMessage</span>
+                    <button class="btn btn-danger btn-sm" @onclick="() => _errorMessage = null">x</button>
+                </div>
             }
-            else
+            @if (!string.IsNullOrWhiteSpace(_infoMessage))
             {
-                @foreach (var msg in _messages)
+                <div class="header d-flex justify-content-between bg-warning">
+                    <span class="text-white">@_infoMessage</span>
+                </div>
+            }
+            <ul id="messages-ul" style="padding: 5px">
+                @if (_loadingMessages)
                 {
-                    var incoming = msg.SenderId == currentUser.UserName;
-                    var isToday = msg.SendAt.Date == DateTime.Today.Date;
-
-                    var cls = $"justify-content-{(incoming ? "start" : "end")}";
-
-
-                    <li class="d-flex @cls">
-                        <p class="single-msg @(incoming ? "other" : "me")">
-                            @msg.Content
-                            <br>
-                            <small class="msg-dt">
-                                @if (isToday)
-                                {
-                                    <span>@msg.SendAt.ToShortTimeString()</span>
-                                }
-                                else
-                                {
-                                    <span>@msg.SendAt.ToShortDateString() | @msg.SendAt.ToShortTimeString()</span>
-                                }
-                            </small>
-                        </p>
+                    <li class="list-group-item">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Loading messages...
                     </li>
                 }
-            }
-        </ul>
+                else
+                {
+                    @foreach (var msg in _messages)
+                    {
+                        var incoming = msg.SenderId == currentUser.UserName;
+                        var isToday = msg.SendAt.Date == DateTime.Today.Date;
+
+                        var cls = $"justify-content-{(incoming ? "start" : "end")}";
+
+
+                        <li class="d-flex @cls">
+                            <p class="single-msg @(incoming ? "other" : "me")">
+                                @msg.Content
+                                <br>
+                                <small class="msg-dt">
+                                    @if (isToday)
+                                    {
+                                        <span>@msg.SendAt.ToShortTimeString()</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@msg.SendAt.ToShortDateString() | @msg.SendAt.ToShortTimeString()</span>
+                                    }
+                                </small>
+                            </p>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
     </div>
+   
+    
 
     <div>
 

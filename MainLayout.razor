@@ -24,7 +24,7 @@
             <li class="@(currentPageIndex == i ? "current-page" : "")"
                 @onclick="() => changeCurrentPageIndex(currentIndex)">
                 <a href="@menuItems[i].page" >
-                    <i class="@menuItems[i].icon"></i>
+                    <logo class="@menuItems[i].icon"></logo>
                     <p>@menuItems[i].title</p>
                 </a>
             </li>
@@ -39,7 +39,7 @@
                 <li class="@(currentPageIndex == i ? "current-page" : "")"
                     @onclick="() => changeCurrentPageIndex(currentIndex)">
                     <a href="@menuItems[i].page">
-                        <i class="@menuItems[i].icon"></i>
+                        <logo class="@menuItems[i].icon"></logo>
                         <p>@menuItems[i].title</p>
                     </a>
                 </li>

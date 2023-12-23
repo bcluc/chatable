@@ -10,6 +10,8 @@ namespace Chatable.Data.Entitles
         public const string defaultImgGroup = "img/default_group.jpg";
         public const string defaultBg = "img/pattern_bg.jpg";
         public const string imgWaitChat = "img/wait_chat.png";
+        public const string waterMark = "img/waterMark.png";
+
 
 
         public static readonly IList<String> states = new ReadOnlyCollection<String>

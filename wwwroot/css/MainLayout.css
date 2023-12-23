@@ -43,7 +43,7 @@
     align-items: center;
 }
 
-.sidebar ul li a i {
+.sidebar ul li a logo {
     color: white;
     min-width: 80px; 
     font-size: 30px;
