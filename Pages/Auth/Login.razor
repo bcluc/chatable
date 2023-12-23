@@ -118,6 +118,7 @@
                     <MudTextField Placeholder="123456" @bind-Value="model.password" For="@(() => model.password)"
                         Variant="Variant.Outlined" InputType="@PasswordInput"
                         Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" />
+
                     <p class="erro mb-8">@erroMessage</p>
 
                     <MudButton ButtonType="ButtonType.Submit" Disabled="@_processing" Variant="Variant.Filled" 
