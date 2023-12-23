@@ -2,7 +2,7 @@
 
 namespace Chatable.Data.Entitles.Respond
 {
-    public class GroupGetRespond
+    public class GroupGetResponse
     {
         public bool Success { get; set; }
         public string Message { get; set; }

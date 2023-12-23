@@ -11,5 +11,15 @@ namespace Chatable.Data.Entitles.Model
         public string ConversationType { get; set; }
         public bool IsSelected { get; set; }
         public Conversation() { }
+
+        public Conversation(string? id,  string conversationType, Message? lastMessage)
+        {
+            Id = id;
+            LastMessage = lastMessage;
+            ConversationType = conversationType;
+
+            Name = "Local";
+            Avatar = Constant.defaultImgGroup;
+        }
     }
 }

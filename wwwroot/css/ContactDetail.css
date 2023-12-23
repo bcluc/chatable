@@ -1,0 +1,101 @@
+﻿@import url('Theme.css');
+
+/* Layout cho màn hình Contact */
+.contact-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    padding: 18px 16px;
+    background-color: white;
+}
+
+#back-btn {
+    display: none;
+    padding: 10px;
+    border-radius: 8px;
+    width: 40px;
+}
+
+@media (max-width: 800px) {
+
+    #back-btn {
+        display: block;
+    }
+}
+
+.contact-list {
+    flex: 1; /* expanded */
+    overflow-y: scroll;
+    background-color: #FAFAFA;
+}
+
+
+/*.userlist {
+    height: calc(100vh - 40px);
+    overflow-y: scroll;
+}
+
+.contact-container {
+    flex: 1;
+    width: auto;
+    height: auto;
+    display: flex !;
+    position: relative;
+    align-self: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.contact-page-cont {
+    flex-grow: 1 !important;
+    flex-direction: column !important;
+    display: flex !important;
+}
+
+.contact-header-container {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-self: stretch;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-bottom: 5px;
+}
+
+.contact-user-container {
+    flex: 1;
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+}
+
+.contact-btn-container {
+    flex: 0 0 auto;
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    justify-content: flex-end;
+}
+
+.contact-p {
+    font-size: 17px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: black;
+    align-items: center;
+    margin-left: 15px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+}*/
