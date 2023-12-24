@@ -11,10 +11,15 @@ namespace Chatable.Data.Entitles
         public const string defaultBg = "img/pattern_bg.jpg";
         public const string imgWaitChat = "img/wait_chat.png";
         public const string waterMark = "img/waterMark.png";
+        public const string gearOutline = "img/gear-outline.svg";
+		public const string themeIcon = "img/theme_icon.svg";
+        public const string lightMode = "img/lightMode.jpg";
+        public const string darkMode = "img/darkMode.jpg";
 
 
 
-        public static readonly IList<String> states = new ReadOnlyCollection<String>
+
+		public static readonly IList<String> states = new ReadOnlyCollection<String>
         (new List<String> 
         {
         "Alabama", "Alaska", "American Samoa"

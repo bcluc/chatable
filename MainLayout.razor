@@ -39,7 +39,7 @@
                 <li class="@(currentPageIndex == i ? "current-page" : "")"
                     @onclick="() => changeCurrentPageIndex(currentIndex)">
                     <a href="@menuItems[i].page">
-                        <logo class="@menuItems[i].icon"></logo>
+                        <logo class="@menuItems[i].icon"/>
                         <p>@menuItems[i].title</p>
                     </a>
                 </li>
@@ -74,7 +74,7 @@
             title = "Danh bạ",
         },
         new MenuItem {
-            page = "chat",
+            page = "setting",
             icon = "fa-solid fa-gear",
             title = "Cài đặt",
         },
