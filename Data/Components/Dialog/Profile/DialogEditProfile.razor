@@ -1,20 +1,204 @@
-﻿<MudDialog>
+﻿@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles;
+@using System.Globalization;
+@using System.Net.Http;
+@using Newtonsoft.Json;
+
+@inject IDialogService DialogService
+@inject HttpClient _http
+
+
+<MudDialog Class="dialog-edit-profile">
     <DialogContent>
-        Dialog Content
+        @if (currentUser == null)
+        {
+            <p>Loading</p>
+        }
+        else
+        {
+            <div>
+                <div class="app-component-container">
+                    <div Class="photos">
+                        <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
+                        <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
+                            <MudImage Src="@currentUser.Avatar"></MudImage>
+                        </MudAvatar>
+                        <MudIconButton Icon="@Icons.Material.Filled.CameraAlt" Style="position: absolute; width: 15px; height:12px; left: 57%; margin-top: 160px;" />
+                        <p style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.UserName</p>
+                    </div>
+                    <div class ="infor">
+                        <MudText >Tên hiển thị</MudText>
+                        <MudTextField @bind-Value="@currentUser.UserName"
+                                      Variant="Variant.Outlined" Margin="Margin.Dense"
+                                      Style="background-color: white; border-radius: 8px; border-width: 1px;"
+                                      HelperText="Sử dụng tên thật để bạn bè dễ dàng nhận diện hơn"></MudTextField>
+                        
+                        <MudDivider></MudDivider>
+
+                        <MudText>Họ và tên</MudText>
+                        <MudTextField @bind-Value="@currentUser.Name"
+                                      Variant="Variant.Outlined" Margin="Margin.Dense"
+                                      Style=" border-radius: 8px; border-width: 1px"></MudTextField>
+                        <MudText>Email</MudText>
+                        <MudTextField @bind-Value="@currentUser.Email"
+                                      Variant="Variant.Outlined" Margin="Margin.Dense"
+                                      Style="background-color: white; border-radius: 8px; border-width: 1px; margin-top: 10px"></MudTextField>
+
+                        <MudText>Giới tính</MudText>
+
+                        <MudRadioGroup @bind-SelectedOption="IsMale" Class="center-radio-group" Style="background-color: white; margin-top: 10px">
+                            <MudRadio Option="true" Color="Color.Primary" Dense="true" Class="radio-custom">Nam</MudRadio>
+                            <MudRadio Option="false" Color="Color.Secondary" Dense="true" Class="radio-custom">Nữ</MudRadio>
+                        </MudRadioGroup>
+
+                        <MudText>Ngày sinh</MudText>       
+                        
+                        <MudDatePicker  
+                                       MaxDate="DateTime.Now"
+                                       Variant="Variant.Outlined"
+                                       Style="background-color: white; border-radius:8px; border-width: 1px; margin-top: 10px"
+                                       @bind-Date="@dob" DisableToolbar="true" DateFormat="dd.MM.yyyy"
+                                       Class="top0" />
+                    </div>
+
+                   
+                </div>
+            </div>
+        }
     </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="CancelAll">Close All</MudButton>
+    <DialogActions >
+        <div class="dialog-actions">
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="SaveChange">Lưu thay đổi</MudButton>
+        </div>
+        
     </DialogActions>
 </MudDialog>
+<style>
+    .dialog-edit-profile
+    {
+        height: 700px;
+    }
+    .custom-dialog-content {
+        padding 0;
+        margin: 0;
+        align-content: center;
+    }
+
+    .nopadding {
+        padding: 0;
+    }
+
+    .photos {
+        position: relative;
+        width: 100%;
+        text-align: center;
+    }
+    .infor {
+        margin-top: 70px;
+        height: 300px;
+        max-height: 300px; 
+        overflow-y: auto; 
+        padding: 10px;
+    }
+
+    .input-row {
+        display: flex;
+        align-items: center;
+    }
+
+    .column {
+        flex: 1;
+        margin-right: 10px; 
+    }
+    
+
+    .dialog-actions {
+        position: fixed;
+        bottom: 0px;
+        flex-shrink: 0;
+        padding: 16px;
+        text-align: center;
+    }
+
+</style>
+
 @code {
+    public class ApiResponse<T>
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public T Data { get; set; }
+    }
+}
+
+@code {
+    User currentUser = Constant.currentUser;
+
+    //thong tin hien thi
+    private string UserName { get; set; }
+    private string FullName { get; set; }
+    private string Email { get; set; }
+    private bool IsMale;
+    DateTime ?dob; 
+    // protected override void OnInitialized()
+    // {
+    //     LoadProfile();
+    //     if (currentUser!=null)
+    //     {
+    //         if (currentUser.Gender == "male")
+    //         {
+    //             IsMale = true;
+    //         }
+    //         else
+    //         {
+    //             IsMale = false;
+    //         }
+    //         dob = currentUser.DateOfBirth;
+    //     }
+    // }
+
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     void Submit() => MudDialog.Close(DialogResult.Ok(true));
     void Cancel() => MudDialog.Cancel();
 
-    private void CancelAll()
-    {
+    private void SaveChange()
+    {  
+        //call api save change
         MudDialog.CancelAll();
     }
+    // private async Task<User> GetCurUser()
+    // {
+    //     User curUser = new User();
+    //     try
+    //     {
+    //         var response = await _http.GetAsync("https://localhost:7124/api/v1/User/CurrentUser");
+
+    //         if (response.IsSuccessStatusCode)
+    //         {
+    //             var responseContent = await response.Content.ReadAsStringAsync();
+    //             if (responseContent != null)
+    //             {
+    //                 ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+    //                 curUser = apiResponse.Data;
+    //                 return curUser;
+    //             }
+    //             return null;
+
+    //         }
+    //         return null;
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e.Message);
+    //         return null;
+    //     }
+    // }
+
+    // private async Task LoadProfile()
+    // {
+    //     currentUser = await GetCurUser();
+    //     StateHasChanged();
+    // }
 }
