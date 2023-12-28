@@ -9,7 +9,7 @@
 
 <link rel="stylesheet" href="/css/AddGroupDialog.css">
 
-<MudDialog class="custom-dialog-content">
+<MudDialog >
     <DialogContent>
         @if (currentUser == null)
         {
@@ -22,30 +22,26 @@
                     <div Class="photos">
                         <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
                         <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
-                            <MudImage Src="@currentUser.Avatar"></MudImage>
+                            <MudImage Src="@currentUser.avatar"></MudImage>
                         </MudAvatar>
                         <MudIconButton Icon="@Icons.Material.Filled.CameraAlt" Style="position: absolute; width: 15px; height:12px; left: 57%; margin-top: 160px;" />
-                        <p style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.UserName</p>
+                        <p style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</p>
                     </div>
 
                     <div class="infor">
                         <p style=" font-size: 15px; font-weight: 500;"> Thông tin cá nhân </p>
                         <div class="phone">
-                            <p class="title">Họ tên</p>
-                            <MudText>@currentUser.Name</MudText>
-                                <MudTextField @bind-Value="@currentUser.UserName"
-                                              Variant="Variant.Outlined" Margin="Margin.Dense"
-                                              Style="background-color: white; border-radius: 8px; border-width: 1px;"
-                                              HelperText="Sử dụng tên thật để bạn bè dễ dàng nhận diện hơn"></MudTextField>
+                            <p class="title">Email</p>
+                            <MudText>@(currentUser.email != null ? currentUser.email : "Chưa cập nhập")</MudText>
 
                             </div>
                             <div class="sex">
                                 <p class="title">Giới tính</p>
-                                <p>@currentUser.Gender</p>
+                                <p>@currentUser.gender</p>
                         </div>
                         <div class="dob">
                             <p class="title">Ngày sinh</p>
-                            <p>@currentUser.DateOfBirth.ToString("dd/M/yyyy", CultureInfo.InvariantCulture)</p>
+                            <p>@(currentUser.dob.HasValue ? currentUser.dob.Value.ToString("dd/MM/yyyy") : "N/A")</p>
                         </div>
                     </div>
                 </div>
@@ -123,10 +119,22 @@
         public string Message { get; set; }
         public T Data { get; set; }
     }
+    public class UserInfor {
+        public string userName { get; set; }
+        public string fullName { get; set; }
+        public string email { get; set; }
+        public string avatar { get; set; }
+        public DateTime? dob = DateTime.Now;
+        public string gender { get; set; }
+        // public string pass { get; set; }
+        // public DateTime? lastTimeOnl { get; set; }
+        // public DateTime? createdAt { get; set; }
+
+    }
 }
 @code {
 
-    User currentUser;
+    UserInfor currentUser;
     protected override void OnInitialized()
     {
         LoadProfile();
@@ -140,9 +148,9 @@
         DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân");
     }
 
-    private async Task<User> GetCurUser ()
+    private async Task<UserInfor> GetCurUser ()
     {
-        User curUser = new User();
+        UserInfor curUser = new UserInfor();
         try
         {
             var response = await _http.GetAsync("https://localhost:7124/api/v1/User/CurrentUser");
@@ -152,7 +160,7 @@
                 var responseContent = await response.Content.ReadAsStringAsync();
                 if (responseContent!=null)
                 {
-                    ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+                    ApiResponse<UserInfor> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<UserInfor>>(responseContent);
                     curUser = apiResponse.Data;
                     return curUser;
                 }

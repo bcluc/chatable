@@ -43,6 +43,11 @@
                                   Variant="Variant.Outlined" Class="mb-4"
                                   @bind-Value="model.fullName" For="@(() => model.fullName)" />
 
+                    <MudText>Email</MudText>
+                    <MudTextField Placeholder="VanA@gmail.com" Required="true" RequiredError="Hãy điền email"
+                                  Variant="Variant.Outlined" Class="mb-4"
+                                  @bind-Value="model.email" For="@(() => model.email)" />
+
                     <MudText>Mật khẩu</MudText>
                     <MudTextField Placeholder="Abc@12345" Required="true" RequiredError="Hãy chọn mật khẩu"
                                   Variant="Variant.Outlined"
@@ -209,6 +214,9 @@
 
         [Required(ErrorMessage = "Họ tên người dùng là bắt buộc.")]
         public string fullName { get; set; }
+
+        [Required(ErrorMessage = "Email là bắt buộc.")]
+        public string email { get; set; }
 
         public string avatar = null;
 
