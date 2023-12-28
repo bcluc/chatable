@@ -20,61 +20,90 @@
 @inject IHttpClientFactory ClientFactory
 
 <link rel="stylesheet" href="/css/ChatLayout.css">
-<!-- Your Blazor component -->
 
-<div class="home-container">
-	<div class="home-container1">
-		<div class="home-container2">
-			<SearchField>
+<style>
+	.mud-divider-fullwidth {
+		flex-grow: 0;
+	}
+</style>
 
-			</SearchField>
+<div class="chat-layout">
+	<div id="left-banner">
+		<SearchField>
+		</SearchField> 
 
-			<div class="list-container">
+		<MudDivider></MudDivider>
 
-				@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />*@
-				<div class="list-group list-group-flush">
+		<div class="list-conversations">
 
-					@if (_loadingUsers)
-					{
-						<li class="list-group-item">
-							<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-							Loading...
-						</li>
-					}
-					else
-					{
-						@foreach (var chat in Chats)
-						{
-							<li class="list-group-item @(chat.IsSelected ? "user-select" : "user-unselect")" @onclick="() => OnUserSelected(chat)">
-								@*<a href="#" @onclick="() => NavigateToChat(chat)">*@
-								<div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
-									<MudAvatar>
-										<MudImage Src=@chat.Avatar></MudImage>
-									</MudAvatar>
-									<h4 class="user-name">@chat.Name</h4>
-								</div>
-								@*</a>*@
-							</li>
-						}
-					}
+			@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" /> *@
+			@if (_loadingUsers)
+			{
+				<div class="coversation-container">
+					<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+					Loading...
 				</div>
+			}
+			else
+			{
+				@foreach (var chat in Chats)
+				{
+					<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
+						 @onclick="() => OnUserSelected(chat)">
+						<img class="coversation-img mr-3" src="@chat.Avatar" />
+						<div class="d-flex justify-start flex-column" style="flex: 1">
+							<div class="d-flex">
+								<p class="coversation-name">@chat.Name</p>
+								<MudSpacer/>
+								<p style="color: gray;">4 giờ</p>
+							</div>
+							<p class="coversation-last-message">last message</p>
+						</div>
+					</div>
 
-			</div>
+				}
+			}
+
 		</div>
-
-		<div class="home-container4">
-
-			<ChatDetail Id="@_id"
-						NewIncomingMessage="@_newIncomingMessage"
-						OnIncomingMessageRecieved="()=> _newIncomingMessage = null"
-						/>
-		</div>
-
 	</div>
+
+	<MudDivider id="v-divider" Vertical="true"/>
+
+	@if (_id == null)
+	{
+		<div class="wait-chat">
+			<p class="wait-chat-title mb-4">Chào mừng đến với <span style="font-weight: 700;">Chatable!</span></p>
+			<p class="mb-4" style="font-size: 15px">Hãy bắt đầu cuộc trò chuyện của bạn ngay.</p>
+			<img src="@Constant.imgWaitChat" class="wait-chat-img" />
+		</div>
+	} 
+	else
+	{
+		<div id="right-banner">
+			
+			<ChatDetail Id="@_id"
+						BackToConversationList="BackToConversationList"
+				NewIncomingMessage="@_newIncomingMessage"
+				OnIncomingMessageRecieved="()=> _newIncomingMessage = null" />
+		</div>
+	}
+		
+	
 </div>
 
-
 @code {
+
+	/* Code của Lâm */
+	void BackToConversationList()
+	{
+		// isShowChat = false;
+		Chats.ForEach(e => e.IsSelected = false);
+		_navigationManager.NavigateTo($"/chat");
+	}
+
+	/* TODO: Thay đổi cách code chỗ _selectedUser */
+
+	/* Code của Cường */
 	[Parameter]
 	public string? _id { get; set; }
 
@@ -111,7 +140,7 @@
 		// return chat room
 		return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
 	}
-	
+
 	private void OpenAddGroupDialog()
 	{
 		var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
@@ -120,6 +149,7 @@
 
 	private async Task OnUserSelected(Conversation user)
 	{
+		/* Code của BC*/
 		_selectedUser = user;
 
 		var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
@@ -140,6 +170,9 @@
 			chatUser.IsSelected = true;
 		}
 		_navigationManager.NavigateTo($"/chat/{user.Id}");
+
+		/* Code của Lâm */
+		// isShowChat = true;
 	}
 	
 	private void ConfigureConnection()
@@ -163,7 +196,7 @@
 			if (response.IsSuccessStatusCode)
 			{
 				var responseContent = await response.Content.ReadAsStringAsync();
-				var respond = JsonConvert.DeserializeObject<GroupGetRespond>(responseContent);
+				var respond = JsonConvert.DeserializeObject<GroupGetResponse>(responseContent);
 				success = true;
 				try
 				{

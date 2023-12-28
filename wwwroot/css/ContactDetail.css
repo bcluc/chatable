@@ -1,6 +1,41 @@
 ﻿@import url('Theme.css');
 
-.userlist {
+/* Layout cho màn hình Contact */
+.contact-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    padding: 18px 16px;
+    background-color: white;
+}
+
+#back-btn {
+    display: none;
+    padding: 10px;
+    border-radius: 8px;
+    width: 40px;
+}
+
+@media (max-width: 800px) {
+
+    #back-btn {
+        display: block;
+    }
+}
+
+.contact-list {
+    flex: 1; /* expanded */
+    overflow-y: scroll;
+    background-color: #FAFAFA;
+}
+
+
+/*.userlist {
     height: calc(100vh - 40px);
     overflow-y: scroll;
 }
@@ -63,4 +98,4 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     width: 100%;
-}
+}*/

@@ -1,0 +1,85 @@
+﻿@page "/setting"
+@using Chatable.Data.Components
+@using Chatable.Data.Entitles
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+@inject IJSRuntime JSRuntime
+
+<link rel="stylesheet" href="/css/SettingLayout.css">
+
+
+<div class="chat-layout">
+	<div id="left-banner">
+		<div class="header">
+			<MudText Class="header-text">Cài đặt</MudText>
+		</div>
+		<div class="list-setting">
+			@*<MudButtonGroup VerticalAlign="true">*@
+			<MudButton 
+						Target="_blank"
+						Variant="Variant.Text"
+						@onclick="() => changeComponent(true)"
+						Class="@(loadGeneral ? "cusButton active-button" : "cusButton")"						
+						Disabled=false>
+				<div class="d-flex justify-center align-center">
+					<img src ="@Constant.gearOutline" style="color:black;height: 24px; width:24px; margin-right: 15px; "/>
+						Cài đặt chung
+				</div>
+			</MudButton>
+			<MudButton Target="_blank"
+					   Variant="Variant.Text"
+					   @onclick="() => changeComponent(false)"
+					   Class="@(loadGeneral ? "cusButton" : "cusButton active-button" )"
+					   Disabled=false>
+				<div class="d-flex justify-center align-center">
+					<img src="@Constant.themeIcon" style="color:black;height: 24px; width:24px;  margin-right: 15px; " />
+						Giao diện
+				</div>
+			</MudButton>
+			@*</MudButtonGroup>*@
+		</div>
+	</div>
+	<MudDivider id="v-divider" Vertical="true" />
+	<div id="right-banner">
+		
+		@if (loadGeneral)
+		{
+			<GeneralSetting></GeneralSetting>
+		}
+		else
+		{
+			<ThemeSetting/>
+		}
+
+	</div>
+
+</div>
+@code {
+	private bool loadGeneral = true;
+
+	private class MenuItem
+	{
+		public bool? isGeneral { get; set; }
+		public string? icon { get; set; }
+		public string? title { get; set; }
+	}
+	private MenuItem[] menuItems = new MenuItem[]
+			{
+		new MenuItem {
+			isGeneral = true,
+			icon = Constant.gearOutline,
+			title = "Cài đặt chung",
+		},
+		new MenuItem {
+			isGeneral = false,
+			icon = Constant.themeIcon,
+			title = "Giao diện",
+		}
+			};
+
+	private void changeComponent(bool x)
+	{
+		loadGeneral = x;
+	}
+
+}

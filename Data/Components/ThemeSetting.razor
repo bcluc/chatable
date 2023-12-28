@@ -1,0 +1,32 @@
+﻿@using Chatable.Data.Components
+@using Chatable.Data.Entitles
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+@inject IJSRuntime JSRuntime
+
+<div class="container">
+    <MudText Style="font-size:22px; font-weight: 600; ">Cài dặt giao diện</MudText>
+    <div style="padding-top: 50px; padding-left: 30px; padding-bottom: 10px;">
+        <img src="@Constant.lightMode" style="margin-right: 100px;"/>
+        <img src="@Constant.darkMode" />
+    </div>
+    <MudRadioGroup @bind-SelectedOption="isLight" Required="true" RequiredError="Hãy chọn giới tính" Class="center-radio-group"Style="margin-left: 50px">
+        <MudRadio Option="true" Color="Color.Default" Dense="true" Class="radio-custom" Style="margin-left: 15px; margin-right: 190px">Mặc định</MudRadio>
+        <MudRadio Option="false" Color="Color.Default" Dense="true" Class="radio-custom">Nền tối</MudRadio>
+    </MudRadioGroup>
+    
+</div>
+<style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background-color: white;
+        padding: 30px 40px;
+    }
+</style>
+
+@code {
+    public bool isLight { get; set; } = true;
+    string test = "testtt";
+}
