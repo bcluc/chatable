@@ -153,7 +153,7 @@
         UserInfor curUser = new UserInfor();
         try
         {
-            var response = await _http.GetAsync("https://localhost:7124/api/v1/User/CurrentUser");
+            var response = await _http.GetAsync(Constant.uriHost+ "User/CurrentUser");
 
             if (response.IsSuccessStatusCode)
             {

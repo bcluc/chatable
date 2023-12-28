@@ -16,10 +16,12 @@ namespace Chatable.Data.Entitles
         public const string lightMode = "img/lightMode.jpg";
         public const string darkMode = "img/darkMode.jpg";
 
+        public const string uriHost = "https://localhost:7124/api/v1/";
 
 
 
-		public static readonly IList<String> states = new ReadOnlyCollection<String>
+
+        public static readonly IList<String> states = new ReadOnlyCollection<String>
         (new List<String> 
         {
         "Alabama", "Alaska", "American Samoa"
