@@ -7,6 +7,8 @@ namespace Chatable.Data.Entitles.Model
     {
         public string UserName { get; set; }
         public string Password { get; set; }
+
+        public string Email { get; set; }
         //public string Name { get; set; }
         //public string Avatar { get; set; }
         public string Gender { get; set; }
@@ -15,10 +17,11 @@ namespace Chatable.Data.Entitles.Model
         public DateTime DateOfBirth { get; set; }
         public DateTime CreatedAt { get; set; } 
         public User() { }
-        public User(string userName, string fullName, string gender, string lastTimeOnline, string dateOfBirth, string? conversationId)
+        public User(string userName, string fullName, string email,  string gender, string lastTimeOnline, string dateOfBirth, string? conversationId)
         {
             UserName = userName;
             Name = fullName;
+            Email = email;
             Avatar = getDefaultAvt(gender);
             Gender = gender;
             LastTimeOnline = DateTime.Now;

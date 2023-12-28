@@ -3,9 +3,11 @@
 <link rel="stylesheet" href="/css/ChatList.css">
 
 <div class="list-group list-group-flush">
+   
       
     @if (Loading)
     {
+       
         <li class="list-group-item">
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             Loading...
@@ -15,6 +17,7 @@
     {
         @foreach (var chat in Chats)
         {
+            
             <li class="list-group-item @(chat.IsSelected ? "user-select" : "user-unselect")" @onclick="() => HandleUserClick(chat)">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>

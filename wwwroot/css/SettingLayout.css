@@ -1,0 +1,120 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/*
+    Bố cục tổng quá
+    chat-layout là div cha
+    chứa 2 div con: #left-banner và #right-banner
+*/
+
+.chat-layout {
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+#left-banner {
+    min-width: 310px;
+    width: 310px;
+    height: 100%;
+    background-color: #F9FAFB;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+.header {
+    width: 100%;
+    height: 100px;
+    padding: 28px 40px;
+}
+.header .header-text {
+    font-size: 32px;
+    font-weight: 700;
+}
+.list-setting {
+    width: 100%;
+    align-items: start;
+}
+
+#right-banner {
+    width: 100%;
+    height: 100%;
+}
+.main_container {
+    padding-left: 80px;
+    transition: all 0.3s linear;
+}
+ul li:hover {
+    background-color: #EBF7FF;
+}
+ul li a {
+    cursor: pointer;
+    padding: 20px 50px;
+    display: flex;
+    align-items: center;
+}
+
+    ul li a img {
+        color: black;
+        min-width: 24px;
+        font-size: 24px;
+        display: flex;
+        margin-right: 20px;
+        justify-content: center;
+        align-items: center;
+    }
+    ul li a p {
+    color: black;
+    white-space: nowrap;
+    font-size: 18px;
+    font-weight: 400;
+    }
+
+.cusButton {
+    text-transform: none;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 40px;
+    font-size: 16px;
+    border-radius: 10px;
+}
+    .cusButton:hover {
+        background-color: #EBF7FF;
+    }
+    .cusButton:active, .cusButton:focus {
+        background-color: #EBF7FF;
+    }
+.active-button {
+    background-color: #EBF7FF;
+}
+
+@media (max-width: 800px) {
+
+    .chat-layout {
+        display: block;
+        position: relative;
+    }
+
+    #v-divider {
+        display: none;
+    }
+
+    #left-banner {
+        width: 100%;
+        height: 100%;
+    }
+
+    #right-banner {
+        position: fixed;
+        top: 0px;
+        left: 80px;
+        width: calc(100% - 80px);
+        /*display: none;*/
+    }
+}

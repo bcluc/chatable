@@ -7,77 +7,186 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IDialogService Dialog
-<div class="title">
-    @{
-        <h1>Chatable</h1>
-        <h2>Hãy tạo tài khoản của bạn</h2>
-    }
-</div>
-<div Class="body">
-    <EditForm Model="@model" OnValidSubmit="RegisterAccount">
-        <DataAnnotationsValidator />
-        <MudCard Style="width:350px" Class="container">
-            <MudCardContent>
-                <MudTextField T="string" Label="Tên người dùng" Required="true" RequiredError="Tên người dùng là bắt buộc"
-                              @bind-Value="model.userName" For="@(() => model.userName)" />
-                <MudTextField Label="Họ tên người dùng" Required="true" RequiredError="Họ tên người dùng là bắt buộc"
-                              @bind-Value="model.fullName" For="@(() => model.fullName)" />
 
-                <MudDatePicker Label="Ngày sinh" Required="true" RequiredError="Ngày sinh là bắt buộc"
-                    @bind-Date="model.dob" DisableToolbar="true" DateFormat="dd.MM.yyyy" />
 
-                <MudRadioGroup @bind-SelectedOption="isMale" Required="true" RequiredError="Giới tính là bắt buộc">
-                    <MudRadio Option="true" Color="Color.Primary" Dense="true">Nam</MudRadio>
-                    <MudRadio Option="false" Color="Color.Secondary" Dense="true">Nữ</MudRadio>
-                </MudRadioGroup>
-                <MudTextField Label="Mật khẩu" Class="mt-3" Required="true" RequiredError="Mật khẩu là bắt buộc"
-                              @bind-Value="model.password" For="@(() => model.password)" InputType="InputType.Password" />
-                <MudTextField Label="Nhập lại mật khẩu" Class="mt-3" Required="true" RequiredError="Hãy xác nhận lại mật khẩu"
-                              @bind-Value="model.confirmPassword" For="@(() => model.confirmPassword)" InputType="InputType.Password" />
-                <p class="erro">@erroMessage</p>
-            </MudCardContent>
-            <MudCardActions>
-               @*  <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Đăng ký</MudButton> *@
-                <MudButton ButtonType="ButtonType.Submit"  Disabled="@_processing" Variant="Variant.Filled" Color="Color.Primary">
-                    @if (_processing)
-                    {
-                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                        <MudText Class="ms-2">Đang xử lý</MudText>
-                    }
-                    else
-                    {
-                        <MudText>Đăng ký</MudText>
-                    }
-                </MudButton>
-            </MudCardActions>
-        </MudCard>
-    </EditForm>
-   
+<div class="container">
+    <div class="header">
+        <svg width="163" height="44" viewBox="0 0 163 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M60.64 32.384C58.528 32.384 56.8213 31.5947 55.52 30.016C54.2187 28.416 53.568 26.304 53.568 23.68C53.568 21.056 54.016 18.6773 54.912 16.544C55.8293 14.3893 57.1307 12.64 58.816 11.296C60.5013 9.952 62.368 9.28 64.416 9.28C65.184 9.28 65.8667 9.39733 66.464 9.632C68 8.608 69.5893 8.096 71.232 8.096C72 8.096 72.7147 8.21333 73.376 8.448C74.0587 8.66133 74.56 8.928 74.88 9.248C74.7093 9.97333 74.432 10.6347 74.048 11.232C73.0453 10.4853 72.032 10.112 71.008 10.112C69.984 10.112 69.0453 10.3147 68.192 10.72C69.1947 11.7867 69.696 13.3013 69.696 15.264C69.696 17.2053 69.184 18.976 68.16 20.576C67.136 22.176 65.856 22.976 64.32 22.976C63.4027 22.976 62.656 22.592 62.08 21.824C61.5253 21.056 61.248 20.096 61.248 18.944C61.248 16.1707 62.2827 13.664 64.352 11.424C62.6667 11.488 61.3013 12.5973 60.256 14.752C59.2107 16.8853 58.688 19.4667 58.688 22.496C58.688 26.912 59.968 29.12 62.528 29.12C64.2773 29.12 66.144 28.032 68.128 25.856L69.248 26.784C68.9707 27.2747 68.512 27.8827 67.872 28.608C67.2533 29.3333 66.6347 29.9413 66.016 30.432C65.3973 30.9227 64.5973 31.3707 63.616 31.776C62.6347 32.1813 61.6427 32.384 60.64 32.384ZM67.488 15.584C67.488 13.8347 67.0933 12.64 66.304 12C65.3653 12.832 64.608 13.8453 64.032 15.04C63.4773 16.2347 63.2 17.472 63.2 18.752C63.2 19.4133 63.3173 19.9573 63.552 20.384C63.808 20.8107 64.128 21.024 64.512 21.024C65.344 21.024 66.048 20.4373 66.624 19.264C67.2 18.0907 67.488 16.864 67.488 15.584ZM73.9852 10.88C73.9852 10.176 73.9213 9.67467 73.7933 9.376C75.4573 8.8 77.0253 8.512 78.4973 8.512C78.6893 8.704 78.7853 9.19467 78.7853 9.984C78.7853 11.392 78.1879 14.6347 76.9933 19.712C78.7213 18.4533 80.2359 17.824 81.5373 17.824C82.3479 17.824 82.9559 18.08 83.3613 18.592C83.7879 19.104 84.0013 19.7867 84.0013 20.64C84.0013 21.472 83.7559 22.848 83.2653 24.768C82.7746 26.6667 82.5293 27.968 82.5293 28.672C82.5293 29.376 82.6146 29.728 82.7853 29.728C82.9559 29.728 83.4039 29.536 84.1293 29.152L84.5133 28.96L85.0893 30.08C84.8973 30.2507 84.6413 30.464 84.3213 30.72C84.0013 30.976 83.4146 31.3173 82.5613 31.744C81.7079 32.1707 80.9186 32.384 80.1933 32.384C79.4893 32.384 78.9239 32.16 78.4973 31.712C78.0706 31.2427 77.8573 30.624 77.8573 29.856C77.8573 29.0667 78.0919 27.648 78.5613 25.6C79.0519 23.5307 79.2973 22.2293 79.2973 21.696C79.2973 21.1413 79.0733 20.864 78.6253 20.864C78.0706 20.864 77.3773 21.0987 76.5453 21.568C75.3719 26.7307 74.7853 30.08 74.7853 31.616C73.8893 31.9573 72.3639 32.128 70.2093 32.128C70.1879 31.7653 70.1773 31.4453 70.1773 31.168C70.1773 30.2507 70.8066 27.1147 72.0653 21.76C73.3453 16.4053 73.9852 12.7787 73.9852 10.88ZM95.6523 18.752C95.6949 18.7093 95.8123 18.432 96.0043 17.92C97.0069 17.92 98.3509 18.2187 100.036 18.816C99.5029 20.5867 99.0763 22.4427 98.7563 24.384C98.4363 26.304 98.2763 27.68 98.2763 28.512C98.2763 29.3227 98.3616 29.728 98.5323 29.728C98.6603 29.728 99.1296 29.5253 99.9403 29.12L100.324 28.928L100.9 30.048C100.708 30.2187 100.452 30.432 100.132 30.688C99.8336 30.944 99.2576 31.296 98.4043 31.744C97.5509 32.1707 96.7829 32.384 96.1003 32.384C94.7776 32.384 94.0096 31.7867 93.7963 30.592C92.4309 31.7867 91.1936 32.384 90.0843 32.384C88.9963 32.384 88.0683 31.9573 87.3003 31.104C86.5536 30.2507 86.1803 28.9067 86.1803 27.072C86.1803 24.2133 86.7669 21.9627 87.9403 20.32C89.1136 18.656 90.5323 17.824 92.1963 17.824C93.3909 17.824 94.5429 18.1333 95.6523 18.752ZM92.0043 29.664C92.5163 29.664 93.0923 29.4613 93.7323 29.056C93.8816 26.048 94.3829 23.072 95.2363 20.128C94.5963 19.8507 94.0523 19.712 93.6042 19.712C92.8363 19.712 92.1749 20.4693 91.6203 21.984C91.0869 23.4773 90.8203 25.1307 90.8203 26.944C90.8203 28.7573 91.2149 29.664 92.0043 29.664ZM111.507 18.208C111.465 18.7413 111.283 19.36 110.963 20.064C110.153 19.9787 109.385 19.936 108.659 19.936H108.083C107.102 24.6933 106.611 27.6587 106.611 28.832C106.611 29.4507 106.739 29.76 106.995 29.76C107.273 29.76 107.987 29.4933 109.139 28.96L109.715 30.016C107.817 31.5947 106.057 32.384 104.435 32.384C103.689 32.384 103.07 32.1493 102.579 31.68C102.11 31.2107 101.875 30.592 101.875 29.824C101.875 29.0347 101.961 28.1493 102.131 27.168C102.323 26.1867 102.579 24.992 102.899 23.584C103.219 22.1547 103.454 21.0027 103.603 20.128C102.814 20.192 102.227 20.256 101.843 20.32C101.801 20.064 101.779 19.7227 101.779 19.296C101.779 18.848 101.811 18.4853 101.875 18.208H103.891C104.062 17.056 104.147 15.968 104.147 14.944L104.115 13.952V13.856C105.779 13.28 107.347 12.992 108.819 12.992C108.905 13.4187 108.947 13.952 108.947 14.592C108.947 15.232 108.766 16.4373 108.403 18.208H111.507ZM120.465 18.752C120.507 18.7093 120.625 18.432 120.817 17.92C121.819 17.92 123.163 18.2187 124.849 18.816C124.315 20.5867 123.889 22.4427 123.569 24.384C123.249 26.304 123.089 27.68 123.089 28.512C123.089 29.3227 123.174 29.728 123.345 29.728C123.473 29.728 123.942 29.5253 124.753 29.12L125.137 28.928L125.713 30.048C125.521 30.2187 125.265 30.432 124.945 30.688C124.646 30.944 124.07 31.296 123.217 31.744C122.363 32.1707 121.595 32.384 120.913 32.384C119.59 32.384 118.822 31.7867 118.609 30.592C117.243 31.7867 116.006 32.384 114.897 32.384C113.809 32.384 112.881 31.9573 112.113 31.104C111.366 30.2507 110.993 28.9067 110.993 27.072C110.993 24.2133 111.579 21.9627 112.753 20.32C113.926 18.656 115.345 17.824 117.009 17.824C118.203 17.824 119.355 18.1333 120.465 18.752ZM116.817 29.664C117.329 29.664 117.905 29.4613 118.545 29.056C118.694 26.048 119.195 23.072 120.049 20.128C119.409 19.8507 118.865 19.712 118.417 19.712C117.649 19.712 116.987 20.4693 116.433 21.984C115.899 23.4773 115.633 25.1307 115.633 26.944C115.633 28.7573 116.027 29.664 116.817 29.664ZM134.592 9.664C134.592 11.2853 134.048 14.464 132.96 19.2C134.24 18.2827 135.392 17.824 136.416 17.824C137.461 17.824 138.346 18.2613 139.072 19.136C139.818 19.9893 140.192 21.3013 140.192 23.072C140.192 26.0373 139.605 28.3307 138.432 29.952C137.28 31.5733 135.872 32.384 134.208 32.384C133.589 32.384 132.96 32.3093 132.32 32.16C131.701 32.0107 131.232 31.8507 130.912 31.68L130.432 31.456C129.066 31.9253 127.733 32.16 126.432 32.16C126.304 32.0533 126.24 31.5413 126.24 30.624C126.24 29.6853 126.837 26.6133 128.032 21.408C129.226 16.1813 129.824 12.608 129.824 10.688C129.824 10.3467 129.77 9.90933 129.664 9.376C131.328 8.8 132.917 8.512 134.432 8.512C134.538 8.81067 134.592 9.19467 134.592 9.664ZM134.304 20.544C133.898 20.544 133.29 20.736 132.48 21.12C131.498 25.2587 130.965 28.224 130.88 30.016C131.52 30.2933 132.128 30.432 132.704 30.432C133.514 30.432 134.186 29.6853 134.72 28.192C135.274 26.6987 135.552 25.056 135.552 23.264C135.552 21.4507 135.136 20.544 134.304 20.544ZM144.143 32.384C143.417 32.384 142.809 32.1387 142.319 31.648C141.849 31.1573 141.615 30.4747 141.615 29.6C141.615 28.704 142.137 25.8773 143.183 21.12C144.249 16.3413 144.783 12.896 144.783 10.784L144.591 9.376C146.255 8.8 147.812 8.512 149.263 8.512C149.476 8.81067 149.583 9.33333 149.583 10.08C149.583 11.7867 149.039 15.0933 147.951 20C146.884 24.8853 146.351 27.7333 146.351 28.544C146.351 29.3333 146.447 29.728 146.639 29.728L148.879 28.928L149.455 30.048C148.729 30.624 147.844 31.1573 146.799 31.648C145.775 32.1387 144.889 32.384 144.143 32.384ZM150.051 26.464C150.051 23.7973 150.851 21.696 152.451 20.16C154.072 18.6027 155.907 17.824 157.955 17.824C159.213 17.824 160.248 18.1333 161.059 18.752C161.869 19.3707 162.275 20.2027 162.275 21.248C162.275 22.272 162.008 23.136 161.475 23.84C160.963 24.544 160.333 25.088 159.587 25.472C158.072 26.2187 156.685 26.688 155.427 26.88L154.659 26.976C154.808 28.9813 155.629 29.984 157.123 29.984C157.635 29.984 158.179 29.856 158.755 29.6C159.331 29.344 159.779 29.088 160.099 28.832L160.579 28.448L161.347 29.472C161.176 29.7067 160.835 30.016 160.323 30.4C159.811 30.784 159.331 31.104 158.883 31.36C157.645 32.0427 156.291 32.384 154.819 32.384C153.347 32.384 152.184 31.8613 151.331 30.816C150.477 29.7707 150.051 28.32 150.051 26.464ZM154.627 25.408C155.715 25.216 156.579 24.7573 157.219 24.032C157.859 23.3067 158.179 22.368 158.179 21.216C158.179 20.064 157.837 19.488 157.155 19.488C156.344 19.488 155.715 20.1813 155.267 21.568C154.84 22.9333 154.627 24.2133 154.627 25.408Z" fill="black" />
+            <g clip-path="url(#clip0_7_933)">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M20 42C31.0456 42 40 33.0456 40 22C40 10.9543 31.0456 2 20 2C8.95432 2 0 10.9543 0 22C0 33.0456 8.95432 42 20 42ZM12.2958 30.6185C13.6694 32.1795 15.4697 32.96 17.6967 32.96C18.779 32.96 19.8301 32.7622 20.8499 32.3668C21.8906 31.9715 22.7335 31.5344 23.3787 31.0556C24.0447 30.5768 24.7107 29.9837 25.3768 29.2761C26.0427 28.5476 26.511 27.9544 26.7817 27.4966L25.3144 26.2478C23.2538 28.4539 21.3911 29.5571 19.726 29.5571C17.499 29.5571 16.3855 27.3198 16.3855 22.8449C16.3855 20.389 16.8538 18.1411 17.7904 16.1015C18.7478 14.041 19.9341 12.9483 21.3494 12.8234C19.5803 14.9047 18.6958 17.1941 18.6958 19.6917C18.6958 20.9197 19.008 21.9291 19.6323 22.72C20.2567 23.5109 21.058 23.9063 22.0362 23.9063C23.5972 23.9063 24.8668 23.1154 25.8451 21.5337C26.8232 19.931 27.3124 18.2036 27.3124 16.3512C27.3124 14.478 26.8337 13.0211 25.8763 11.9805C26.5632 11.7307 27.1978 11.6059 27.7807 11.6059C28.9046 11.6059 29.9556 11.9701 30.9339 12.6985L31.0588 12.4176C31.35 11.8556 31.579 11.1792 31.7456 10.3883C31.4334 10.0761 30.9441 9.81593 30.2783 9.6078C29.6329 9.37885 28.9359 9.26439 28.1866 9.26439C26.7088 9.26439 25.2207 9.7431 23.7221 10.7005C23.0145 10.5132 22.3484 10.4195 21.7241 10.4195C19.5595 10.4195 17.5823 11.0751 15.7923 12.3863C14.0024 13.6976 12.6288 15.4042 11.6714 17.5063C10.714 19.5876 10.2353 21.9083 10.2353 24.4683C10.2353 27.0076 10.9221 29.0576 12.2958 30.6185ZM23.6909 20.0039C23.2954 21.0237 22.7855 21.5337 22.1611 21.5337C21.7657 21.5337 21.4535 21.3671 21.2245 21.0341C20.9956 20.7011 20.8811 20.2224 20.8811 19.598C20.8811 17.2462 21.7449 15.2273 23.4723 13.5415C24.0343 14.145 24.3153 15.1129 24.3153 16.4449C24.3153 17.7769 24.1071 18.9632 23.6909 20.0039Z" fill="#3559E0" />
+            </g>
+            <defs>
+                <clipPath id="clip0_7_933">
+                    <rect width="40" height="40" fill="white" transform="translate(0 2)" />
+                </clipPath>
+            </defs>
+        </svg>
+    </div>
+
+    <MudDivider Style="flex-grow: 0" />
+
+    <div class="login-section">
+        <EditForm Model="@model" OnValidSubmit="RegisterAccount">
+            <DataAnnotationsValidator />
+            <MudCard Class="over-lay" Elevation="8">
+                <MudCardContent>
+                    <MudText Class="mb-5" Style="font-weight: 500; font-size: 32px">Đăng ký</MudText>
+
+
+                    <MudText>Tên đăng nhập</MudText>
+                    <MudTextField  Placeholder="chatable174" @bind-Value="model.userName" For="@(() => model.userName)" RequiredError="Hãy điền tên đăng nhập"
+                                  Variant="Variant.Outlined" Class="mb-4 rounded-corners" />
+
+                    <MudText>Tên người dùng</MudText>
+                    <MudTextField Placeholder="Nguyễn Văn A" Required="true" RequiredError="Hãy điền tên người dùng"
+                                  Variant="Variant.Outlined" Class="mb-4"
+                                  @bind-Value="model.fullName" For="@(() => model.fullName)" />
+
+                    <MudText>Email</MudText>
+                    <MudTextField Placeholder="VanA@gmail.com" Required="true" RequiredError="Hãy điền email"
+                                  Variant="Variant.Outlined" Class="mb-4"
+                                  @bind-Value="model.email" For="@(() => model.email)" />
+
+                    <MudText>Mật khẩu</MudText>
+                    <MudTextField Placeholder="Abc@12345" Required="true" RequiredError="Hãy chọn mật khẩu"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" Class="mb-4"
+                                  @bind-Value="model.password" For="@(() => model.password)" InputType="@PasswordInput" />
+
+                    <MudText>Nhập lại mật khẩu</MudText>
+                    <MudTextField Placeholder="Abc@12345" Required="true" RequiredError="Hãy xác nhận lại mật khẩu"
+                                  Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" Class="mb-4"
+                                  @bind-Value="model.confirmPassword" For="@(() => model.confirmPassword)" InputType="@PasswordInput" />
+
+
+                    <MudText>Giới tính</MudText>
+                    <MudRadioGroup @bind-SelectedOption="isMale" Required="true" RequiredError="Hãy chọn giới tính" Class="center-radio-group">
+                        <MudRadio   Option="true" Color="Color.Primary" Dense="true" Class="radio-custom">Nam</MudRadio>
+                        <MudRadio Option="false" Color="Color.Secondary" Dense="true" Class="radio-custom">Nữ</MudRadio>
+                    </MudRadioGroup>
+
+                    <MudText>Ngày sinh</MudText>
+                    <MudDatePicker  Required="true" RequiredError="Hãy chọn ngày sinh của bạn"
+                                    MaxDate="DateTime.Now"
+                                   Variant="Variant.Outlined"
+                                   @bind-Date="model.dob" DisableToolbar="true" DateFormat="dd.MM.yyyy" 
+                                   Class="top0"/>
+
+                    <p class="erro">@erroMessage</p>
+                </MudCardContent>
+                <MudCardActions class ="flex-col">
+                   
+                    <MudButton ButtonType="ButtonType.Submit" Disabled="@_processing" Variant="Variant.Filled" Color="Color.Primary"
+                               Class="login-button mb-8" FullWidth="true" DisableElevation="true">
+                        @if (_processing)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Đang xử lý</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Đăng ký</MudText>
+                        }
+                    </MudButton>
+
+                    <div align="center">
+                        <MudText Inline="true">Bạn đã có tài khoản?</MudText>
+                        <a href="login">Đăng nhập ngay</a>
+                    </div>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+    </div>
 </div>
 
 <style>
-    .title {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 30px 0;
-    }
-
-    .body {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px 0;
-    }
-
-    .toSignUp {
-        margin-left: 40px
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
 
     .container {
-        background: white;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
+
+    .header {
+        padding: 16px 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .login-section {
+        background: white url(/img/login-backgroud.png) no-repeat fixed center center;
+        background-size: cover;
+        flex: 1;
+        display: flex;
+        align-items: start;
+        justify-content: center;
+    }
+
+    .over-lay {
+        width: 42vw;
+        padding: 10px 20px 20px 20px;
+        border-radius: 30px;
+
+    }
+    .flex-col {
+        flex-direction: column;
+    }
+    .center-radio-group {
+    display: flex;
+    justify-content: center;
+    }
+    .radio-custom {
+        font-size: 10px;
+        margin-left: 20px;
+        padding-bottom:10px;
+        padding-top: 5px;
+        color: black;
+    }
+    .top0 {
+        margin-top:0px;
+    }
+    .login-button {
+        border-radius: 30px;
+        padding: 10px 0;
+        color: white;
+        background-color: #3559E0;
+        font-size: 18px;
+        font-weight: 500;
+        text-transform: none;
+    }
+
+        .login-button:hover {
+            background-color: #4CB9E7;
+        }
+
+    a {
+        display: inline;
+        font-weight: 500;
+        font-size: 16px;
+    }
+
+        a:hover {
+            text-decoration: underline;
+            color: #4CB9E7;
+            cursor: pointer;
+        }
+
+    /* Thay đổi border-radius của Outlined MudTextField */
+    .mud-input-outlined-border {
+        border-radius: 12px !important;
+    }
+
+    /* Thay đổi margin-top mặc định 6px Outlined MudTextField thành 0px*/
+    .mud-input-control {
+        margin-top: 4px;
+    }
+
     .erro {
         display: flex;
         width: 100%;
@@ -91,6 +200,11 @@
     private bool _processing = false;
     bool success;
     string erroMessage;
+
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    bool isShow;
+
     Boolean isMale = true;
     DialogOptions disableBackdropClick = new DialogOptions() { DisableBackdropClick = true };
     public class RegisterAccountForm
@@ -100,6 +214,9 @@
 
         [Required(ErrorMessage = "Họ tên người dùng là bắt buộc.")]
         public string fullName { get; set; }
+
+        [Required(ErrorMessage = "Email là bắt buộc.")]
+        public string email { get; set; }
 
         public string avatar = null;
 
@@ -115,6 +232,22 @@
         [Required(ErrorMessage = "Nhập lại mật khẩu là bắt buộc.")]
         [Compare(nameof(password), ErrorMessage = "Mật khẩu và nhập lại mật khẩu không khớp.")]
         public string confirmPassword { get; set; }
+    }
+
+    void togglePasswordVisibility()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
     }
 
     private async Task<bool> RegisterAccount(EditContext context)
