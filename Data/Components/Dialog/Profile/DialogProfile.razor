@@ -145,8 +145,12 @@
 
     private void OpenEditDialog()
     {
+        MudDialog.Close(DialogResult.Ok(true));
+        //DialogEditProfile dialogEditProfile = new DialogEditProfile() { DisableBackdropClick = true };
         DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân");
     }
+    
+
 
     private async Task<UserInfor> GetCurUser ()
     {
