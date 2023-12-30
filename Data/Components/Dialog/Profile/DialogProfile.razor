@@ -9,7 +9,7 @@
 
 <link rel="stylesheet" href="/css/AddGroupDialog.css">
 
-<MudDialog >
+<MudDialog class="custom-dialog-content" >
     <DialogContent>
         @if (currentUser == null)
         {
@@ -17,32 +17,40 @@
         }
         else
         {
-            <div>
-                <div class="app-component-container">
-                    <div Class="photos">
-                        <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
-                        <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
-                            <MudImage Src="@currentUser.avatar"></MudImage>
-                        </MudAvatar>
-                        <MudIconButton Icon="@Icons.Material.Filled.CameraAlt" Style="position: absolute; width: 15px; height:12px; left: 57%; margin-top: 160px;" />
-                        <p style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</p>
+            <div class="app-component-container">
+                <div Class="photos">
+                    <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
+                    <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
+                        <MudImage Src="@currentUser.avatar"></MudImage>
+                    </MudAvatar>
+                    <MudFileUpload T="IFormFile" FilesChanged="UploadFiles">
+                        <ButtonTemplate>
+                            <MudIconButton HtmlTag="label"
+                                           Color="Color.Info"
+                                           Icon="@Icons.Material.Filled.PhotoCamera"
+                                           Style="position: absolute; width: 15px; height:12px; left: 55%; margin-top: 6px;"
+                                           for="@context.Id">
+                            </MudIconButton>
+                        </ButtonTemplate>
+                    </MudFileUpload>
+                    <MudText style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</MudText>
+
+
+                </div>
+
+                <div class="infor">
+                    <p style=" font-size: 15px; font-weight: 500;"> Thông tin cá nhân </p>
+                    <div class="email">
+                        <MudText class="title">Email</MudText>
+                        <MudText>@(currentUser.email != null ? currentUser.email : "Chưa cập nhập")</MudText>
                     </div>
-
-                    <div class="infor">
-                        <p style=" font-size: 15px; font-weight: 500;"> Thông tin cá nhân </p>
-                        <div class="phone">
-                            <p class="title">Email</p>
-                            <MudText>@(currentUser.email != null ? currentUser.email : "Chưa cập nhập")</MudText>
-
-                            </div>
-                            <div class="sex">
-                                <p class="title">Giới tính</p>
-                                <p>@currentUser.gender</p>
-                        </div>
-                        <div class="dob">
-                            <p class="title">Ngày sinh</p>
-                            <p>@(currentUser.dob.HasValue ? currentUser.dob.Value.ToString("dd/MM/yyyy") : "N/A")</p>
-                        </div>
+                    <div class="sex">
+                        <MudText class="title">Giới tính</MudText>
+                        <MudText>@currentUser.gender</MudText>
+                    </div>
+                    <div class="dob">
+                        <MudText class="title">Ngày sinh</MudText>
+                            <MudText>@(currentUser.dob.HasValue ? currentUser.dob.Value.ToString("dd/MM/yyyy") : "N/A")</MudText>
                     </div>
                 </div>
             </div>
@@ -50,13 +58,16 @@
     </DialogContent>
     <DialogActions >
         <div class="toEdit">
-            <MudButton Color="Color.Primary" OnClick="OpenEditDialog">
+            <MudButton StartIcon="@Icons.Material.Filled.Edit"  Color="Color.Primary" OnClick="OpenEditDialog" Style="width: 100%">
                 Chỉnh sửa thông tin
             </MudButton>
         </div>
     </DialogActions>
 </MudDialog>
 <style>
+    .mud-dialog .mud-dialog-content {
+        padding: 8px 0;
+    }
     .custom-dialog-content {
         padding: 0;
         margin: 0;
@@ -75,8 +86,9 @@
         height: 100px;
         width: 100%;
         margin-top: 80px;
+        padding-left: 60px;
     }
-    .phone {
+    .email {
         display: flex;
         width: 100%;
         align-items: center;
@@ -135,13 +147,48 @@
 @code {
 
     UserInfor currentUser;
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        LoadProfile();
-        //Console.WriteLine(currentUser);
+        await LoadProfile();
     }
 
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    private async Task UploadFiles(IFormFile file)
+    {
+        try
+        {
+            if (file != null)
+            {
+                var content = new MultipartFormDataContent();
+                content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
+
+                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+                httpRequestMessage.Method = new HttpMethod("POST");
+                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/UploadAvatar");
+
+                httpRequestMessage.Content = content;
+
+                var response = await _http.SendAsync(httpRequestMessage);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Show success message
+                    await DialogService.ShowMessageBox("Bạn đã cập nhập thông tin thành công!", "Thành công");
+
+
+                }
+                else
+                {
+                    string resBody = await response.Content.ReadAsStringAsync();
+                    dynamic result = JsonConvert.DeserializeObject(resBody);
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+        }
+    }
 
     private void OpenEditDialog()
     {
@@ -150,8 +197,6 @@
         DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân");
     }
     
-
-
     private async Task<UserInfor> GetCurUser ()
     {
         UserInfor curUser = new UserInfor();

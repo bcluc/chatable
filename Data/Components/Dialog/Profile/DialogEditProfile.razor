@@ -4,10 +4,11 @@
 @using System.Net.Http;
 @using Newtonsoft.Json;
 @using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel.DataAnnotations
 
 @inject IDialogService DialogService
 @inject HttpClient _http
-
+@* ai test nhớ điền mail vô nha *@
 <MudDialog class="custom-dialog-content">
     <DialogContent>
             @if (currentUser == null)
@@ -42,7 +43,7 @@
                             <div style="margin-top: 10px;"> 
                                 <MudText Style="font-size: 16px">Tên hiển thi</MudText>
                                 <MudTextField Required="true" RequiredError="Bạn cần điền tên hiển thị!"
-                                      @bind-Value="@FullNameChanged" For="@(() => FullNameChanged)"
+                                      @bind-Value="@model.FullNameChanged" For="@(() => model.FullNameChanged)"
                                       TextChanged="CheckChange"
                                                   Variant="Variant.Outlined" Margin="Margin.Dense" 
                                                   Style="background-color: white; border-radius: 8px; border-width: 2px; border-color: #ECEDF0"
@@ -52,7 +53,7 @@
 
                             <div style="margin-top: 10px;">
                                  <MudText Style="font-size: 16px">Email</MudText>
-                                    <MudTextField @bind-Value="@EmailChanged" For="@(() => EmailChanged)"
+                                <MudTextField @bind-Value="@model.EmailChanged" For="@(() => model.EmailChanged)"
                                       TextChanged="CheckChange"
                                       Required="true" RequiredError ="Bạn cần điền Email!" 
                                               Variant="Variant.Outlined" Margin="Margin.Dense"
@@ -62,8 +63,8 @@
                             <div style="margin-top: 10px">
                                 <MudText Style="font-size: 16px">Giới tính</MudText>
 
-                            <MudRadioGroup T="string" 
-                                       SelectedOption="@GenderChanged"
+                            <MudRadioGroup T="string"
+                                       SelectedOption="@model.GenderChanged"
                                        SelectedOptionChanged="OnGenderChanged"
                                        Class="center-radio-group"
                                        Style="background-color: white!important; margin-top: 10px">
@@ -87,9 +88,9 @@
                                 <MudDatePicker MaxDate="DateTime.Now"
                                                Variant="Variant.Outlined"
                                                Style="background-color: white; border-radius:8px; border-width: 2px; border-color: #ECEDF0 "
-                                               Date="@dobChanged"
+                                       Date="@model.dobChanged"
                                                DateChanged="OnDobChanged"
-                                               For="@(() => dobChanged)"
+                                       For="@(() => model.dobChanged)"
                                                DisableToolbar="true"
                                                DateFormat="dd.MM.yyyy"  
                                                Required="true"
@@ -211,6 +212,22 @@
         public DateTime? createdAt { get; set; }
 
     }
+    public class UpdateUserForm
+    {
+
+        [Required(ErrorMessage = "Họ tên người dùng là bắt buộc.")]
+        public string FullNameChanged { get; set; }
+
+        [Required(ErrorMessage = "Email là bắt buộc.")]
+        public string EmailChanged { get; set; }
+
+        [Required(ErrorMessage = "Ngày sinh là bắt buộc.")]
+        public DateTime? dobChanged = DateTime.Today;
+
+        public string GenderChanged { get; set; } = "Nam";
+
+       
+    }
 }
 
 @code {
@@ -218,16 +235,12 @@
     bool CanUpdate = false;
     string erroMessage;
 
+    UpdateUserForm model = new UpdateUserForm();
 
-    //thong tin hien thi để check xem người dùng có thay đổi thông tin hay k => enable nút cập nhập
-    private string FullNameChanged { get; set; }
-    private string EmailChanged { get; set; }
-    private string GenderChanged { get; set; }
-    private DateTime? dobChanged = DateTime.Now;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        LoadProfile();
+        await LoadProfile();
     }
 
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
@@ -254,8 +267,7 @@
                     // Show success message
                     await DialogService.ShowMessageBox("Bạn đã cập nhập thông tin thành công!", "Thành công");
 
-                    // Close the dialog
-
+                   
                 }
                 else
                 {
@@ -280,18 +292,18 @@
 
     private void  OnGenderChanged(string selectedgender)
     {
-        GenderChanged = selectedgender;
+        model.GenderChanged = selectedgender;
         if (CanUpdate == false)
         {
-            CanUpdate = (currentUser.gender != GenderChanged) ? true : false;
+            CanUpdate = (currentUser.gender != model.GenderChanged) ? true : false;
         }
     }
     private void OnDobChanged(DateTime? newDate)
     {
-        dobChanged = newDate;
+        model.dobChanged = newDate;
         if (CanUpdate == false)
         {
-            if (currentUser.dob != dobChanged.GetValueOrDefault())
+            if (currentUser.dob != model.dobChanged.GetValueOrDefault())
             {
                 CanUpdate = true;
             }
@@ -301,10 +313,10 @@
     {
         if (!CanUpdate)
         {
-            if (FullNameChanged != null && EmailChanged != null )
+            if (model.FullNameChanged != null && model.EmailChanged != null)
             {
-                if (FullNameChanged != currentUser.fullName ||
-                    EmailChanged != currentUser.email )
+                if (model.FullNameChanged != currentUser.fullName ||
+                    model.EmailChanged != currentUser.email)
                 {
                     CanUpdate = true;
                 }
@@ -315,12 +327,12 @@
     private async Task<bool> SaveChange()
     {
         //gán các giá trị đã thay đổi vô current user
-        currentUser.fullName = FullNameChanged;
-        currentUser.email = EmailChanged;
-        currentUser.gender = GenderChanged;
-        if (dobChanged.HasValue)
+        currentUser.fullName = model.FullNameChanged;
+        currentUser.email = model.EmailChanged;
+        currentUser.gender = model.GenderChanged;
+        if (model.dobChanged.HasValue)
         {
-            currentUser.dob = dobChanged.GetValueOrDefault();
+            currentUser.dob = model.dobChanged.GetValueOrDefault();
         }
 
         //call api save change
@@ -329,7 +341,7 @@
             try
             {
 
-                currentUser.gender = GenderChanged;
+                currentUser.gender = model.GenderChanged;
                 string serializedUser = JsonConvert.SerializeObject(currentUser);
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
                 httpRequestMessage.Method = new HttpMethod("PUT");
@@ -401,13 +413,11 @@
 
         if (currentUser != null)
         {
-            FullNameChanged = currentUser.fullName;
-            EmailChanged = currentUser.email;
-            dobChanged = currentUser.dob;
-            GenderChanged = currentUser.gender;
-            dobChanged = currentUser.dob;
-            
-
+            model.FullNameChanged = currentUser.fullName;
+            model.EmailChanged = currentUser.email;
+            model.dobChanged = currentUser.dob;
+            model.GenderChanged = currentUser.gender;
+           
             StateHasChanged();
         }
     }
