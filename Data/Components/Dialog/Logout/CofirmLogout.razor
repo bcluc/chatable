@@ -1,0 +1,60 @@
+﻿@using System.Net.Http;
+@using Chatable.Data.Entitles
+@using Newtonsoft.Json;
+
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject HttpClient _http
+
+<MudDialog>
+    <DialogContent>
+        Bạn có chắc muốn đăng  xuất
+        <MudText class="erro">@erroMessage</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Accept">Đồng ý</MudButton>
+    </DialogActions>
+</MudDialog>
+<style>
+
+    .erro {
+        display: flex;
+        width: 100%;
+        margin: 10px 0px;
+        color: red;
+        font-size: 14px;
+    }
+</style>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    string erroMessage;
+    void Cancel() => MudDialog.Cancel();
+    public async Task Accept()
+    {
+        try
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/Logout");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/login");
+
+            }
+            else
+            {
+                string resBody = await response.Content.ReadAsStringAsync();
+                dynamic result = JsonConvert.DeserializeObject(resBody);
+                erroMessage = result.Message.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            erroMessage = ex.Message;
+        }
+
+    }
+}

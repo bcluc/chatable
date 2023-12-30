@@ -35,7 +35,7 @@
         <ul>
             @for (int i = 3; i <= 4; ++i)
             {
-                var currentIndex = i;
+                var currentIndex = i;             
                 <li class="@(currentPageIndex == i ? "current-page" : "")"
                     @onclick="() => changeCurrentPageIndex(currentIndex)">
                     <a href="@menuItems[i].page">
@@ -102,9 +102,13 @@
 
     User currentUser = Constant.currentUser;
     bool themeOn = false;
-    public async Task Logout()
+
+    public void Logout()
     {
-        NavigationManager.NavigateTo("");
+        //message xác nhận oke thì out
+        //NavigationManager.NavigateTo("");
+        var options = new DialogOptions { ClassBackground = "dialog-blur-backgroud" };
+        DialogService.Show<Data.Components.Dialog.Logout.CofirmLogout>("Xác nhận", options);
     }
     private void OpenDialog()
     {

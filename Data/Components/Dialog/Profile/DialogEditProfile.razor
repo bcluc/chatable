@@ -3,6 +3,7 @@
 @using System.Globalization;
 @using System.Net.Http;
 @using Newtonsoft.Json;
+@using Microsoft.AspNetCore.Components.Forms
 
 @inject IDialogService DialogService
 @inject HttpClient _http
@@ -11,7 +12,7 @@
     <DialogContent>
             @if (currentUser == null)
             {
-                <MudProgressCircular Indeterminate="true"></MudProgressCircular>
+            <p>Loading</p>
             }
             else
             {
@@ -21,18 +22,18 @@
                             <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
                                 <MudImage Src="@currentUser.avatar"></MudImage>
                             </MudAvatar>
-                            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                            <MudFileUpload T="IFormFile" FilesChanged="UploadFiles">
                                 <ButtonTemplate>
                                     <MudIconButton HtmlTag="label"
                                                    Color="Color.Info"
                                                    Icon="@Icons.Material.Filled.PhotoCamera"
-                                                    Style="position: absolute; width: 15px; height:12px; left: 57%; margin-top: 160px;"
+                                                   Style="position: absolute; width: 15px; height:12px; left: 55%; margin-top: 6px;"
                                                    for="@context.Id">
                                     </MudIconButton>
                                 </ButtonTemplate>
                             </MudFileUpload>
 
-                           @*  <MudIconButton Icon="@Icons.Material.Filled.CameraAlt" Style="position: absolute; width: 15px; height:12px; left: 57%; margin-top: 160px;" /> *@
+                        
                             
                         </div>
 
@@ -61,28 +62,23 @@
                             <div style="margin-top: 10px">
                                 <MudText Style="font-size: 16px">Giới tính</MudText>
 
-                                <MudRadioGroup @bind-SelectedOption="IsMale"                                               
-                                                Class="center-radio-group"
-                                                Style="background-color: white!important; margin-top: 10px">
+                            <MudRadioGroup T="string" 
+                                       SelectedOption="@GenderChanged"
+                                       SelectedOptionChanged="OnGenderChanged"
+                                       Class="center-radio-group"
+                                       Style="background-color: white!important; margin-top: 10px">
 
-                                    <MudRadio Option="true"
+                                    <MudRadio Option=@("Nam")
                                                 Color="Color.Primary" 
                                                 Dense="true" Class="radio-custom"
                                                 Style="margin-left: 60px">Nam</MudRadio>
-                                    <MudRadio Option="false"
+                                    <MudRadio Option=@("Nữ")
                                                 Color="Color.Primary"
                                                 Dense="true" 
                                                 Class="radio-custom" 
                                                 Style="margin-left: 60px">Nữ</MudRadio>
                                 </MudRadioGroup>
-                                @{
-                                GenderChanged = (IsMale) ? "Nam" : "Nữ";
-
-                                if (currentUser.gender != GenderChanged)
-                                    {
-                                        CanUpdate = true;
-                                    }
-                                }
+                                
                   
                             </div>
                             <div style="margin-top: 10px; background-color: white">
@@ -91,12 +87,16 @@
                                 <MudDatePicker MaxDate="DateTime.Now"
                                                Variant="Variant.Outlined"
                                                Style="background-color: white; border-radius:8px; border-width: 2px; border-color: #ECEDF0 "
-                                               @bind-Date="dobChanged" For="@(() => dobChanged)"
-                                               DisableToolbar="true" DateFormat="dd.MM.yyyy"                                             
-                                               Class="top0" />
-
-
-                    </div>
+                                               Date="@dobChanged"
+                                               DateChanged="OnDobChanged"
+                                               For="@(() => dobChanged)"
+                                               DisableToolbar="true"
+                                               DateFormat="dd.MM.yyyy"  
+                                               Required="true"
+                                               RequiredError="Hãy chọn ngày sinh của bạn"
+                                               Class="top0" >
+                                </MudDatePicker>
+                        </div>
                             <p class="erro mb-8">@erroMessage</p>
                             <MudDivider></MudDivider>
                         </div>
@@ -218,13 +218,13 @@
     bool CanUpdate = false;
     string erroMessage;
 
+
     //thong tin hien thi để check xem người dùng có thay đổi thông tin hay k => enable nút cập nhập
     private string FullNameChanged { get; set; }
     private string EmailChanged { get; set; }
     private string GenderChanged { get; set; }
     private DateTime? dobChanged = DateTime.Now;
-    private bool IsMale;
-    DateTime? dobCur = DateTime.Now; 
+
     protected override void OnInitialized()
     {
         LoadProfile();
@@ -232,21 +232,85 @@
 
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
-    void Cancel() => MudDialog.Cancel();
-
-
-    private void UploadFiles(IBrowserFile file)
+    private async Task UploadFiles(IFormFile file)
     {
-        files.Add(file);
-        //TODO upload the files to the server
+        try
+        {
+            if (file != null)
+            {
+                var content = new MultipartFormDataContent();
+                content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
+
+                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+                httpRequestMessage.Method = new HttpMethod("POST");
+                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/UploadAvatar");
+
+                httpRequestMessage.Content = content;
+
+                var response = await _http.SendAsync(httpRequestMessage);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Show success message
+                    await DialogService.ShowMessageBox("Bạn đã cập nhập thông tin thành công!", "Thành công");
+
+                    // Close the dialog
+
+                }
+                else
+                {
+                    string resBody = await response.Content.ReadAsStringAsync();
+                    dynamic result = JsonConvert.DeserializeObject(resBody);
+                    erroMessage = result.Message.ToString();
+                }
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            erroMessage = ex.Message;
+        }
     }
 
-    // private void  OnGenderChanged(bool selectedgender)
-    // {
-    //     GenderChanged = (selectedgender) ? "Nam" : "Nữ";
-    //     CanUpdate = (currentUser.gender != GenderChanged)? true: false;
-    // }
+    void Cancel()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+        DialogService.Show<DialogProfile>("Thông tin cá nhân");
+    }
+
+    private void  OnGenderChanged(string selectedgender)
+    {
+        GenderChanged = selectedgender;
+        if (CanUpdate == false)
+        {
+            CanUpdate = (currentUser.gender != GenderChanged) ? true : false;
+        }
+    }
+    private void OnDobChanged(DateTime? newDate)
+    {
+        dobChanged = newDate;
+        if (CanUpdate == false)
+        {
+            if (currentUser.dob != dobChanged.GetValueOrDefault())
+            {
+                CanUpdate = true;
+            }
+        }
+    }
+    private void CheckChange()
+    {
+        if (!CanUpdate)
+        {
+            if (FullNameChanged != null && EmailChanged != null )
+            {
+                if (FullNameChanged != currentUser.fullName ||
+                    EmailChanged != currentUser.email )
+                {
+                    CanUpdate = true;
+                }
+            }
+        }
+    }
 
     private async Task<bool> SaveChange()
     {
@@ -254,14 +318,18 @@
         currentUser.fullName = FullNameChanged;
         currentUser.email = EmailChanged;
         currentUser.gender = GenderChanged;
-        //currentUser.dob = (dobChanged != null) ? dobChanged : currentUser.dob;
+        if (dobChanged.HasValue)
+        {
+            currentUser.dob = dobChanged.GetValueOrDefault();
+        }
+
         //call api save change
-        if(currentUser.fullName != null )
+        if(currentUser.fullName != null && currentUser.email != null )
         {
             try
             {
 
-                currentUser.gender = (IsMale == true) ? "Nam" : "Nữ";
+                currentUser.gender = GenderChanged;
                 string serializedUser = JsonConvert.SerializeObject(currentUser);
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
                 httpRequestMessage.Method = new HttpMethod("PUT");
@@ -297,8 +365,8 @@
         }
 
         return await Task.FromResult(true);
-        //MudDialog.CancelAll();
     }
+
     private async Task<UserInfor> GetCurUser()
     {
         UserInfor curUser = new UserInfor();
@@ -337,35 +405,11 @@
             EmailChanged = currentUser.email;
             dobChanged = currentUser.dob;
             GenderChanged = currentUser.gender;
-            dobCur = currentUser.dob;
-            if (currentUser.gender == "Nam")
-            {
-                IsMale = true;
-            }
-            else
-            {
-                IsMale = false;
-            }
+            dobChanged = currentUser.dob;
+            
 
             StateHasChanged();
         }
     }
 
-    private void CheckChange()
-    {
-        //nào như fix cái lỗi email thì xài cái cmt
-        // if (FullNameChanged != null && EmailChanged != null)
-        // {
-        //     if (FullNameChanged != currentUser.fullName || EmailChanged != currentUser.email || GenderChanged != currentUser.gender)
-        //     {
-        //         CanUpdate = true;
-        //     }
-        // }
-        if (FullNameChanged != currentUser.fullName ||
-            EmailChanged != currentUser.email ||
-            GenderChanged != currentUser.gender)
-            {
-                CanUpdate = true;
-            }
-    }
 }
