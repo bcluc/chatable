@@ -1,0 +1,86 @@
+@import url('Theme.css');
+
+p {
+    font-family: SVN-Poppins;
+}
+
+td {
+    font-family: SVN-Poppins;
+}
+
+.detail-text {
+    color: #bbb;
+    font-family: SVN-Poppins;
+    font-size: 12px;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: normal;
+    line-height: 20px;
+    text-transform: none;
+    text-align: center;
+    padding: 0;
+    margin: 0
+}
+
+.topBorder {
+    background-color: var(--bg-color);
+    font-size: 1px;
+    line-height: 3px
+}
+
+.confirm-button {
+    padding: 12px 35px;
+    border-radius: 50px;
+    background-color: var(--bg-color);
+}
+
+
+.text-button {
+    color: #fff;
+    font-family: SVN-Poppins;
+    font-size: 13px;
+    font-weight: 600;
+    font-style: normal;
+    letter-spacing: 1px;
+    line-height: 20px;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: block
+}
+
+.normal-text {
+    color: #000;
+    font-family: SVN-Poppins;
+    font-size: 28px;
+    font-weight: 500;
+    font-style: normal;
+    letter-spacing: normal;
+    line-height: 36px;
+    text-transform: none;
+    text-align: center;
+    padding: 0;
+    margin: 0
+}
+
+.img-avt {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    display: block;
+    color: #f9f9f9;
+    border-radius: 100%;
+    border: 2px solid #fff;
+}
+
+.tableCard {
+    background-color: #fff;
+    border-color: #e5e5e5;
+    border-style: solid;
+    border-width: 0 1px 1px 1px;
+    margin-top: 20px
+}
+
+.link-text {
+    color: #bbb;
+    text-decoration: underline
+}

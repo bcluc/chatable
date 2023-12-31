@@ -1,0 +1,142 @@
+@import url('Theme.css');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: SVN-Poppins;
+}
+
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    padding: 16px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.login-section {
+    background: white url(/img/login-backgroud.png) no-repeat fixed center center;
+    background-size: cover;
+    flex:0;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+}
+
+.over-lay {
+    width: 42vw;
+    padding: 10px 20px 10px 20px;
+    border-radius: 15px;
+}
+.over-lay-center {
+    margin-top: 10px;
+    width: 42vw;
+    padding: 10px 20px 10px 20px;
+    border-radius: 15px;
+    text-align: center;
+}
+.login-button {
+    border-radius: 11px;
+    padding: 10px 0;
+    color: white;
+    background-color: var(--bg-color);
+    font-size: 18px;
+    font-weight: 500;
+    font-family: SVN-Poppins;
+    text-transform: none;
+}
+
+.login-button:hover {
+    background-color: var(--btn-hover);
+}
+
+a {
+    display: inline;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: var(--btn-hover);
+    cursor: pointer;
+}
+
+/* Thay đổi border-radius của Outlined MudTextField */
+.mud-input-outlined-border {
+    border-radius: 12px !important;
+}
+
+/* Thay đổi margin-top mặc định 6px Outlined MudTextField thành 0px*/
+.mud-input-control {
+    margin-top: 4px;
+}
+.erro {
+    display: flex;
+    width: 100%;
+    margin: 10px 0px;
+    color: red;
+    font-size: 14px;
+}
+.or {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    color: #a4b0be;
+    font-family: SVN-Poppins;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
+  .or .line {
+    width: 155px;
+    height: 1px;
+    background: #efefef;
+  }
+
+  .footer {
+    position: absolute;
+    bottom: 0; 
+    width: 100%;
+    margin-bottom: 20px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+  }
+  
+  .footer a {
+    font-size: 14px;
+    color: #273c75;
+    font-weight: bold;
+    margin-left: 14px;
+    font-family: SVN-Poppins;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+  
+  .footer #chatable {
+    position: absolute;
+    right: 0; 
+    color: #7f8fa6;
+    margin-right: 20px;
+    font-family: SVN-Poppins;
+    font-size: 12px;
+  }
+  .mud-typography-body1{
+    font-family: SVN-Poppins !important;
+  }

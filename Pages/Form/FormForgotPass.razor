@@ -1,12 +1,7 @@
-﻿@layout LoginLayout
-@page "/"
-@page "/login"
+@page "/forgotpass"
+@layout LoginLayout
 
 @using System.ComponentModel.DataAnnotations;
-@using Chatable.Data.Entitles.Model;
-@using Chatable.Data.Entitles.Request;
-@using Chatable.Data.Entitles.Response;
-@using Chatable.Data.Entitles;
 @using Microsoft.AspNetCore.Components.Forms;
 @using System.Net.Http;
 @using Newtonsoft.Json;
@@ -15,79 +10,10 @@
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
 
+
+@using Chatable.Data.Entitles;
+
 <link rel="stylesheet" href="/css/AuthTemplate.css">
-
-@* <style>
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-}
-
-.container {
-height: 100%;
-display: flex;
-flex-direction: column;
-}
-
-.header {
-padding: 16px 0;
-display: flex;
-justify-content: center;
-}
-
-.login-section {
-background: white url(/img/login-backgroud.png) no-repeat fixed center center;
-background-size: cover;
-flex:1;
-display: flex;
-align-items: start;
-justify-content: center;
-}
-
-.over-lay {
-width: 42vw;
-padding: 10px 20px 20px 20px;
-border-radius: 30px;
-}
-
-.login-button {
-border-radius: 30px;
-padding: 10px 0;
-color: white;
-background-color: #3559E0;
-font-size: 18px;
-font-weight: 500;
-text-transform: none;
-}
-
-.login-button:hover {
-background-color: #4CB9E7;
-}
-
-a {
-display: inline;
-font-weight: 500;
-font-size: 16px;
-}
-
-a:hover {
-text-decoration: underline;
-color: #4CB9E7;
-cursor: pointer;
-}
-
-/* Thay đổi border-radius của Outlined MudTextField */
-.mud-input-outlined-border {
-border-radius: 12px !important;
-}
-
-/* Thay đổi margin-top mặc định 6px Outlined MudTextField thành 0px*/
-.mud-input-control {
-margin-top: 4px;
-}
-
-</style> *@
 
 <div class="container">
     <div class="header">
@@ -115,16 +41,12 @@ margin-top: 4px;
             <DataAnnotationsValidator />
             <MudCard Class="over-lay" Outlined="true">
                 <MudCardContent>
-                    <MudText Class="mb-5" Style="font-weight: 500; font-size: 32px">Đăng nhập</MudText>
+                    <MudText Class="mb-5" Style="font-weight: 500; font-size: 32px; font-family: SVN-Poppins">Quên mật
+                        khẩu</MudText>
 
-                    <MudText>Tên đăng nhập</MudText>
-                    <MudTextField Placeholder="chatableName" @bind-Value="model.userName" For="@(() => model.userName)"
-                        Variant="Variant.Outlined" Class="mb-4" />
-
-                    <MudText>Mật khẩu</MudText>
-                    <MudTextField Placeholder="123456" @bind-Value="model.password" For="@(() => model.password)"
-                        Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End"
-                        AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" />
+                    <MudText Style="font-family: SVN-Poppins">Tên đăng nhập hoặc Email</MudText>
+                    <MudTextField Placeholder="chatableName, email@gmail.com" @bind-Value="model.userName"
+                        For="@(() => model.userName)" Variant="Variant.Outlined" Class="mb-4" />
 
                     <p class="erro mb-8">@erroMessage</p>
 
@@ -137,27 +59,37 @@ margin-top: 4px;
                         }
                         else
                         {
-                            <MudText>Đăng nhập</MudText>
+                            <MudText Style="font-family: SVN-Poppins">Quên Mật Khẫu</MudText>
                         }
                     </MudButton>
-
-                    <div align="center" class="mb-2">
-                        <a href="forgotpass">Quên mật khẩu</a>
+                    <div class="or">
+                        <div class="line"></div>
+                        HOẶC
+                        <div class="line"></div>
                     </div>
 
                     <div align="center">
-                        <MudText Inline="true" Style="font-family: SVN-Poppins">Chưa có tài khoản?</MudText>
-                        <a href="signup">Đăng ký ngay</a>
+                        <div> Đã có tài khoản? <a href="login">Đăng nhập ngay</a></div>
+
                     </div>
 
+                </MudCardContent>
+            </MudCard>
+            <MudCard Class="over-lay-center" Outlined="true">
+                <MudCardContent>
+                    <div class="card card-body signup text-center">
+                        <div> Chưa có tài khoản? <a href="signup">Đăng ký ngay</a></div>
+                    </div>
                 </MudCardContent>
             </MudCard>
         </EditForm>
     </div>
     <footer class="footer">
         <div>
-            <a>Chính sách riêng tư</a>
-            <a>Điều khoản người dùng</a>
+            <a href="confirm">Chính sách riêng tư</a>
+            <a >Điều khoản người dùng</a>
+
+
         </div>
         <div>
             <p id="chatable">&copy; <span id="year"></span> CHATABLE</p>
@@ -165,95 +97,28 @@ margin-top: 4px;
     </footer>
 </div>
 
-@*
-nhubaole
-LeBaoNhu71!
-*@
+
 
 @code {
-    /* Lâm: 106 -> 125 */
-    bool isShow;
-    InputType PasswordInput = InputType.Password;
-    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-
-    void togglePasswordVisibility()
-    {
-        @if (isShow)
-        {
-            isShow = false;
-            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-            PasswordInput = InputType.Password;
-        }
-        else
-        {
-            isShow = true;
-            PasswordInputIcon = Icons.Material.Filled.Visibility;
-            PasswordInput = InputType.Text;
-        }
-    }
-
-    /* Nhi: 161 -> oo */
-    LoginForm model = new LoginForm();
-    bool success;
     private bool _processing = false;
-    String erroMessage;
+        bool success;
 
+    LoginForm model = new LoginForm();
+    String erroMessage;
     public class LoginForm
     {
 
-        [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
+        [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập hoặc email")]
         public string userName { get; set; }
 
-        [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
-        public string password { get; set; }
-
     }
+
     private async Task<bool> LoginUser(EditContext context)
     {
         _processing = true;
         try
         {
-            string serializedUser = JsonConvert.SerializeObject(model);
-            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-            httpRequestMessage.Method = new HttpMethod("POST");
-            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/login");
-            // httpRequestMessage.RequestUri = new Uri("http://localhost:5275/api/v1/Auth/login");
-
-            httpRequestMessage.Content = new StringContent(serializedUser);
-
-            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-            var response = await _http.SendAsync(httpRequestMessage);
-
-            if (response.IsSuccessStatusCode)
-            {
-                success = true;
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
-                try
-                {
-                    if (user.Token != null)
-                    {
-                        await _localStorageService.SetItemAsync("jwt_token", user.Token);
-                    }
-                }
-                catch (Exception e)
-                {
-                    erroMessage = e.Message;
-                }
-            }
-            else
-            {
-                success = false;
-                string resBody = await response.Content.ReadAsStringAsync();
-                dynamic result = JsonConvert.DeserializeObject(resBody);
-                erroMessage = result.message;
-            }
-            _processing = false;
-
-            if (success)
-            {
-                _navigationManager.NavigateTo("/chat");
-            }
+            
         }
         catch (Exception ex)
         {
