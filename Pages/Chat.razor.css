@@ -1,5 +1,4 @@
-﻿<style >
-.custom-button {
+﻿.custom-button {
     padding: 10px 15px;
     font-size: 16px;
     background-color: #0091ff;
@@ -13,8 +12,6 @@
     margin-right: 8px;
 }
 
-</style >
-<!-- Your Blazor component -->
-<button class="custom-button" >
+/* <button class="custom-button" >
 <i class="material-icons" > add</i > Add
-</button >
+</button > */
