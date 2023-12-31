@@ -33,7 +33,7 @@
         
     <div class="bottom-list">
         <ul>
-            @for (int i = 3; i <= 4; ++i)
+            @* @for (int i = 3; i <= 4; ++i)
             {
                 var currentIndex = i;
                 <li class="@(currentPageIndex == i ? "current-page" : "")"
@@ -43,7 +43,21 @@
                         <p>@menuItems[i].title</p>
                     </a>
                 </li>
-            }
+            } *@
+
+            <li class="@(currentPageIndex == 3 ? "current-page" : "")"
+                @onclick="() => changeCurrentPageIndex(3)">
+                <a href="@menuItems[3].page">
+                    <logo class="@menuItems[3].icon" />
+                    <p>@menuItems[3].title</p>
+                </a>
+            </li>
+            <li @onclick="() => OpenConfirmLogoutDialog()">
+                <a>
+                    <logo class="@menuItems[4].icon" />
+                    <p>@menuItems[4].title</p>
+                </a>
+            </li>
         </ul>
     </div>
        
@@ -84,7 +98,7 @@
             title = "Chế độ",
         },
         new MenuItem {
-            page = "chat",
+            page = "",
             icon = "bx bx-log-out",
             title = "Đăng xuất",
         },
@@ -98,17 +112,20 @@
     }
 }
 
+@using Chatable.Data.Components.Dialog;
+
 @code {
 
     User currentUser = Constant.currentUser;
     bool themeOn = false;
-    public async Task Logout()
-    {
-        NavigationManager.NavigateTo("");
-    }
     private void OpenDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
         DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+    }
+    private void OpenConfirmLogoutDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<LogoutDialog>("Xác nhận", options);
     }
 }
