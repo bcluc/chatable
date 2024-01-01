@@ -179,6 +179,7 @@
     private async Task LoadProfile()
     {
         currentUser = await GetCurUser();
+        if(currentUser.avatar == null) currentUser.avatar = Constant.defaultImgMale;
         StateHasChanged();
     }
     

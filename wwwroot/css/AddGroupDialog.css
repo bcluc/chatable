@@ -1,4 +1,6 @@
-﻿.app-component-container {
+﻿@import url('Theme.css');
+
+.app-component-container {
     width: 421px;
     height: fit-content ;
     display: flex;
@@ -34,7 +36,7 @@
     margin-right: 10px;
     padding-left: 10px;
     padding-right: 10px;
-    
+    font-family: SVN-Poppins;
 }
 
 .app-component-ul {
@@ -65,12 +67,14 @@
 }
 
 .app-component-text3 {
+    font-family: SVN-Poppins;
     padding-right: 20px;
 }
 
 .app-component-text4 {
     width:60px;
     text-align: right;
+    font-family: SVN-Poppins;
 }
 .list-select {
     width: 100%;
@@ -92,12 +96,14 @@
     background-color: #eaedf0;
     padding: 10px;
     border-radius: 5%;
+    font-family: SVN-Poppins;
 }
 .app-component-button2 {
     margin-left: 10px;
     background-color: #abcdff;
     color: #e0ebfd;
     padding: 10px;
+    font-family: SVN-Poppins;
     border-radius:5%;
 }
 .app-component-button2-activate {
@@ -106,5 +112,6 @@
     color: white;
     padding: 10px;
     border-radius: 5%;
+    font-family: SVN-Poppins;
 }
 

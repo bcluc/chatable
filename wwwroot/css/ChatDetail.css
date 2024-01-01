@@ -36,6 +36,7 @@
 }
 
 .receiver-name {
+    font-family: SVN-Poppins;
     font-size: 16px;
     font-weight: bold;
     white-space: nowrap;
@@ -44,6 +45,8 @@
 }
 
 .receiver-status {
+    font-family: SVN-Poppins;
+
     font-size: 14px;
     color: gray;
 }
@@ -85,6 +88,8 @@
 
 /*-------------------------------------------------------------------------------------*/
 #message-input {
+    font-family: SVN-Poppins;
+
     display: flex;
     align-items: center;
 }
@@ -107,6 +112,8 @@
     background-color: var(--bg-color);
     padding: 6px 15px;
     color: white;
+    font-family: SVN-Poppins;
+
     font-size: 16px;
     font-weight: 500;
 }
@@ -122,6 +129,8 @@
     padding: 10px 12px;
     border-radius: 10px;
     font-size: 16px;
+    font-family: SVN-Poppins;
+
     margin-bottom: 6px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -137,6 +146,8 @@
 }
 
 .msg-dt {
+    font-family: SVN-Poppins;
+
     font-size: 11px;
     color: black;
 }

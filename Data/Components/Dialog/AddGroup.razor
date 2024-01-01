@@ -110,7 +110,7 @@
             throw new ArgumentNullException(nameof(user));
         }
 
-        var chatUser = userList.FirstOrDefault(c => c.Id == user.Id);
+        var chatUser = userList.FirstOrDefault(c => c.UserName == user.UserName);
 
         if (chatUser is null)
         {

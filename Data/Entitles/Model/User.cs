@@ -3,11 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace Chatable.Data.Entitles.Model
 {
-    public class User : Conversation
+    public class User 
     {
         public string UserName { get; set; }
-        public string Password { get; set; }
-
         public string Email { get; set; }
         public string Name { get; set; }
         public string Avatar { get; set; }
@@ -17,7 +15,7 @@ namespace Chatable.Data.Entitles.Model
         public DateTime DateOfBirth { get; set; }
         public DateTime CreatedAt { get; set; } 
         public User() { }
-        public User(string userName, string fullName, string email,  string gender, string lastTimeOnline, string dateOfBirth, string? conversationId)
+        public User(string userName, string fullName, string email,  string gender, string lastTimeOnline, string dateOfBirth)
         {
             UserName = userName;
             Name = fullName;
@@ -26,10 +24,8 @@ namespace Chatable.Data.Entitles.Model
             Gender = gender;
             LastTimeOnline = DateTime.Now;
             DateOfBirth = DateTime.Parse(dateOfBirth);
-            Id = conversationId;
-            ConversationType = "Peer";
         }
-        //public bool IsSelected { get; set; }
+        public bool IsSelected { get; set; }
 
         private string getDefaultAvt(string gender)
         {

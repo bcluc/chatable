@@ -124,6 +124,39 @@
 		{
 			chat.IsSelected = false;
 		}
+		@* base.OnInitialized();
+        if (!AuthenticationState.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            if (!await IsTokenExpiredAsync())
+            {
+                _hubConnection = ConfigureHubConnection();
+
+                _loadingUsers = true;
+                var userListTask = GetClient().GetFromJsonAsync<ICollection<UserDto>>("api/users", JsonConverter.JsonSerializerOptions);
+                var chatListTask = GetClient().GetFromJsonAsync<IList<UserDto>>("api/users/chats", JsonConverter.JsonSerializerOptions);
+
+                await _hubConnection.StartAsync();
+
+                var usersList = await userListTask;
+                if (usersList is not null)
+                {
+                    Users = usersList;
+                }
+
+                var chatsList = await chatListTask;
+                if (chatsList is not null)
+                {
+                    Chats = chatsList;
+                }
+                _loadingUsers = false;
+                await _hubConnection.SendAsync(nameof(IBlazingChatHubServer.SetUserOnline), AuthenticationState.User);
+                StateHasChanged();
+            }
+        } *@
 		await GetGroup();
 	}
 

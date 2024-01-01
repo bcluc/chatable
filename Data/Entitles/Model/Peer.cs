@@ -4,25 +4,19 @@ namespace Chatable.Data.Entitles.Model
 {
     public class Peer : Conversation
     {
-       public string UserName { get; set; }
-        public string Password { get; set; }
-
-        public string Email { get; set; }
-        //public string Name { get; set; }
-        //public string Avatar { get; set; }
+        public string UserName { get; set; }
         public string Gender { get; set; }
         [DefaultValue("Nam")]
-        public DateTime DateOfBirth { get; set; }
-        public DateTime CreatedAt { get; set; } 
+        public DateTime LastTimeOnline { get; set; }
+        public DateTime CreatedAt { get; set; }
         public Peer() { }
-        public Peer(string userName, string fullName, string email,  string gender, string dateOfBirth, string? conversationId)
+        public Peer(string userName, string fullName, string gender, string lastTimeOnline, string? conversationId)
         {
             UserName = userName;
             Name = fullName;
-            Email = email;
             Avatar = getDefaultAvt(gender);
             Gender = gender;
-            DateOfBirth = DateTime.Parse(dateOfBirth);
+            LastTimeOnline = DateTime.Now;
             Id = conversationId;
             ConversationType = "Peer";
         }

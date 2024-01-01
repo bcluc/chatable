@@ -3,7 +3,7 @@ using Chatable.Data.Entitles.Model;
 
 namespace Chatable.Data.Entitles
 {
-    public static class Constant
+    public class Constant
     {
         public const string defaultImgMale = "img/default_male.jpg";
         public const string defaultImgFemale = "img/default_female.jpg";
@@ -13,7 +13,7 @@ namespace Chatable.Data.Entitles
         public const string waterMark = "img/waterMark.png";
         public const string logoIcon = "img/logo-1.svg";
         public const string logoText = "img/logo-2.svg";
-        public const string signature = "img/signature.svg";
+                public const string signature = "img/signature.svg";
 
         public const string gearOutline = "img/gear-outline.svg";
         public const string themeIcon = "img/theme_icon.svg";
@@ -34,26 +34,28 @@ namespace Chatable.Data.Entitles
 
         public static readonly List<Conversation> chats = new List<Conversation>
         {
-            new User("nhubaole", "Trần Lê Hoàng Lâm","","Nam","2023-11-19 07:58:48.084+00","2023-11-19 07:58:48.084+00","BC_nhubaole"),
-            new User("nhihuynh", "Công chúa Elsa","","Nữ", "2023-12-04 17:03:22.2+00","2023-12-04 17:03:22.2+00", "BC_nhihuynh"),
-            new Group("123","Group Local Test", "", "BC", "2023-12-04 17:03:22.2+00")
+            new Peer("nhubaole", "Trần Lê Hoàng Lâm","Nam","2023-11-19 07:58:48.084+00","BC_nhubaole"),
+            new Peer("nhihuynh", "Công chúa Elsa","Nữ", "2023-12-04 17:03:22.2+00","BC_nhihuynh"),
+            new Group("123","Group Local Test", "BC", "2023-12-04 17:03:22.2+00")
         };
 
         public static readonly IList<User> usersList = new List<User>
         {
-        new User("nhubaole", "Trần Lê Hoàng Lâm","", "Name","2023-11-19 07:58:48.084+00","2023-11-19 07:58:48.084+00", "BC_nhubaole"),
-        new User("nhihuynh", "Công chúa Elsa","", "Nữ", "2023-12-04 17:03:22.2+00","2023-12-04 17:03:22.2+00", "BC_nhihuynh"),
+        new User("nhubaole", "Trần Lê Hoàng Lâm","", "Name","2023-11-19 07:58:48.084+00","2023-11-19 07:58:48.084+00"),
+        new User("nhihuynh", "Công chúa Elsa","", "Nữ", "2023-12-04 17:03:22.2+00","2023-12-04 17:03:22.2+00"),
         };
 
-        public static readonly User currentUser = new("Bùi Cường", "Bùi Cường", "", "Nam", "2023-12-05 11:27:29.397+00", "2023-12-05 11:27:29.397+00", "BC");
+        public static User currentUser = new("Bùi Cường", "Bùi Cường", "", "Nam", "2023-12-05 11:27:29.397+00", "2023-12-05 11:27:29.397+00");
 
         public static readonly Message visibleMessage = new("0", "BC", "1", DateTime.Now, "Text", "Say hi");
 
-        public static readonly Group currentGroup = new Group("123", "Group Local Test", "", "BC", "2023-12-04 17:03:22.2+00");
+        public static readonly Group currentGroup = new Group("123", "Group Local Test", "BC", "2023-12-04 17:03:22.2+00");
 
-        public static readonly User oppositeUser = new User("nhubaole", "Trần Lê Hoàng Lâm", "", "Nam", "2023-11-19 07:58:48.084+00", "2023-11-19 07:58:48.084+00", "BC_nhubaole");
+        public static readonly Peer oppositeUser = new Peer("nhubaole", "Trần Lê Hoàng Lâm", "Nam", "2023-11-19 07:58:48.084+00","BC_nhubaole");
 
-
+        public void updateCurrentUser(User user){
+            currentUser = user;
+        }
     }
 
 
