@@ -1,6 +1,12 @@
 ﻿@using Chatable.Data.Entitles;
 @using Chatable.Data.Components.Dialog.Profile;
 @using Chatable.Data.Entitles.Model;
+@using System.Globalization;
+@using System.Net.Http;
+@using Chatable.Data.Entitles.Respond
+@using Newtonsoft.Json;
+
+@inject HttpClient _http
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
@@ -14,8 +20,8 @@
 
 <div class="sidebar">
     <div class="user">
-        <img src="@currentUser.Avatar" class="user_img" @onclick="OpenDialog" />
-        <p>@currentUser.Name</p>
+        <img src="@currentUser.avatarUrl" class="user_img" @onclick="OpenDialog" />
+        <p>@currentUser.fullName</p>
     </div>
     <ul>
         @for (int i = 0; i <= 2; ++i)
@@ -33,7 +39,7 @@
         
     <div class="bottom-list">
         <ul>
-            @for (int i = 3; i <= 4; ++i)
+            @* @for (int i = 3; i <= 4; ++i)
             {
                 var currentIndex = i;             
                 <li class="@(currentPageIndex == i ? "current-page" : "")"
@@ -43,7 +49,21 @@
                         <p>@menuItems[i].title</p>
                     </a>
                 </li>
-            }
+            } *@
+
+            <li class="@(currentPageIndex == 3 ? "current-page" : "")"
+                @onclick="() => changeCurrentPageIndex(3)">
+                <a href="@menuItems[3].page">
+                    <logo class="@menuItems[3].icon" />
+                    <p>@menuItems[3].title</p>
+                </a>
+            </li>
+            <li @onclick="() => OpenConfirmLogoutDialog()">
+                <a>
+                    <logo class="@menuItems[4].icon" />
+                    <p>@menuItems[4].title</p>
+                </a>
+            </li>
         </ul>
     </div>
        
@@ -84,7 +104,7 @@
             title = "Chế độ",
         },
         new MenuItem {
-            page = "chat",
+            page = "",
             icon = "bx bx-log-out",
             title = "Đăng xuất",
         },
@@ -98,21 +118,20 @@
     }
 }
 
-@code {
+@using Chatable.Data.Components.Dialog;
 
+@code {
     User currentUser = Constant.currentUser;
     bool themeOn = false;
-
-    public void Logout()
-    {
-        //message xác nhận oke thì out
-        //NavigationManager.NavigateTo("");
-        var options = new DialogOptions { ClassBackground = "dialog-blur-backgroud" };
-        DialogService.Show<Data.Components.Dialog.Logout.CofirmLogout>("Xác nhận", options);
-    }
     private void OpenDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
         DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
     }
+    private void OpenConfirmLogoutDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<LogoutDialog>("Xác nhận", options);
+    }
+    
 }

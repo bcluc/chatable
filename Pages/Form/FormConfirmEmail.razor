@@ -1,0 +1,212 @@
+@page "/confirm"
+@layout LoginLayout
+
+@using System.ComponentModel.DataAnnotations;
+@using Microsoft.AspNetCore.Components.Forms;
+@using System.Net.Http;
+@using Newtonsoft.Json;
+
+@inject Blazored.LocalStorage.ILocalStorageService _localStorageService
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+
+
+@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles;
+
+
+<link rel="stylesheet" href="/css/FormConfirmEmail.css">
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout:fixed;background-color:#f9f9f9"
+    id="bodyTable">
+    <tbody>
+        <tr>
+            <td style="padding-right:10px;padding-left:10px;" align="center" valign="top" id="bodyCell">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" class="wrapperBody"
+                    style="max-width:600px">
+                    <tbody>
+                        <tr>
+                            <td align="center" valign="top">
+                                <table border="0" cellpadding="0" cellspacing="0" width="100%" class="tableCard">
+                                    <tbody>
+                                        <tr>
+                                            <td class="topBorder" height="3">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding-top: 30px; padding-bottom: 10px;" align="center"
+                                                valign="middle" class="emailLogo">
+                                                <a href="#" style="text-decoration:none" target="_blank">
+                                                    <img alt="" border="0" src="@Constant.logoText"
+                                                        style="width:100%;max-width:150px;height:auto;display:block"
+                                                        width="150">
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding-bottom: 20px;" align="center" valign="top"
+                                                class="imgHero">
+                                                <a href="#" style="text-decoration:none" target="_blank">
+                                                    <img alt="" border="0" src="@curUser.avatarUrl" class="img-avt"
+                                                        width="200px">
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding-bottom: 5px; padding-left: 20px; padding-right: 20px;"
+                                                align="center" valign="top" class="mainTitle">
+                                                <h2 class="normal-text">Chào "@curUser.fullName"</h2>
+                                            </td>
+                                        </tr>
+                                        <!-- Verify Email // -->
+                                        <tr>
+                                            <td style="padding-bottom: 10px; padding-left: 20px; padding-right: 20px;"
+                                                align="center" valign="top" class="subTitle">
+                                                <h4 class="detail-text"
+                                                    style="font-size:16px;line-height:24px;padding:0;margin:0">Xác nhận
+                                                    email của bạn</h4>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding-left:20px;padding-right:20px" align="center" valign="top"
+                                                class="containtTable ui-sortable">
+                                                <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                                                    class="tableDescription" style="">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="padding-bottom: 20px;" align="center"
+                                                                valign="top" class="description">
+                                                                <p class="normal-text"
+                                                                    style="font-size:14px;font-weight:400;font-style:normal">
+                                                                    Để hoàn thành quá trình đặt lại mật khẩu, vui lòng
+                                                                    ấn Xác nhận Email. <br> Email sẽ có hiệu lực trong 5
+                                                                    phút</p>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                                                    class="tableButton" style="">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="padding-top:20px;padding-bottom:20px"
+                                                                align="center" valign="top">
+                                                                <table border="0" cellpadding="0" cellspacing="0"
+                                                                    align="center">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td align="center" class="confirm-button">
+                                                                                <a href="resetpassword" target="_blank"
+                                                                                    class="text-button">Xác nhận
+                                                                                    Email</a>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-size:1px;line-height:1px" height="20">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" valign="middle" style="padding-bottom: 40px;"
+                                                class="emailRegards">
+                                                <!-- Image and Link // -->
+                                                <a href="#" target="_blank" style="text-decoration:none;">
+                                                    <img mc:edit="signature" src="@Constant.signature" alt=""
+                                                        width="150" border="0" style="width:100%;
+                                                    max-width:150px; height:auto; display:block;">
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table border="0" cellpadding="0" cellspacing="0" width="100%" class="space">
+                                    <tbody>
+                                        <tr>
+                                            <td style="font-size:1px;line-height:1px" height="30">&nbsp;</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" class="wrapperFooter"
+                    style="max-width:600px">
+                    <tbody>
+                        <tr>
+                            <td align="center" valign="top">
+                                <table border="0" cellpadding="0" cellspacing="0" width="100%" class="footer">
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding-top:10px;padding-bottom:10px;padding-left:10px;padding-right:10px"
+                                                align="center" valign="top" class="socialLinks">
+                                                <a href="#facebook-link" style="display:inline-block" target="_blank"
+                                                    class="facebook">
+                                                    <img alt="" border="0"
+                                                        src="http://email.aumfusion.com/vespro/img/social/light/facebook.png"
+                                                        style="height:auto;width:100%;max-width:40px;margin-left:2px;margin-right:2px"
+                                                        width="40">
+                                                </a>
+                                                <a href="#twitter-link" style="display: inline-block;" target="_blank"
+                                                    class="google">
+                                                    <img alt="" border="0"
+                                                        src="http://email.aumfusion.com/vespro/img/social/light/google.png"
+                                                        style="height:auto;width:100%;max-width:40px;margin-left:2px;margin-right:2px"
+                                                        width="40">
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 10px 10px 5px;" align="center" valign="top"
+                                                class="brandInfo">
+                                                <p class="detail-text">©&nbsp;Chatable Inc. | 123 Đ.ABC | TP.HCM,
+                                                    VietNam .</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 0px 10px 20px;" align="center" valign="top"
+                                                class="footerLinks">
+                                                <p class="detail-text"> <a href="#" class="link-text"
+                                                        target="_blank">Đến Chatable</a>&nbsp;|&nbsp; <a href="#"
+                                                        class="link-text" target="_blank">Điều khoản người dùng
+                                                    </a>&nbsp;|&nbsp; <a href="#" class="link-text"
+                                                        target="_blank">Chính sách riêng tư</a>
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 0px 10px 10px;" align="center" valign="top"
+                                                class="footerEmailInfo">
+                                                <p class="detail-text">Nếu bạn có thắc mắc, vui lòng liên hệ chúng tôi
+                                                    tại <a href="#" class="link-text"
+                                                        target="_blank">support@mail.com.</a>
+                                                </p>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td style="font-size:1px;line-height:1px" height="30">&nbsp;</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="font-size:1px;line-height:1px" height="30">&nbsp;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+@code {
+    User curUser = Constant.currentUser;
+}

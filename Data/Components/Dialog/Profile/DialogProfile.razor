@@ -2,10 +2,13 @@
 @using Chatable.Data.Entitles;
 @using System.Globalization;
 @using System.Net.Http;
+@using Chatable.Data.Entitles.Respond
 @using Newtonsoft.Json;
 
 @inject IDialogService DialogService
 @inject HttpClient _http
+@inject IJSRuntime jsRuntime
+
 
 <link rel="stylesheet" href="/css/AddGroupDialog.css">
 
@@ -124,111 +127,18 @@
     }
 
 </style>
-@code{
-    public class ApiResponse<T>
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; }
-        public T Data { get; set; }
-    }
-    public class UserInfor {
-        public string userName { get; set; }
-        public string fullName { get; set; }
-        public string email { get; set; }
-        public string avatar { get; set; }
-        public DateTime? dob = DateTime.Now;
-        public string gender { get; set; }
-        // public string pass { get; set; }
-        // public DateTime? lastTimeOnl { get; set; }
-        // public DateTime? createdAt { get; set; }
 
-    }
-}
 @code {
 
-    UserInfor currentUser;
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadProfile();
+    User currentUser = Constant.currentUser;
     }
 
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-    private async Task UploadFiles(IFormFile file)
-    {
-        try
-        {
-            if (file != null)
-            {
-                var content = new MultipartFormDataContent();
-                content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
-
-                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-                httpRequestMessage.Method = new HttpMethod("POST");
-                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/UploadAvatar");
-
-                httpRequestMessage.Content = content;
-
-                var response = await _http.SendAsync(httpRequestMessage);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    // Show success message
-                    await DialogService.ShowMessageBox("Bạn đã cập nhập thông tin thành công!", "Thành công");
-
-
-                }
-                else
-                {
-                    string resBody = await response.Content.ReadAsStringAsync();
-                    dynamic result = JsonConvert.DeserializeObject(resBody);
-                }
-            }
-
-        }
-        catch (Exception ex)
-        {
-        }
     }
 
     private void OpenEditDialog()
+        //jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
     {
-        MudDialog.Close(DialogResult.Ok(true));
-        //DialogEditProfile dialogEditProfile = new DialogEditProfile() { DisableBackdropClick = true };
         DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân");
-    }
     
-    private async Task<UserInfor> GetCurUser ()
-    {
-        UserInfor curUser = new UserInfor();
-        try
-        {
-            var response = await _http.GetAsync(Constant.uriHost+ "User/CurrentUser");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (responseContent!=null)
-                {
-                    ApiResponse<UserInfor> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<UserInfor>>(responseContent);
-                    curUser = apiResponse.Data;
-                    return curUser;
-                }
-                return null;
-
-            }
-            return null;
-        } 
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            return null;
-        }
-    }
-
-    private async Task LoadProfile()
-    {
-        currentUser = await GetCurUser();
-        StateHasChanged();
-    }
     
 }

@@ -1,13 +1,7 @@
-﻿@layout LoginLayout
-@page "/"
-@page "/login"
+@page "/forgotpass"
+@layout LoginLayout
 
 @using System.ComponentModel.DataAnnotations;
-@using Chatable.Data.Entitles.Model;
-@using Chatable.Data.Entitles.Request;
-@using Chatable.Data.Entitles.Respond
-@using Chatable.Data.Entitles.Response;
-@using Chatable.Data.Entitles;
 @using Microsoft.AspNetCore.Components.Forms;
 @using System.Net.Http;
 @using Newtonsoft.Json;
@@ -15,82 +9,11 @@
 @inject Blazored.LocalStorage.ILocalStorageService _localStorageService
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
-@inject IJSRuntime jsRuntime
 
+
+@using Chatable.Data.Entitles;
 
 <link rel="stylesheet" href="/css/AuthTemplate.css">
-
-@* <style>
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-}
-
-.container {
-height: 100%;
-display: flex;
-flex-direction: column;
-}
-
-.header {
-padding: 16px 0;
-display: flex;
-justify-content: center;
-}
-
-.login-section {
-background: white url(/img/login-backgroud.png) no-repeat fixed center center;
-background-size: cover;
-flex:1;
-display: flex;
-align-items: start;
-justify-content: center;
-}
-
-.over-lay {
-width: 42vw;
-padding: 10px 20px 20px 20px;
-border-radius: 30px;
-}
-
-.login-button {
-border-radius: 30px;
-padding: 10px 0;
-color: white;
-background-color: #3559E0;
-font-size: 18px;
-font-weight: 500;
-text-transform: none;
-}
-
-.login-button:hover {
-background-color: #4CB9E7;
-}
-
-a {
-display: inline;
-font-weight: 500;
-font-size: 16px;
-}
-
-a:hover {
-text-decoration: underline;
-color: #4CB9E7;
-cursor: pointer;
-}
-
-/* Thay đổi border-radius của Outlined MudTextField */
-.mud-input-outlined-border {
-border-radius: 12px !important;
-}
-
-/* Thay đổi margin-top mặc định 6px Outlined MudTextField thành 0px*/
-.mud-input-control {
-margin-top: 4px;
-}
-
-</style> *@
 
 <div class="container">
     <div class="header">
@@ -118,16 +41,12 @@ margin-top: 4px;
             <DataAnnotationsValidator />
             <MudCard Class="over-lay" Outlined="true">
                 <MudCardContent>
-                    <MudText Class="mb-5" Style="font-weight: 500; font-size: 32px">Đăng nhập</MudText>
+                    <MudText Class="mb-5" Style="font-weight: 500; font-size: 32px; font-family: SVN-Poppins">Quên mật
+                        khẩu</MudText>
 
-                    <MudText>Tên đăng nhập</MudText>
-                    <MudTextField Placeholder="chatableName" @bind-Value="model.userName" For="@(() => model.userName)"
-                        Variant="Variant.Outlined" Class="mb-4" />
-
-                    <MudText>Mật khẩu</MudText>
-                    <MudTextField Placeholder="123456" @bind-Value="model.password" For="@(() => model.password)"
-                        Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End"
-                        AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" />
+                    <MudText Style="font-family: SVN-Poppins">Tên đăng nhập hoặc Email</MudText>
+                    <MudTextField Placeholder="chatableName, email@gmail.com" @bind-Value="model.userName"
+                        For="@(() => model.userName)" Variant="Variant.Outlined" Class="mb-4" />
 
                     <p class="erro mb-8">@erroMessage</p>
 
@@ -140,27 +59,37 @@ margin-top: 4px;
                         }
                         else
                         {
-                            <MudText>Đăng nhập</MudText>
+                            <MudText Style="font-family: SVN-Poppins">Quên Mật Khẫu</MudText>
                         }
                     </MudButton>
-
-                    <div align="center" class="mb-2">
-                        <a href="forgotpass">Quên mật khẩu</a>
+                    <div class="or">
+                        <div class="line"></div>
+                        HOẶC
+                        <div class="line"></div>
                     </div>
 
                     <div align="center">
-                        <MudText Inline="true" Style="font-family: SVN-Poppins">Chưa có tài khoản?</MudText>
-                        <a href="signup">Đăng ký ngay</a>
+                        <div> Đã có tài khoản? <a href="login">Đăng nhập ngay</a></div>
+
                     </div>
 
+                </MudCardContent>
+            </MudCard>
+            <MudCard Class="over-lay-center" Outlined="true">
+                <MudCardContent>
+                    <div class="card card-body signup text-center">
+                        <div> Chưa có tài khoản? <a href="signup">Đăng ký ngay</a></div>
+                    </div>
                 </MudCardContent>
             </MudCard>
         </EditForm>
     </div>
     <footer class="footer">
         <div>
-            <a>Chính sách riêng tư</a>
-            <a>Điều khoản người dùng</a>
+            <a href="confirm">Chính sách riêng tư</a>
+            <a >Điều khoản người dùng</a>
+
+
         </div>
         <div>
             <p id="chatable">&copy; <span id="year"></span> CHATABLE</p>
@@ -168,131 +97,28 @@ margin-top: 4px;
     </footer>
 </div>
 
-@*
-nhubaole
-LeBaoNhu71!
-*@
+
 
 @code {
-    User usr;
-    bool isShow;
-    InputType PasswordInput = InputType.Password;
-    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-
-    void togglePasswordVisibility()
-    {
-        @if (isShow)
-        {
-            isShow = false;
-            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-            PasswordInput = InputType.Password;
-        }
-        else
-        {
-            isShow = true;
-            PasswordInputIcon = Icons.Material.Filled.Visibility;
-            PasswordInput = InputType.Text;
-        }
-    }
+    private bool _processing = false;
+        bool success;
 
     LoginForm model = new LoginForm();
-    bool success;
-    private bool _processing = false;
     String erroMessage;
-
     public class LoginForm
     {
 
-        [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
+        [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập hoặc email")]
         public string userName { get; set; }
 
-        [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
-        public string password { get; set; }
-
-
     }
-
-
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     try
-    //     {
-    //         cookieStorageAccessor = new CookieStorageAccessor(JSRuntime);
-    //         if (cookieStorageAccessor != null)
-    //         {
-    //             accessToken = await cookieStorageAccessor.GetValueAsync<String>("accessToken");
-    //             refreshToken = await cookieStorageAccessor.GetValueAsync<String>("refreshToken");
-
-    //             if (!string.IsNullOrEmpty(accessToken) && !string.IsNullOrEmpty(refreshToken))
-    //             {
-    //                 Console.WriteLine(accessToken);
-    //                 Console.WriteLine(refreshToken);
-    //             }
-    //             else
-    //             {
-    //                 _navigationManager.NavigateTo("/login");
-    //             }
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine(ex.Message);
-    //     }
-
-    // }
-
 
     private async Task<bool> LoginUser(EditContext context)
     {
         _processing = true;
         try
         {
-            string serializedUser = JsonConvert.SerializeObject(model);
-            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-            httpRequestMessage.Method = new HttpMethod("POST");
-            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/login");
-            // httpRequestMessage.RequestUri = new Uri("http://localhost:5275/api/v1/Auth/login");
-
-            httpRequestMessage.Content = new StringContent(serializedUser);
-
-            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-            var response = await _http.SendAsync(httpRequestMessage);
-
-            if (response.IsSuccessStatusCode)
-            {
-                success = true;
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
-                try
-                {
-                    if (user.Token != null)
-                    {
-                        await _localStorageService.SetItemAsync("jwt_token", user.Token);
-                    }
-                }
-                catch (Exception e)
-                {
-                    erroMessage = e.Message;
-                }
-            }
-            else
-            {
-                success = false;
-                string resBody = await response.Content.ReadAsStringAsync();
-                dynamic result = JsonConvert.DeserializeObject(resBody);
-                erroMessage = result.message;
-            }
-            _processing = false;
-
-            if (success)
-            {
-                usr = await GetCurUser();
-                if (usr.avatarUrl == null) setNullAvt(usr.gender);
-                Constant.currentUser = usr;
-
-                await jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
-                _navigationManager.NavigateTo("/chat");
-            }
+            
         }
         catch (Exception ex)
         {
@@ -301,41 +127,4 @@ LeBaoNhu71!
         }
         return await Task.FromResult(true);
     }
-    private async Task<User> GetCurUser()
-    {
-        User curUser = new User();
-        try
-        {
-            var response = await _http.GetAsync(Constant.uriHost + "User/CurrentUser");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (responseContent != null)
-                {
-                    ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
-                    curUser = apiResponse.Data;
-                    return curUser;
-                }
-                return null;
-
-            }
-            return null;
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-    }
-    
-    private void setNullAvt(string gender)
-    {
-        if (gender == "Nữ")
-        {
-            usr.avatarUrl = Constant.defaultImgFemale;
-
-        }
-        else usr.avatarUrl = Constant.defaultImgMale;
-    }
-    
 }

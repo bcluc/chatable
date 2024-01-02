@@ -4,6 +4,7 @@
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Respond;
+@using Chatable.Data.Entitles.Response
 @using Microsoft.AspNetCore.SignalR.Client;
 @using System.Net.Http.Headers;
 @using System.Text.Json;
@@ -49,15 +50,15 @@
 				@foreach (var chat in Chats)
 				{
 					<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
-						 @onclick="() => OnUserSelected(chat)">
+					@onclick="() => OnUserSelected(chat)">
 						<img class="coversation-img mr-3" src="@chat.Avatar" />
 						<div class="d-flex justify-start flex-column" style="flex: 1">
 							<div class="d-flex">
 								<p class="coversation-name">@chat.Name</p>
 								<MudSpacer/>
-								<p style="color: gray;">4 giờ</p>
+								<p style="color: gray;">@chat.lastMessage.sendAt</p>
 							</div>
-							<p class="coversation-last-message">last message</p>
+							<p class="coversation-last-message">@chat.lastMessage.content</p>
 						</div>
 					</div>
 
@@ -76,55 +77,88 @@
 			<p class="mb-4" style="font-size: 15px">Hãy bắt đầu cuộc trò chuyện của bạn ngay.</p>
 			<img src="@Constant.imgWaitChat" class="wait-chat-img" />
 		</div>
-	} 
+	}
 	else
 	{
 		<div id="right-banner">
-			
+
 			<ChatDetail Id="@_id"
-						BackToConversationList="BackToConversationList"
-				NewIncomingMessage="@_newIncomingMessage"
-				OnIncomingMessageRecieved="()=> _newIncomingMessage = null" />
+			BackToConversationList="BackToConversationList"
+			NewIncomingMessage="@_newIncomingMessage"
+			OnIncomingMessageRecieved="()=> _newIncomingMessage = null" />
 		</div>
 	}
-		
-	
+
+
 </div>
 
 @code {
 
-	/* Code của Lâm */
-	void BackToConversationList()
-	{
-		// isShowChat = false;
-		Chats.ForEach(e => e.IsSelected = false);
-		_navigationManager.NavigateTo($"/chat");
-	}
+    /* Code của Lâm */
+    void BackToConversationList()
+    {
+        // isShowChat = false;
+        Chats.ForEach(e => e.IsSelected = false);
+        _navigationManager.NavigateTo($"/chat");
+    }
 
-	/* TODO: Thay đổi cách code chỗ _selectedUser */
+    /* TODO: Thay đổi cách code chỗ _selectedUser */
 
-	/* Code của Cường */
-	[Parameter]
-	public string? _id { get; set; }
+    /* Code của Cường */
+    [Parameter]
+    public string? _id { get; set; }
 
-	private string value2;
-	private bool _loadingUsers = false;
-	private Conversation? _selectedUser = null;
-	private Message? _newIncomingMessage = null;
-	private HubConnection? hubConnection;
+    private string value2;
+    private bool _loadingUsers = false;
+    private Conversation? _selectedUser = null;
+    private Message? _newIncomingMessage = null;
+    private HubConnection? hubConnection;
 
-	// Khi nào run thì đổi
-	// = IList.Empty<Conversation>();
-	public List<Conversation> Chats = Constant.chats;
-	private IList<String> states = Constant.states;
+    // Khi nào run thì đổi
+    // = IList.Empty<Conversation>();
+    public List<Conversation> Chats = new List<Conversation>();
+    private IList<String> states = Constant.states;
 
-	protected override async Task OnInitializedAsync()
-	{
-		foreach(var chat in Chats)
-		{
-			chat.IsSelected = false;
-		}
-		await GetGroup();
+    protected override async Task OnInitializedAsync()
+    {
+        foreach(var chat in Chats)
+        {
+            chat.IsSelected = false;
+        }
+        @* base.OnInitialized();
+        if (!AuthenticationState.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            if (!await IsTokenExpiredAsync())
+            {
+                _hubConnection = ConfigureHubConnection();
+
+                _loadingUsers = true;
+                var userListTask = GetClient().GetFromJsonAsync<ICollection<UserDto>>("api/users", JsonConverter.JsonSerializerOptions);
+                var chatListTask = GetClient().GetFromJsonAsync<IList<UserDto>>("api/users/chats", JsonConverter.JsonSerializerOptions);
+
+                await _hubConnection.StartAsync();
+
+                var usersList = await userListTask;
+                if (usersList is not null)
+                {
+                    Users = usersList;
+                }
+
+                var chatsList = await chatListTask;
+                if (chatsList is not null)
+                {
+                    Chats = chatsList;
+                }
+                _loadingUsers = false;
+                await _hubConnection.SendAsync(nameof(IBlazingChatHubServer.SetUserOnline), AuthenticationState.User);
+                StateHasChanged();
+            }
+        } *@
+		await GetConversation();
 	}
 
 	//private async Task<bool>
@@ -158,7 +192,7 @@
 			selectedChatUser.IsSelected = false;
 		}
 
-		var chatUser = Chats.FirstOrDefault(c => c.Id == user.Id);
+		var chatUser = Chats.FirstOrDefault(c => c.conversationId == user.conversationId);
 		//Truong hop Chats null, user dau tien
 		if (chatUser is null)
 		{
@@ -169,16 +203,55 @@
 		{
 			chatUser.IsSelected = true;
 		}
-		_navigationManager.NavigateTo($"/chat/{user.Id}");
+		_navigationManager.NavigateTo($"/chat/{user.conversationId}");
 
 		/* Code của Lâm */
 		// isShowChat = true;
 	}
-	
+
 	private void ConfigureConnection()
 	{
 		//Tạo hub connection, listen
 
+	}
+
+	private async Task<bool> GetConversation()
+	{
+		bool success;
+		string erroMessage;
+		try
+		{
+			HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+			httpRequestMessage.Method = new HttpMethod("GET");
+			httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation");
+			var response = await _http.SendAsync(httpRequestMessage);
+
+			if (response.IsSuccessStatusCode)
+			{
+				var responseContent = await response.Content.ReadAsStringAsync();
+				var respond = JsonConvert.DeserializeObject<ApiResponse<List<Conversation>>>(responseContent);
+				success = true;
+				try
+				{
+					if (respond.Data != null)
+					{
+						Chats = respond.Data;
+					}
+				}
+				catch (Exception e)
+				{
+					erroMessage = e.Message;
+				}
+
+				await JSRuntime.InvokeAsync<string>("console.log", "group get", respond.Data);
+			}
+		}
+		catch (Exception ex)
+		{
+			success = false;
+			erroMessage = ex.Message;
+		}
+		return await Task.FromResult(true);
 	}
 
 	private async Task<bool> GetGroup()
@@ -190,7 +263,7 @@
 		{
 			HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
 			httpRequestMessage.Method = new HttpMethod("GET");
-			httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Group");
+			httpRequestMessage.RequestUri = new Uri(Constant.uriHost+ "Group");
 			var response = await _http.SendAsync(httpRequestMessage);
 
 			if (response.IsSuccessStatusCode)
@@ -223,4 +296,6 @@
 		}
 		return await Task.FromResult(true);
 	}
+
+	
 }
