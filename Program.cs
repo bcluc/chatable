@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using Chatable.Data.Entitles.Model;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor.Services;
@@ -9,7 +10,6 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 builder.Services.AddHttpClient();
 builder.Services.AddBlazoredLocalStorage();
-
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

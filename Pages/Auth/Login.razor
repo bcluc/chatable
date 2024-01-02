@@ -13,6 +13,7 @@
 @inject Blazored.LocalStorage.ILocalStorageService _localStorageService
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
+@inject IJSRuntime JSRuntime
 
 <style>
     * {
@@ -191,7 +192,39 @@ LeBaoNhu71!
         [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
         public string password { get; set; }
 
+
     }
+
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     try
+    //     {
+    //         cookieStorageAccessor = new CookieStorageAccessor(JSRuntime);
+    //         if (cookieStorageAccessor != null)
+    //         {
+    //             accessToken = await cookieStorageAccessor.GetValueAsync<String>("accessToken");
+    //             refreshToken = await cookieStorageAccessor.GetValueAsync<String>("refreshToken");
+
+    //             if (!string.IsNullOrEmpty(accessToken) && !string.IsNullOrEmpty(refreshToken))
+    //             {
+    //                 Console.WriteLine(accessToken);
+    //                 Console.WriteLine(refreshToken);
+    //             }
+    //             else
+    //             {
+    //                 _navigationManager.NavigateTo("/login");
+    //             }
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine(ex.Message);
+    //     }
+
+    // }
+
+
     private async Task<bool> LoginUser(EditContext context)
     {
         _processing = true;
