@@ -70,7 +70,7 @@ Chi tiết chat gồm 3 phần
                 {
                     @foreach (var msg in _messages)
                     {
-                        var incoming = msg.SenderId == currentUser.UserName;
+                        var incoming = msg.SenderId == currentUser.userName;
                         var isToday = msg.SendAt.Date == DateTime.Today.Date;
 
                         var cls = $"justify-content-{(incoming ? "start" : "end")}";
@@ -178,9 +178,9 @@ Chi tiết chat gồm 3 phần
             _scrollToBottom = true;
         }
 
-        if (SelectedUser is not null && SelectedUser.Id != previousSelectedUserId)
+        if (SelectedUser is not null && SelectedUser.conversationId != previousSelectedUserId)
         {
-            previousSelectedUserId = SelectedUser.Id;
+            previousSelectedUserId = SelectedUser.conversationId;
             await LoadMessagesAsync();
             _scrollToBottom = true;
         }
@@ -211,13 +211,13 @@ Chi tiết chat gồm 3 phần
         {
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("GET");
-            httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Conversation/" + Id );
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost+ "Conversation/" + Id );
             var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var respond = JsonConvert.DeserializeObject<ConversationGetResponse>(responseContent);
+                var respond = JsonConvert.DeserializeObject<ApiResponse<Conversation>>(responseContent);
                 success = true;
                 try
                 {
@@ -256,7 +256,7 @@ Chi tiết chat gồm 3 phần
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var respond = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+                var respond = JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
                 success = true;
                 try
                 {
@@ -290,11 +290,11 @@ Chi tiết chat gồm 3 phần
             var allMessages = new List<Message>
             {
                 // new Message("1",currentUser.UserName,"2",new DateTime(2022, 12, 25,10,30,12),"Text","How r u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Hiii"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Chào bạn"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Cho mình làm quen được không"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Mình tên là Hoàng Lâm"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Rất vui được gặp bạn"),
+                new Message("1",currentUser.userName,"2",DateTime.Now,"Text","Hiii"),
+                new Message("1",currentUser.userName,"2",DateTime.Now,"Text","Chào bạn"),
+                new Message("1",currentUser.userName,"2",DateTime.Now,"Text","Cho mình làm quen được không"),
+                new Message("1",currentUser.userName,"2",DateTime.Now,"Text","Mình tên là Hoàng Lâm"),
+                new Message("1",currentUser.userName,"2",DateTime.Now,"Text","Rất vui được gặp bạn"),
                 // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
                 // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
                 // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),

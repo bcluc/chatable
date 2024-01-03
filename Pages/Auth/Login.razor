@@ -5,6 +5,7 @@
 @using System.ComponentModel.DataAnnotations;
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
+@using Chatable.Data.Entitles.Respond
 @using Chatable.Data.Entitles.Response;
 @using Chatable.Data.Entitles;
 @using Microsoft.AspNetCore.Components.Forms;
@@ -14,6 +15,8 @@
 @inject Blazored.LocalStorage.ILocalStorageService _localStorageService
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
+@inject IJSRuntime jsRuntime
+
 
 <link rel="stylesheet" href="/css/AuthTemplate.css">
 
@@ -171,6 +174,7 @@ LeBaoNhu71!
 *@
 
 @code {
+    User usr;
     bool isShow;
     InputType PasswordInput = InputType.Password;
     string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
@@ -250,6 +254,11 @@ LeBaoNhu71!
 
             if (success)
             {
+                usr = await GetCurUser();
+                if (usr.avatarUrl == null) setNullAvt(usr.gender);
+                Constant.currentUser = usr;
+
+                await jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
                 _navigationManager.NavigateTo("/chat");
             }
         }
@@ -260,4 +269,41 @@ LeBaoNhu71!
         }
         return await Task.FromResult(true);
     }
+    private async Task<User> GetCurUser()
+    {
+        User curUser = new User();
+        try
+        {
+            var response = await _http.GetAsync(Constant.uriHost + "User/CurrentUser");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (responseContent != null)
+                {
+                    ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+                    curUser = apiResponse.Data;
+                    return curUser;
+                }
+                return null;
+
+            }
+            return null;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+    
+    private void setNullAvt(string gender)
+    {
+        if (gender == "Nữ")
+        {
+            usr.avatarUrl = Constant.defaultImgFemale;
+
+        }
+        else usr.avatarUrl = Constant.defaultImgMale;
+    }
+    
 }
