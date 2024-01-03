@@ -70,7 +70,7 @@ Chi tiết chat gồm 3 phần
                 {
                     @foreach (var msg in _messages)
                     {
-                        var incoming = msg.SenderId == currentUser.UserName;
+                        var incoming = msg.SenderId == currentUser.userName;
                         var isToday = msg.SendAt.Date == DateTime.Today.Date;
 
                         var cls = $"justify-content-{(incoming ? "start" : "end")}";
@@ -146,7 +146,7 @@ Chi tiết chat gồm 3 phần
     private User currentUser = Constant.currentUser;
 
     [Parameter]
-    public String? Id{ get; set; }
+    public Conversation? SelectedUser { get; set; }
 
     [Parameter]
     public EventCallback OnIncomingMessageRecieved { get; set; }
@@ -154,7 +154,7 @@ Chi tiết chat gồm 3 phần
     [Parameter]
     public Message? NewIncomingMessage { get; set; }
 
-    private IList<Message> _messages = new List<Message>();
+    private List<Message> _messages = new List<Message>();
 
     private string _newMessage = "";
     private string? _errorMessage;
@@ -162,26 +162,26 @@ Chi tiết chat gồm 3 phần
     private string previousSelectedUserId = "";
     private bool _scrollToBottom = false;
     private bool _loadingMessages = false;
-    private Conversation? SelectedUser;
 
     protected override async Task OnInitializedAsync()
     {
-        await GetFakeConversation();
+        await JSRuntime.InvokeAsync<string>("console.log", "mess get", "inifirst");
     }
 
     protected override async Task OnParametersSetAsync()
     {
+        await JSRuntime.InvokeAsync<string>("console.log", "mess get", "later");
         if (NewIncomingMessage is not null)
         {
-            _messages.Add(NewIncomingMessage);
+            //_messages.Add(NewIncomingMessage);
             await OnIncomingMessageRecieved.InvokeAsync();
             _scrollToBottom = true;
         }
 
-        if (SelectedUser is not null && SelectedUser.Id != previousSelectedUserId)
+        if (SelectedUser is not null && SelectedUser.conversationId != previousSelectedUserId)
         {
-            previousSelectedUserId = SelectedUser.Id;
-            await LoadMessagesAsync();
+            previousSelectedUserId = SelectedUser.conversationId;
+            await GetConversation();
             _scrollToBottom = true;
         }
     }
@@ -195,50 +195,62 @@ Chi tiết chat gồm 3 phần
         }
     }
 
-    private async Task<bool> GetFakeConversation()
-    {
-        SelectedUser = Constant.oppositeUser;
-        return await Task.FromResult(true);
-    }
-    
 
-    // Get Conversation
+    //Get Conversation
     private async Task<bool> GetConversation()
     {
-        bool success;
-        string erroMessage;
-        try
+        if (SelectedUser == null) return await Task.FromResult(false);
+        else
         {
-            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-            httpRequestMessage.Method = new HttpMethod("GET");
-            httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Conversation/" + Id );
-            var response = await _http.SendAsync(httpRequestMessage);
-
-            if (response.IsSuccessStatusCode)
+            bool success;
+            string erroMessage;
+            try
             {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var respond = JsonConvert.DeserializeObject<ConversationGetResponse>(responseContent);
-                success = true;
-                try
-                {
-                    if (respond.Data != null)
-                    {
-                        SelectedUser = respond.Data;
-                    }
-                }
-                catch (Exception e)
-                {
-                    erroMessage = e.Message;
-                }
+                _loadingMessages = true;
+                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+                httpRequestMessage.Method = new HttpMethod("GET");
+                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/" + SelectedUser.conversationType+"/" + SelectedUser.conversationId+ "/Messages");
+                var response = await _http.SendAsync(httpRequestMessage);
 
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var respond = JsonConvert.DeserializeObject<ApiResponse<List<Message>>>(responseContent);
+                    success = true;
+                    try
+                    {
+                        if (respond.Data != null)
+                        {
+                            _messages = respond.Data;
+                            _infoMessage = null;
+
+                            await JSRuntime.InvokeAsync<string>("console.log", "mess get", respond.Data);
+                            await JSRuntime.InvokeAsync<string>("console.log", "mess get", _messages);
+                        }
+                        else
+                        {
+                            _infoMessage = $"Không có cuộc trò chuyện nào giữa bạn và {SelectedUser.Name}";
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        erroMessage = e.Message;
+                    }
+
+                }
             }
+            catch (Exception ex)
+            {
+                success = false;
+                erroMessage = ex.Message;
+            }
+            finally
+            {
+                _loadingMessages = false;
+            }
+            return await Task.FromResult(true);
         }
-        catch (Exception ex)
-        {
-            success = false;
-            erroMessage = ex.Message;
-        }
-        return await Task.FromResult(true);
+
     }
 
     // Get nguoi dung
@@ -250,19 +262,19 @@ Chi tiết chat gồm 3 phần
         {
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("GET");
-            httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/User/{Id}");
+            httpRequestMessage.RequestUri = new Uri( Constant.uriHost + "User/{SelectedUser.conversationId}");
             var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var respond = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+                var respond = JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
                 success = true;
                 try
                 {
                     if (respond.Data != null)
                     {
-                       
+                       // SelectedUser = respond.Data;
                     }
                 }
                 catch (Exception e)
@@ -285,16 +297,18 @@ Chi tiết chat gồm 3 phần
         try
         {
             _loadingMessages = true;
-            _messages.Clear();
+            //_messages.Clear();
 
             var allMessages = new List<Message>
             {
                 // new Message("1",currentUser.UserName,"2",new DateTime(2022, 12, 25,10,30,12),"Text","How r u"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Hiii"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Chào bạn"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Cho mình làm quen được không"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Mình tên là Hoàng Lâm"),
-                new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","Rất vui được gặp bạn"),
+
+                // new Message("1",currentUser.userName,"2",DateTime.Now,"Text","Hiii"),
+                // new Message("1",currentUser.userName,"2",DateTime.Now,"Text","Chào bạn"),
+                // new Message("1",currentUser.userName,"2",DateTime.Now,"Text","Cho mình làm quen được không"),
+                // new Message("1",currentUser.userName,"2",DateTime.Now,"Text","Mình tên là Hoàng Lâm"),
+                // new Message("1",currentUser.userName,"2",DateTime.Now,"Text","Rất vui được gặp bạn"),
+
                 // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
                 // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),
                 // new Message("1",currentUser.UserName,"2",DateTime.Now,"Text","How d u"),

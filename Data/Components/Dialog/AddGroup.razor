@@ -110,7 +110,7 @@
             throw new ArgumentNullException(nameof(user));
         }
 
-        var chatUser = userList.FirstOrDefault(c => c.UserName == user.UserName);
+        var chatUser = userList.FirstOrDefault(c => c.userName == user.userName);
 
         if (chatUser is null)
         {
@@ -122,7 +122,7 @@
             if (chatUser.IsSelected == true) 
             {
                 chatUser.IsSelected = false;
-                var itemToRemove = _selectedUsers.SingleOrDefault(r => r.UserName == chatUser.UserName);
+                var itemToRemove = _selectedUsers.SingleOrDefault(r => r.userName == chatUser.userName);
                 if (itemToRemove != null)
                     _selectedUsers.Remove(itemToRemove);
             }
@@ -138,11 +138,11 @@
 
     private async Task<bool> CreateGroup(List<User> users)
     {
-        var memberList = users.Select(l => l.UserName).ToList();
+        var memberList = users.Select(l => l.userName).ToList();
         string res = "";
         if (groupName == "")
         {
-            groupName = currentUser.Name + "," + _selectedUsers[0].Name + ", " + _selectedUsers[1].Name;
+            groupName = currentUser.fullName + "," + _selectedUsers[0].fullName + ", " + _selectedUsers[1].fullName;
         }
         //await jsRuntime.InvokeAsync<string>("console.log","This is group member", memberList.ToString());
         GroupRequest group = new GroupRequest(groupName, memberList);
@@ -162,7 +162,7 @@
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+                // var user = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
                 success = true;
             }
             else

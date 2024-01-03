@@ -136,6 +136,6 @@ else
             throw new ArgumentNullException(nameof(user));
         }
         // go to conversation link với type là peer
-        _navigationManager.NavigateTo("/chat/" + Constant.currentUser.UserName +"_" +user.UserName);
+        _navigationManager.NavigateTo("/chat/" + Constant.currentUser.userName +"_" +user.userName);
     }
 }

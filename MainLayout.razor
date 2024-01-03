@@ -1,6 +1,12 @@
 ﻿@using Chatable.Data.Entitles;
 @using Chatable.Data.Components.Dialog.Profile;
 @using Chatable.Data.Entitles.Model;
+@using System.Globalization;
+@using System.Net.Http;
+@using Chatable.Data.Entitles.Respond
+@using Newtonsoft.Json;
+
+@inject HttpClient _http
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
@@ -14,8 +20,8 @@
 
 <div class="sidebar">
     <div class="user">
-        <img src="@currentUser.Avatar" class="user_img" @onclick="OpenDialog" />
-        <p>@currentUser.Name</p>
+        <img src="@currentUser.avatarUrl" class="user_img" @onclick="OpenDialog" />
+        <p>@currentUser.fullName</p>
     </div>
     <ul>
         @for (int i = 0; i <= 2; ++i)
@@ -115,7 +121,6 @@
 @using Chatable.Data.Components.Dialog;
 
 @code {
-
     User currentUser = Constant.currentUser;
     bool themeOn = false;
     private void OpenDialog()
@@ -128,4 +133,5 @@
         var options = new DialogOptions { CloseOnEscapeKey = true };
         DialogService.Show<LogoutDialog>("Xác nhận", options);
     }
+    
 }

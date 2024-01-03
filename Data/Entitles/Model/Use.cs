@@ -26,8 +26,8 @@ namespace Chatable.Data.Entitles.Model
             Gender = gender;
             LastTimeOnline = DateTime.Now;
             DateOfBirth = DateTime.Parse(dateOfBirth);
-            Id = conversationId;
-            ConversationType = "Peer";
+            base.conversationId = conversationId;
+            conversationType = "Peer";
         }
         //public bool IsSelected { get; set; }
 

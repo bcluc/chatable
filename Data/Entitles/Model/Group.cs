@@ -11,12 +11,12 @@ namespace Chatable.Data.Entitles.Model
         public List<string> MemberList { get; set; }
         public Group(string groupId, string groupName, string adminId, string createdAt)
         {
-            Id = groupId;
+            conversationId = groupId;
             Name = groupName;
             AdminId = adminId;
             Avatar = Constant.defaultImgGroup;
             CreatedAt = DateTime.Parse(createdAt);
-            ConversationType = "Group";
+            conversationType = "Group";
         }
     }
 }
