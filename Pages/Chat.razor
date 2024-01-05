@@ -105,9 +105,9 @@
 
     /* TODO: Thay đổi cách code chỗ _selectedUser */
 
-	/* Code của Cường */
-	[Parameter]
-	public string? _id { get; set; }
+    /* Code của Cường */
+    [Parameter]
+    public string? _id { get; set; }
 
 	private string value2;
 	private bool _loadingUsers = false;
@@ -216,6 +216,45 @@
 	{
 		//Tạo hub connection, listen
 
+	}
+
+	private async Task<bool> GetConversation()
+	{
+		bool success;
+		string erroMessage;
+		try
+		{
+			HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+			httpRequestMessage.Method = new HttpMethod("GET");
+			httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation");
+			var response = await _http.SendAsync(httpRequestMessage);
+
+			if (response.IsSuccessStatusCode)
+			{
+				var responseContent = await response.Content.ReadAsStringAsync();
+				var respond = JsonConvert.DeserializeObject<ApiResponse<List<Conversation>>>(responseContent);
+				success = true;
+				try
+				{
+					if (respond.Data != null)
+					{
+						Chats = respond.Data;
+					}
+				}
+				catch (Exception e)
+				{
+					erroMessage = e.Message;
+				}
+
+				await JSRuntime.InvokeAsync<string>("console.log", "group get", respond.Data);
+			}
+		}
+		catch (Exception ex)
+		{
+			success = false;
+			erroMessage = ex.Message;
+		}
+		return await Task.FromResult(true);
 	}
 
 	private async Task<bool> GetAllConversations()
