@@ -6,6 +6,7 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-family: SVN-Poppins;
 }
 
 .custom-button i {

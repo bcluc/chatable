@@ -19,5 +19,15 @@
             MessageType = messageType;
             Content = content;
         }
+
+        // contructor for get all messages
+        public Message(string senderId, string messageType, string content, DateTime sendAt, string conversationId)
+        {
+            SenderId = senderId;
+            MessageType = messageType;
+            Content = content;
+            SendAt = sendAt;
+            ConversationId = conversationId;
+        }
     }
 }
