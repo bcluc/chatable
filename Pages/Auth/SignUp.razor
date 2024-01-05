@@ -9,6 +9,7 @@
 @inject IDialogService Dialog
 
 <link rel="stylesheet" href="/css/AuthTemplate.css">
+<link rel="stylesheet" href="/css/SignUpLayout.css">
 
 <div class="container">
     <div class="header">
@@ -35,51 +36,60 @@
                     <MudText Class="mb-5" Style="font-weight: 500; font-size: 32px">Đăng ký</MudText>
 
 
-                    <MudText>Tên đăng nhập</MudText>
+                    <MudText Style="margin-top: 10px">Tên đăng nhập</MudText>
                     <MudTextField  Placeholder="chatable174" @bind-Value="model.userName" For="@(() => model.userName)" RequiredError="Hãy điền tên đăng nhập"
                                   Variant="Variant.Outlined" Class="mb-4 rounded-corners" />
 
-                    <MudText>Tên người dùng</MudText>
+                    <MudText Style="margin-top: 10px">Tên người dùng</MudText>
                     <MudTextField Placeholder="Nguyễn Văn A" Required="true" RequiredError="Hãy điền tên người dùng"
                                   Variant="Variant.Outlined" Class="mb-4"
                                   @bind-Value="model.fullName" For="@(() => model.fullName)" />
 
-                    <MudText>Email</MudText>
+                    <MudText Style="margin-top: 10px">Email</MudText>
                     <MudTextField Placeholder="VanA@gmail.com" Required="true" RequiredError="Hãy điền email"
                                   Variant="Variant.Outlined" Class="mb-4"
                                   @bind-Value="model.email" For="@(() => model.email)" />
 
-                    <MudText>Mật khẩu</MudText>
+                    <MudText Style="margin-top: 10px">Mật khẩu</MudText>
                     <MudTextField Placeholder="Abc@12345" Required="true" RequiredError="Hãy chọn mật khẩu"
                                   Variant="Variant.Outlined"
                                   Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" Class="mb-4"
                                   @bind-Value="model.password" For="@(() => model.password)" InputType="@PasswordInput" />
 
-                    <MudText>Nhập lại mật khẩu</MudText>
+                    <MudText Style="margin-top: 10px">Nhập lại mật khẩu</MudText>
                     <MudTextField Placeholder="Abc@12345" Required="true" RequiredError="Hãy xác nhận lại mật khẩu"
                                   Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" Class="mb-4"
                                   @bind-Value="model.confirmPassword" For="@(() => model.confirmPassword)" InputType="@PasswordInput" />
 
 
-                    <MudText>Giới tính</MudText>
+                    <MudText Style="margin-top: 10px">Giới tính</MudText>
                     <MudRadioGroup @bind-SelectedOption="isMale" Required="true" RequiredError="Hãy chọn giới tính" Class="center-radio-group">
-                        <MudRadio   Option="true" Color="Color.Primary" Dense="true" Class="radio-custom">Nam</MudRadio>
-                        <MudRadio Option="false" Color="Color.Secondary" Dense="true" Class="radio-custom">Nữ</MudRadio>
+                        <MudRadio   Option="true" 
+                                    Color="Color.Primary"
+                                    Dense="true"
+                                    Style="margin-left: 50px; margin-top: 10px"
+                                    Class="radio-custom">Nam</MudRadio>
+                        <MudRadio Option="false"
+                                  Color="Color.Secondary" 
+                                  Dense="true"
+                                  Style="margin-left: 50px;  margin-top: 10px"
+                                  Class="radio-custom">Nữ</MudRadio>
                     </MudRadioGroup>
 
-                    <MudText>Ngày sinh</MudText>
+                    <MudText Style="margin-top: 20px">Ngày sinh</MudText>
                     <MudDatePicker  Required="true" RequiredError="Hãy chọn ngày sinh của bạn"
                                     MaxDate="DateTime.Now"
                                    Variant="Variant.Outlined"
-                                   @bind-Date="model.dob" DisableToolbar="true" DateFormat="dd.MM.yyyy" 
+                                   @bind-Date="model.dob" DisableToolbar="true" DateFormat="dd / MM / yyyy" 
                                    Class="top0"/>
 
                     <p class="erro">@erroMessage</p>
-                </MudCardContent>
-                <MudCardActions class ="flex-col">
-                   
-                    <MudButton ButtonType="ButtonType.Submit" Disabled="@_processing" Variant="Variant.Filled" Color="Color.Primary"
-                               Class="login-button mb-8" FullWidth="true" DisableElevation="true">
+
+                    <MudDivider></MudDivider>
+
+
+                    <MudButton ButtonType="ButtonType.Submit" Disabled="@_processing" Variant="Variant.Filled" 
+                               Class="login-button mb-8" FullWidth="true" DisableElevation="true" Style="margin-top: 20px">
                         @if (_processing)
                         {
                             <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
@@ -91,14 +101,24 @@
                         }
                     </MudButton>
 
-                    <div align="center">
+                    <div align="center" >
                         <MudText Inline="true">Bạn đã có tài khoản?</MudText>
                         <a href="login">Đăng nhập ngay</a>
                     </div>
-                </MudCardActions>
+                </MudCardContent>
+                
             </MudCard>
         </EditForm>
     </div>
+    <footer class="footer" style="position: fixed">
+        <div>
+            <a>Chính sách riêng tư</a>
+            <a>Điều khoản người dùng</a>
+        </div>
+        <div>
+            <p id="chatable">&copy; <span id="year"></span> CHATABLE</p>
+        </div>
+    </footer>
 </div>
 
 @code {

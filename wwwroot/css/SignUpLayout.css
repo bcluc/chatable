@@ -1,0 +1,67 @@
+﻿@import url('Theme.css');
+
+
+.mud-dialog .mud-dialog-content {
+    padding: 8px 0;
+}
+
+.custom-dialog-content {
+    padding: 0;
+    margin: 0;
+    align-content: center;
+}
+
+.nopadding {
+    padding: 0;
+}
+
+.photos {
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+.infor {
+    height: 100px;
+    width: 100%;
+    margin-top: 80px;
+    padding-left: 60px;
+}
+
+.email {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.sex {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.dob {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 500;
+    width: 40%;
+}
+
+.toEdit {
+    display: flex;
+    width: 100%;
+    margin-top: 30px;
+    align-items: center;
+    justify-content: center;
+}
+
+body {
+}

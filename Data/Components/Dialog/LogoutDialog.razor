@@ -1,11 +1,19 @@
-﻿<MudDialog>
+﻿@using System.Net.Http;
+@using Chatable.Data.Entitles
+@using Newtonsoft.Json;
+
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject HttpClient _http
+
+<MudDialog>
     <DialogContent>
         ༼ つ ｡◕‿‿◕｡ ༽つ<br /><br />
         Bạn có chắc muốn đăng xuất không?
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Accept">Ok</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -14,4 +22,30 @@
 
     void Submit() => MudDialog.Close(DialogResult.Ok(true));
     void Cancel() => MudDialog.Cancel();
+    public async Task Accept()
+    {
+        try
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/Logout");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/login");
+
+            }
+            else
+            {
+                string resBody = await response.Content.ReadAsStringAsync();
+                dynamic result = JsonConvert.DeserializeObject(resBody);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+    }
 }

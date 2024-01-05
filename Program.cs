@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using Chatable;
 using Chatable.Data.Entitles.Model;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -10,6 +11,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 builder.Services.AddHttpClient();
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddSingleton<AppData>();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -29,6 +31,7 @@ app.UseAuthorization();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
 
 //app.UseEndpoints(endpoints =>
 //{

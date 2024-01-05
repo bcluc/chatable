@@ -1,5 +1,5 @@
 ﻿@layout LoginLayout
-@page "/"
+
 @page "/login"
 
 @using System.ComponentModel.DataAnnotations;
@@ -10,7 +10,9 @@
 @using Chatable.Data.Entitles;
 @using Microsoft.AspNetCore.Components.Forms;
 @using System.Net.Http;
+@using Microsoft.AspNetCore.Http
 @using Newtonsoft.Json;
+@using System.Web;
 
 @inject Blazored.LocalStorage.ILocalStorageService _localStorageService
 @inject HttpClient _http
@@ -173,7 +175,11 @@ nhubaole
 LeBaoNhu71!
 *@
 
+
+
 @code {
+  
+
     User usr;
     bool isShow;
     InputType PasswordInput = InputType.Password;
@@ -202,7 +208,6 @@ LeBaoNhu71!
 
     public class LoginForm
     {
-
         [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
         public string userName { get; set; }
 
@@ -212,36 +217,9 @@ LeBaoNhu71!
 
     }
 
+    
 
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     try
-    //     {
-    //         cookieStorageAccessor = new CookieStorageAccessor(JSRuntime);
-    //         if (cookieStorageAccessor != null)
-    //         {
-    //             accessToken = await cookieStorageAccessor.GetValueAsync<String>("accessToken");
-    //             refreshToken = await cookieStorageAccessor.GetValueAsync<String>("refreshToken");
-
-    //             if (!string.IsNullOrEmpty(accessToken) && !string.IsNullOrEmpty(refreshToken))
-    //             {
-    //                 Console.WriteLine(accessToken);
-    //                 Console.WriteLine(refreshToken);
-    //             }
-    //             else
-    //             {
-    //                 _navigationManager.NavigateTo("/login");
-    //             }
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine(ex.Message);
-    //     }
-
-    // }
-
-
+    // lần đầu
     private async Task<bool> LoginUser(EditContext context)
     {
         _processing = true;

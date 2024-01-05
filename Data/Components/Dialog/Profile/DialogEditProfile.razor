@@ -8,6 +8,7 @@
 
 @inject IDialogService DialogService
 @inject HttpClient _http
+
 @* ai test nhớ điền mail vô nha *@
 <MudDialog class="custom-dialog-content">
     <DialogContent>
@@ -204,7 +205,7 @@
         public string userName { get; set; }
         public string fullName { get; set; }
         public string email { get; set; }
-        public string avatar { get; set; }
+        public string avatarUrl { get; set; }
         public DateTime dob = DateTime.Now;
         public string gender { get; set; }
         public string password { get; set; }
@@ -231,12 +232,13 @@
 }
 
 @code {
-    UserInfor currentUser;
+
+    User currentUser = Constant.currentUser;
     bool CanUpdate = false;
     string erroMessage;
 
     UpdateUserForm model = new UpdateUserForm();
-
+   
 
     protected override async Task OnInitializedAsync()
     {
@@ -340,7 +342,6 @@
         {
             try
             {
-
                 currentUser.gender = model.GenderChanged;
                 string serializedUser = JsonConvert.SerializeObject(currentUser);
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
@@ -379,37 +380,10 @@
         return await Task.FromResult(true);
     }
 
-    private async Task<UserInfor> GetCurUser()
-    {
-        UserInfor curUser = new UserInfor();
-        try
-        {
-            var response = await _http.GetAsync(Constant.uriHost + "User/CurrentUser");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (responseContent != null)
-                {
-                    ApiResponse<UserInfor> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<UserInfor>>(responseContent);
-                    curUser = apiResponse.Data;
-                    return curUser;
-                }
-                return null;
-
-            }
-            return null;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            return null;
-        }
-    }
 
     private async Task LoadProfile()
     {
-        currentUser = await GetCurUser();
+        // currentUser = await GetCurUser();
 
         if (currentUser != null)
         {
