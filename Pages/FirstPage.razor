@@ -1,5 +1,4 @@
 ﻿@layout LoginLayout
-@page "/"
 
 @using System.ComponentModel.DataAnnotations;
 @using Chatable.Data.Entitles.Model;
@@ -18,15 +17,6 @@
 @inject AppData appData;
 
 @code {
-    public class Token
-    {
-
-        public String accessToken { get; set; } = "";
-        public String refreshToken { get; set; } = "";
-
-    }
-}
-@code {
     Token token = new Token();
 
     protected override async Task OnInitializedAsync()
@@ -36,6 +26,7 @@
         {
             token.refreshToken = appData.refresh;
             token.accessToken = appData.access;
+            Constant.token = token;
 
             string serializedToken = JsonConvert.SerializeObject(token);
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();

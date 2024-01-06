@@ -217,7 +217,7 @@ LeBaoNhu71!
 
     }
 
-    
+
 
     // lần đầu
     private async Task<bool> LoginUser(EditContext context)
@@ -245,7 +245,10 @@ LeBaoNhu71!
                 {
                     if (user.Token != null)
                     {
-                        await _localStorageService.SetItemAsync("jwt_token", user.Token);
+                        await _localStorageService.SetItemAsync("access_token", user.Token.accessToken);
+                        Constant.token = user.Token;
+                        await jsRuntime.InvokeAsync<string>("console.log", "access token", Constant.token);
+                       
                     }
                 }
                 catch (Exception e)
