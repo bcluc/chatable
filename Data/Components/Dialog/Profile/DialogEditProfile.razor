@@ -3,85 +3,115 @@
 @using System.Globalization;
 @using System.Net.Http;
 @using Newtonsoft.Json;
+@using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel.DataAnnotations
 
 @inject IDialogService DialogService
 @inject HttpClient _http
 
+@* ai test nhớ điền mail vô nha *@
 <MudDialog class="custom-dialog-content">
     <DialogContent>
             @if (currentUser == null)
             {
-                <MudProgressCircular Indeterminate="true"></MudProgressCircular>
+            <p>Loading</p>
             }
             else
             {
-             
                 <div class="content">
                         <div Class="photos">
                             <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
                             <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
                                 <MudImage Src="@currentUser.avatarUrl"></MudImage>
                             </MudAvatar>
-                            <MudIconButton Icon="@Icons.Material.Filled.CameraAlt" Style="position: absolute; width: 15px; height:12px; left: 57%; margin-top: 160px;" />
-                            <p style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.userName</p>
+                            <MudFileUpload T="IFormFile" FilesChanged="UploadFiles">
+                                <ButtonTemplate>
+                                    <MudIconButton HtmlTag="label"
+                                                   Color="Color.Info"
+                                                   Icon="@Icons.Material.Filled.PhotoCamera"
+                                                   Style="position: absolute; width: 15px; height:12px; left: 55%; margin-top: 6px;"
+                                                   for="@context.Id">
+                                    </MudIconButton>
+                                </ButtonTemplate>
+                            </MudFileUpload>
+
+                        
+                            
                         </div>
 
                         <div class="infor">
-                            <p style=" font-size: 15px; font-weight: 500;"> Thông tin cá nhân </p>
-                            <div style="margin-top: 10px;">
-                                <MudText>Tên hiển thi</MudText>
-                                <MudTextField @bind-Value="@currentUser.userName"
-                                              Variant="Variant.Outlined" Margin="Margin.Dense"
-                                              Style="background-color: white; border-radius: 8px; border-width: 2px; border-color: #ECEDF0"
-                                              HelperText="Sử dụng tên thật để bạn bè dễ dàng nhận diện hơn"></MudTextField>
+                            <p style=" font-size: 18px; font-weight: 500;"> Thông tin cá nhân </p>
+                            <div style="margin-top: 10px;"> 
+                                <MudText Style="font-size: 16px">Tên hiển thi</MudText>
+                                <MudTextField Required="true" RequiredError="Bạn cần điền tên hiển thị!"
+                                      @bind-Value="@model.FullNameChanged" For="@(() => model.FullNameChanged)"
+                                      TextChanged="CheckChange"
+                                                  Variant="Variant.Outlined" Margin="Margin.Dense" 
+                                                  Style="background-color: white; border-radius: 8px; border-width: 2px; border-color: #ECEDF0"
+                                                  HelperText="Sử dụng tên thật để bạn bè dễ dàng nhận diện hơn"></MudTextField>
                                 <MudDivider></MudDivider>
                             </div>
 
                             <div style="margin-top: 10px;">
-                                <MudText>Họ và tên</MudText>
-                                <MudTextField @bind-Value="@currentUser.fullName"
-                                              Variant="Variant.Outlined" Margin="Margin.Dense"
-                                              Style=" background-color:white; border-radius: 8px; border-width: 2px; border-color: #ECEDF0"></MudTextField>
-                            </div>
-                            <div style="margin-top: 10px;">
-                                <MudText>Email</MudText>
-                                <MudTextField @bind-Value="@currentUser.email"
+                                 <MudText Style="font-size: 16px">Email</MudText>
+                                <MudTextField @bind-Value="@model.EmailChanged" For="@(() => model.EmailChanged)"
+                                      TextChanged="CheckChange"
+                                      Required="true" RequiredError ="Bạn cần điền Email!" 
                                               Variant="Variant.Outlined" Margin="Margin.Dense"
                                               Style="background-color: white; border-radius: 8px; border-width: 2px;border-color: #ECEDF0"></MudTextField>
 
                             </div>
                             <div style="margin-top: 10px">
-                                <MudText>Giới tính</MudText>
+                                <MudText Style="font-size: 16px">Giới tính</MudText>
 
-                                <MudRadioGroup @bind-SelectedOption="IsMale" Class="center-radio-group" Style="background-color: white!important; margin-top: 10px">
-                                    <MudRadio Option="true" Color="Color.Primary" Dense="true" Class="radio-custom" Style="margin-left: 60px">Nam</MudRadio>
-                                    <MudRadio Option="false" Color="Color.Primary" Dense="true" Class="radio-custom" Style="margin-left: 60px">Nữ</MudRadio>
+                            <MudRadioGroup T="string"
+                                       SelectedOption="@model.GenderChanged"
+                                       SelectedOptionChanged="OnGenderChanged"
+                                       Class="center-radio-group"
+                                       Style="background-color: white!important; margin-top: 10px">
+
+                                    <MudRadio Option=@("Nam")
+                                                Color="Color.Primary" 
+                                                Dense="true" Class="radio-custom"
+                                                Style="margin-left: 60px">Nam</MudRadio>
+                                    <MudRadio Option=@("Nữ")
+                                                Color="Color.Primary"
+                                                Dense="true" 
+                                                Class="radio-custom" 
+                                                Style="margin-left: 60px">Nữ</MudRadio>
                                 </MudRadioGroup>
-
+                                
+                  
                             </div>
                             <div style="margin-top: 10px; background-color: white">
-                                <MudText>Ngày sinh</MudText>
+                                <MudText Style="font-size: 16px">Ngày sinh</MudText>
 
                                 <MudDatePicker MaxDate="DateTime.Now"
                                                Variant="Variant.Outlined"
                                                Style="background-color: white; border-radius:8px; border-width: 2px; border-color: #ECEDF0 "
-                                               @bind-Date="@dob" DisableToolbar="true" DateFormat="dd.MM.yyyy"
-                                               Class="top0" />
-
-                            </div>
+                                       Date="@model.dobChanged"
+                                               DateChanged="OnDobChanged"
+                                       For="@(() => model.dobChanged)"
+                                               DisableToolbar="true"
+                                               DateFormat="dd.MM.yyyy"  
+                                               Required="true"
+                                               RequiredError="Hãy chọn ngày sinh của bạn"
+                                               Class="top0" >
+                                </MudDatePicker>
+                        </div>
+                            <p class="erro mb-8">@erroMessage</p>
                             <MudDivider></MudDivider>
                         </div>
                     </div>
-           
             }
     </DialogContent>
     <DialogActions >
         <div class="bottom-right-button">
-           
             <MudButton Color="Color.Primary" OnClick="Cancel" Style="margin-right: 20px; background-color: #F5F5F5; color: black">
                 Hủy
             </MudButton>
-            <MudButton Color="Color.Primary" OnClick="SaveChange" Class="btn-save btn-save-hover" >
+            <MudButton Color="Color.Primary" OnClick="SaveChange" Class="btn-save btn-save-hover btn-save-disable "
+                       Disabled="@(!CanUpdate)" >
                 <MudText Style="color: white"> Cập nhập</MudText>
             </MudButton>
         </div>
@@ -118,7 +148,7 @@
         text-align: center;
     }
     .infor {
-        margin-top: 70px;
+        margin-top: 20px;
         height: 300px;
         max-height: 300px; 
         padding: 10px 20px;
@@ -141,13 +171,27 @@
         background-color: #3559E0;
     }
     .btn-save-hover:hover{
-        background-color :#4CB9E7;
+        background-color: #4876FF;
+    }
+
+    .btn-save-disable:disabled {
+        background-color: #63B8FF;
+
     }
     .mud-input-control-input-container 
     {
         background-color: white !important;
     }
+
+    .erro {
+        display: flex;
+        width: 100%;
+        margin: 10px 0px;
+        color: red;
+        font-size: 14px;
+    }
 </style>
+
 
 @code {
     public class ApiResponse<T>
@@ -156,75 +200,200 @@
         public string Message { get; set; }
         public T Data { get; set; }
     }
+    public class UserInfor
+    {
+        public string userName { get; set; }
+        public string fullName { get; set; }
+        public string email { get; set; }
+        public string avatarUrl { get; set; }
+        public DateTime dob = DateTime.Now;
+        public string gender { get; set; }
+        public string password { get; set; }
+        public DateTime? lastTimeOnl { get; set; }
+        public DateTime? createdAt { get; set; }
+
+    }
+    public class UpdateUserForm
+    {
+
+        [Required(ErrorMessage = "Họ tên người dùng là bắt buộc.")]
+        public string FullNameChanged { get; set; }
+
+        [Required(ErrorMessage = "Email là bắt buộc.")]
+        public string EmailChanged { get; set; }
+
+        [Required(ErrorMessage = "Ngày sinh là bắt buộc.")]
+        public DateTime? dobChanged = DateTime.Today;
+
+        public string GenderChanged { get; set; } = "Nam";
+
+       
+    }
 }
 
 @code {
-    User currentUser;
 
-    //thong tin hien thi
-    private string UserName { get; set; }
-    private string FullName { get; set; }
-    private string Email { get; set; }
-    private bool IsMale;
-    DateTime ?dob; 
-    protected override void OnInitialized()
+    User currentUser = Constant.currentUser;
+    bool CanUpdate = false;
+    string erroMessage;
+
+    UpdateUserForm model = new UpdateUserForm();
+   
+
+    protected override async Task OnInitializedAsync()
     {
-        LoadProfile();
-        if (currentUser!=null)
-        {
-            if (currentUser.gender == "male")
-            {
-                IsMale = true;
-            }
-            else
-            {
-                IsMale = false;
-            }
-            dob = currentUser.dob;
-        }
+        await LoadProfile();
     }
 
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
-    void Cancel() => MudDialog.Cancel();
-
-    private void SaveChange()
-    {  
-        //call api save change
-        MudDialog.CancelAll();
-    }
-    private async Task<User> GetCurUser()
+    private async Task UploadFiles(IFormFile file)
     {
-        User curUser = new User();
         try
         {
-            var response = await _http.GetAsync("https://localhost:7124/api/v1/User/CurrentUser");
-
-            if (response.IsSuccessStatusCode)
+            if (file != null)
             {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (responseContent != null)
-                {
-                    ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
-                    curUser = apiResponse.Data;
-                    return curUser;
-                }
-                return null;
+                var content = new MultipartFormDataContent();
+                content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
 
+                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+                httpRequestMessage.Method = new HttpMethod("POST");
+                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/UploadAvatar");
+
+                httpRequestMessage.Content = content;
+
+                var response = await _http.SendAsync(httpRequestMessage);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Show success message
+                    await DialogService.ShowMessageBox("Bạn đã cập nhập thông tin thành công!", "Thành công");
+
+                   
+                }
+                else
+                {
+                    string resBody = await response.Content.ReadAsStringAsync();
+                    dynamic result = JsonConvert.DeserializeObject(resBody);
+                    erroMessage = result.Message.ToString();
+                }
             }
-            return null;
+            
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine(e.Message);
-            return null;
+            erroMessage = ex.Message;
         }
     }
+
+    void Cancel()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+        DialogService.Show<DialogProfile>("Thông tin cá nhân");
+    }
+
+    private void  OnGenderChanged(string selectedgender)
+    {
+        model.GenderChanged = selectedgender;
+        if (CanUpdate == false)
+        {
+            CanUpdate = (currentUser.gender != model.GenderChanged) ? true : false;
+        }
+    }
+    private void OnDobChanged(DateTime? newDate)
+    {
+        model.dobChanged = newDate;
+        if (CanUpdate == false)
+        {
+            if (currentUser.dob != model.dobChanged.GetValueOrDefault())
+            {
+                CanUpdate = true;
+            }
+        }
+    }
+    private void CheckChange()
+    {
+        if (!CanUpdate)
+        {
+            if (model.FullNameChanged != null && model.EmailChanged != null)
+            {
+                if (model.FullNameChanged != currentUser.fullName ||
+                    model.EmailChanged != currentUser.email)
+                {
+                    CanUpdate = true;
+                }
+            }
+        }
+    }
+
+    private async Task<bool> SaveChange()
+    {
+        //gán các giá trị đã thay đổi vô current user
+        currentUser.fullName = model.FullNameChanged;
+        currentUser.email = model.EmailChanged;
+        currentUser.gender = model.GenderChanged;
+        if (model.dobChanged.HasValue)
+        {
+            currentUser.dob = model.dobChanged.GetValueOrDefault();
+        }
+
+        //call api save change
+        if(currentUser.fullName != null && currentUser.email != null )
+        {
+            try
+            {
+                currentUser.gender = model.GenderChanged;
+                string serializedUser = JsonConvert.SerializeObject(currentUser);
+                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+                httpRequestMessage.Method = new HttpMethod("PUT");
+                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User");
+
+                httpRequestMessage.Content = new StringContent(serializedUser);
+
+                httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                var response = await _http.SendAsync(httpRequestMessage);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Show success message
+                    await DialogService.ShowMessageBox("Bạn đã cập nhập thông tin thành công!", "Thành công");
+
+                    // Close the dialog
+                    MudDialog.Close(DialogResult.Ok(true));
+
+                    DialogService.Show<DialogProfile>("Thông tin cá nhân");
+
+                }
+                else
+                {
+                    string resBody = await response.Content.ReadAsStringAsync();
+                    dynamic result = JsonConvert.DeserializeObject(resBody);
+                    erroMessage = result.Message.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                erroMessage = ex.Message;
+            }
+        }
+
+        return await Task.FromResult(true);
+    }
+
 
     private async Task LoadProfile()
     {
-        currentUser = await GetCurUser();
-        StateHasChanged();
+        // currentUser = await GetCurUser();
+
+        if (currentUser != null)
+        {
+            model.FullNameChanged = currentUser.fullName;
+            model.EmailChanged = currentUser.email;
+            model.dobChanged = currentUser.dob;
+            model.GenderChanged = currentUser.gender;
+           
+            StateHasChanged();
+        }
     }
+
 }

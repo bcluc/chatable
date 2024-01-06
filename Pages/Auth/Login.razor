@@ -1,5 +1,5 @@
 ﻿@layout LoginLayout
-@page "/"
+
 @page "/login"
 
 @using System.ComponentModel.DataAnnotations;
@@ -10,7 +10,9 @@
 @using Chatable.Data.Entitles;
 @using Microsoft.AspNetCore.Components.Forms;
 @using System.Net.Http;
+@using Microsoft.AspNetCore.Http
 @using Newtonsoft.Json;
+@using System.Web;
 
 @inject Blazored.LocalStorage.ILocalStorageService _localStorageService
 @inject HttpClient _http
@@ -173,7 +175,11 @@ nhubaole
 LeBaoNhu71!
 *@
 
+
+
 @code {
+  
+
     User usr;
     bool isShow;
     InputType PasswordInput = InputType.Password;
@@ -202,14 +208,18 @@ LeBaoNhu71!
 
     public class LoginForm
     {
-
         [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
         public string userName { get; set; }
 
         [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
         public string password { get; set; }
 
+
     }
+
+    
+
+    // lần đầu
     private async Task<bool> LoginUser(EditContext context)
     {
         _processing = true;
