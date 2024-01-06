@@ -44,6 +44,7 @@ namespace Chatable.Data.Entitles
         };
 
         private static User _currentUser = new User("unknow", "Unknow", "", defaultImgMale, DateTime.Now, "Nam");
+        private static Token _token = new Token();
 
         public static readonly Message visibleMessage = new("0", "BC", "1", DateTime.Now, "Text", "Say hi");
 
@@ -55,7 +56,10 @@ namespace Chatable.Data.Entitles
             get { return _currentUser; }
             set { _currentUser = value; }
         }
+        public static Token token
+        {
+            get { return _token; }
+            set { _token = value; }
+        }
     }
-
-
 }

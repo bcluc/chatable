@@ -95,5 +95,7 @@
     overflow: hidden;
     text-overflow: ellipsis
 }
-
+.dialog-blur-backgroud {
+    backdrop-filter: blur(10px);
+}
 

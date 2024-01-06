@@ -1,5 +1,6 @@
 ﻿@using Chatable.Data.Components;
 @using Chatable.Data.Entitles;
+@using Chatable.Data.Entitles.DTO;
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Respond;
 @using Microsoft.AspNetCore.SignalR.Client;
@@ -16,54 +17,24 @@
 @inject IDialogService DialogService
 @inject IHttpClientFactory ClientFactory
 
-<style>
-    .top_bar {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        padding: 16px;
-    }
-
-    /* Thay đổi border-radius của Outlined MudTextField */
-    .mud-input-outlined-border {
-        border-radius: 8px !important;
-    }
-
-    /* Thay đổi margin-top mặc định 6px Outlined MudTextField thành 0px*/
-    .mud-input-control {
-        margin-top: 0px;
-    }
-
-    .mud-input.mud-input-outlined.mud-input-adorned-start {
-        padding-left: 8px;
-        padding-inline-start: 8px;
-        padding-inline-end: unset;
-    }
-
-    .mud-input > input.mud-input-root-outlined.mud-input-root-adorned-start, div.mud-input-slot.mud-input-root-outlined.mud-input-root-adorned-start {
-        padding-left: 0;
-        padding-inline-start: 0;
-        padding-inline-end: 14px;
-    }
-
-    .mud-input > input.mud-input-root-outlined, div.mud-input-slot.mud-input-root-outlined {
-        padding: 9.5px 14px;
-    }
-
-    .mud-input-outlined-border {
-        border: none !important;
-    }
-
-    .mud-input-control-input-container {
-        background-color: #ECEDF0 !important;
-        border-radius: 8px !important;
-    }
-
-</style>
+<link rel="stylesheet" href="/css/AddGroupDialog.css">
 
 <div class="top_bar">
-    <MudAutocomplete Placeholder="Tìm kiếm" T="string" @bind-Value="searchText" SearchFunc="@Search"
-        Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" />
+    <MudAutocomplete Placeholder="Tìm kiếm" T="ConversationDTO" @bind-Value="selectedConversation" SearchFunc="@Search"
+                     Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" 
+                     ToStringFunc="@(e=> e==null?null : $"{e.Name}")">
+        <ItemTemplate>
+            <div class="list-group-item">
+                <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+                    <MudAvatar>
+                        <MudImage Src=@context.Avt></MudImage>
+                    </MudAvatar>
+                    <h4 class="user-name">@context.Name</h4>
+                </div>
+            </div>
+            
+        </ItemTemplate>
+    </MudAutocomplete>
 
     <MudIconButton Variant="Variant.Text" DisableElevation="true" 
     Style="padding: 9px; border-radius: 8px;" Class="mx-2">
@@ -76,17 +47,73 @@
 </div>
 @code {
     private string searchText;
-    private IList<String> states = Constant.states;
-    private async Task<IEnumerable<string>> Search(string value)
+    private ConversationDTO selectedConversation;
+    private List<ConversationDTO> items = new List<ConversationDTO>();
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllFakeConversation();
+    }
+    private async Task<IEnumerable<ConversationDTO>> Search(string value)
     {
         // In real life use an asynchronous function for fetching data from an api.
         await Task.Delay(5);
 
         // if text is null or empty, don't return values (drop-down will not open)
-        if (string.IsNullOrEmpty(value))
-            return new string[0];
+        if (string.IsNullOrWhiteSpace(value))
+            return Enumerable.Empty<ConversationDTO>();
         // return chat room
-        return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        return items.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));//.Select(x => x.Name);
+    }
+    private async Task<bool> GetAllFakeConversation()
+    {
+        items = new List<ConversationDTO>
+        {
+            new ConversationDTO("test", Constant.defaultImgMale, "test"),
+            new ConversationDTO("2UHY3794", Constant.defaultImgMale, "2UHY3794"),
+            new ConversationDTO("2UHY3794", Constant.defaultImgMale, "2UHY3794")
+        };
+        return await Task.FromResult(true);
+    }
+    private async Task<bool> GetAllConversations()
+    {
+        bool success;
+        string erroMessage;
+        try
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<ConversationDTO>>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        items = respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        return await Task.FromResult(true);
+    }
+
+    private string GetItemText(ConversationDTO item)
+    {
+        return item?.Name ?? string.Empty; 
     }
 
     private void OpenAddGroupDialog()

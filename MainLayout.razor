@@ -41,7 +41,7 @@
         <ul>
             @* @for (int i = 3; i <= 4; ++i)
             {
-                var currentIndex = i;
+                var currentIndex = i;             
                 <li class="@(currentPageIndex == i ? "current-page" : "")"
                     @onclick="() => changeCurrentPageIndex(currentIndex)">
                     <a href="@menuItems[i].page">

@@ -32,10 +32,10 @@
                                class="app-component-textinput input"/>
                     </div>
                 </div>
-                <div class="app-component-container2">
+                <div class="app-component-container2" style="margin-top:10px">
                 <MudItem>
-                    <MudAutocomplete T="string" Label="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
-                                     AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Default" Class="app-component-textinput" />
+                    <MudAutocomplete T="string" Placeholder="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
+                                         AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" Variant="Variant.Outlined" />
                 </MudItem>
                 
                     <UserList Loading="_loadingUsers" Chats="userList" OnUserSelected="OnUserSelected" />

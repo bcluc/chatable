@@ -8,19 +8,27 @@
 
 <MudDialog>
     <DialogContent>
-        ༼ つ ｡◕‿‿◕｡ ༽つ<br /><br />
-        Bạn có chắc muốn đăng xuất không?
+        Bạn có chắc muốn đăng  xuất
+        <MudText class="erro">@erroMessage</MudText>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Accept">Ok</MudButton>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Accept">Đồng ý</MudButton>
     </DialogActions>
 </MudDialog>
+<style>
 
+    .erro {
+        display: flex;
+        width: 100%;
+        margin: 10px 0px;
+        color: red;
+        font-size: 14px;
+    }
+</style>
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    string erroMessage;
     void Cancel() => MudDialog.Cancel();
     public async Task Accept()
     {
@@ -40,11 +48,12 @@
             {
                 string resBody = await response.Content.ReadAsStringAsync();
                 dynamic result = JsonConvert.DeserializeObject(resBody);
+                erroMessage = result.Message.ToString();
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            erroMessage = ex.Message;
         }
 
     }
