@@ -240,13 +240,13 @@ LeBaoNhu71!
             {
                 success = true;
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
+                var user = JsonConvert.DeserializeObject<ApiResponse<Token>>(responseContent);
                 try
                 {
-                    if (user.Token != null)
+                    if (user.Data != null)
                     {
-                        await _localStorageService.SetItemAsync("access_token", user.Token.accessToken);
-                        Constant.token = user.Token;
+                        await _localStorageService.SetItemAsync("access_token", user.Data.accessToken);
+                        Constant.token = user.Data;
                         await jsRuntime.InvokeAsync<string>("console.log", "access token", Constant.token);
                        
                     }
