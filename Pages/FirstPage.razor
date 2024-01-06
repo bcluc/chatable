@@ -1,7 +1,9 @@
 ﻿@layout LoginLayout
+@page "/"
 
 
 @using System.ComponentModel.DataAnnotations;
+@using Blazored.LocalStorage
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
 @using Chatable.Data.Entitles.Respond
@@ -16,42 +18,50 @@
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
 @inject AppData appData;
+@inject IJSRuntime jsRuntime
+@inject ILocalStorageService _iLocalStorageService;
 
 @code {
     Token token = new Token();
-  
-    // protected override async Task OnInitializedAsync()
-    // {
 
-    //     if (!String.IsNullOrEmpty(appData.refresh) && !String.IsNullOrEmpty(appData.access))
-    //     {
-    //         token.refreshToken = appData.refresh;
-    //         token.accessToken = appData.access;
+    protected override async Task OnInitializedAsync()
+    {
+        string storedAccessToken = await _iLocalStorageService.GetItemAsync<string>("access_token");
+        string storedRefreshToken = await _iLocalStorageService.GetItemAsync<string>("refresh_token");
 
-    //         string serializedToken = JsonConvert.SerializeObject(token);
-    //         HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-    //         httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/RefreshToken");
-    //         httpRequestMessage.Method = new HttpMethod("POST");
-    //         httpRequestMessage.Content = new StringContent(serializedToken);
-    //         httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-    //         var response = await _http.SendAsync(httpRequestMessage);
-    //         if (response.IsSuccessStatusCode)
-    //         {
-    //             var responseContent = await response.Content.ReadAsStringAsync();
-    //         }
-    //         else
-    //         {
-    //             string resBody = await response.Content.ReadAsStringAsync();
-    //             dynamic result = JsonConvert.DeserializeObject(resBody);
-    //             Console.WriteLine(result.message);
-    //             _navigationManager.NavigateTo("/login");
-    //         }
-    //     }
+        if (!String.IsNullOrEmpty(storedAccessToken) && !String.IsNullOrEmpty(storedRefreshToken))
+        {
+            token.accessToken = storedAccessToken;
+            token.refreshToken = storedRefreshToken;
 
-    //     else
-    //     {
-    //         _navigationManager.NavigateTo("/login");
-    //     }
-    // }
+            string serializedToken = JsonConvert.SerializeObject(token);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/RefreshToken");
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.Content = new StringContent(serializedToken);
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+            var response = await _http.SendAsync(httpRequestMessage);
+            await _iLocalStorageService.SetItemAsync("respose", response.StatusCode);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Constant.token = token;
+                _navigationManager.NavigateTo("/chat");
+            }
+            else
+            {
+                string resBody = await response.Content.ReadAsStringAsync();
+                dynamic result = JsonConvert.DeserializeObject(resBody);
+                Console.WriteLine(result.message);
+                _navigationManager.NavigateTo("/login");
+            }
+        }
+
+        else
+        {
+            _navigationManager.NavigateTo("/login");
+        }
+    }
 }

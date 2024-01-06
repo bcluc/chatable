@@ -1,5 +1,4 @@
 ﻿@layout LoginLayout
-@page "/"
 @page "/login"
 
 @using System.ComponentModel.DataAnnotations;
@@ -111,8 +110,6 @@ LeBaoNhu71!
 
         [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
         public string password { get; set; }
-
-
     }
 
 }
@@ -175,6 +172,8 @@ LeBaoNhu71!
                     if (user.Data != null)
                     {
                         await _localStorageService.SetItemAsync("access_token", user.Data.accessToken);
+                        await _localStorageService.SetItemAsync("refresh_token", user.Data.refreshToken);
+
                         Constant.token = user.Data;
                         await jsRuntime.InvokeAsync<string>("console.log", "access token", Constant.token);
                        
