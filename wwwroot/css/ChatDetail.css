@@ -50,7 +50,11 @@
     font-size: 14px;
     color: gray;
 }
-
+.list-group-item {
+    font-family: SVN-Poppins;
+    font-size: 18px;
+    justify-content: center;
+}
 .chat-container {
     height: 100%;
     width: 100%;
@@ -157,13 +161,16 @@
     font-family: SVN-Poppins;
 
     font-size: 11px;
-    color: black;
 }
 
 .me .msg-dt {
     display: block;
     width: 100%;
     text-align: right;
+    color: white;
+}
+.other .msg-dt{
+    color: black;
 }
 
 /*

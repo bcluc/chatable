@@ -115,3 +115,76 @@
     font-family: SVN-Poppins;
 }
 
+.top_bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 16px;
+}
+/* Thay đổi border-radius của Outlined MudTextField */
+.mud-input-outlined-border {
+    border-radius: 8px !important;
+}
+
+/* Thay đổi margin-top mặc định 6px Outlined MudTextField thành 0px*/
+.mud-input-control {
+    margin-top: 0px;
+    font-family: SVN-Poppins;
+}
+
+.mud-input.mud-input-outlined.mud-input-adorned-start {
+    padding-left: 8px;
+    padding-inline-start: 8px;
+    padding-inline-end: unset;
+}
+
+.mud-input > input.mud-input-root-outlined.mud-input-root-adorned-start, div.mud-input-slot.mud-input-root-outlined.mud-input-root-adorned-start {
+    padding-left: 0;
+    padding-inline-start: 0;
+    padding-inline-end: 14px;
+}
+
+.mud-input > input.mud-input-root-outlined, div.mud-input-slot.mud-input-root-outlined {
+    padding: 9.5px 14px;
+}
+
+.mud-input-outlined-border {
+    border: none !important;
+}
+
+.mud-input-control-input-container {
+    background-color: #ECEDF0 !important;
+    border-radius: 8px !important;
+}
+.mud-selected-item{
+    background-color: white;
+}
+
+/*Conversation list*/
+.list-group-item {
+    list-style-type: none;
+    padding: 10px 5px 10px 5px;
+    border-radius: 0px;
+    color:black;
+}
+.user-name {
+    font-family: SVN-Poppins;
+    font-size: 14px;
+    text-align: left;
+    width: 100%;
+    height: auto;
+    font-weight: 500;
+    align-self: center;
+    margin-left: 10px;
+    margin-right: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.selected-item{
+    background-color:transparent;
+}
+::deep .mud-popover {
+    width: 600px !important;
+    background-color: aliceblue !important;
+}
