@@ -2,9 +2,12 @@
 @page "/chat/{_id?}"
 @using Chatable.Data.Components;
 @using Chatable.Data.Entitles;
+@using Chatable.Data.Entitles.DTO
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Respond;
 @using Chatable.Data.Entitles.Response
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.SignalR
 @using Microsoft.AspNetCore.SignalR.Client;
 @using System.Net.Http.Headers;
 @using System.Text.Json;
@@ -82,7 +85,9 @@
 	{
 		<div id="right-banner">
 
-			<ChatDetail Id="@_id"
+			<ChatDetail 
+				Id = "@_id"
+				SelectedConversation="@_selectedUser"
 			BackToConversationList="BackToConversationList"
 			NewIncomingMessage="@_newIncomingMessage"
 			OnIncomingMessageRecieved="()=> _newIncomingMessage = null" />
@@ -94,39 +99,47 @@
 
 @code {
 
-    /* Code của Lâm */
-    void BackToConversationList()
-    {
-        // isShowChat = false;
-        Chats.ForEach(e => e.IsSelected = false);
-        _navigationManager.NavigateTo($"/chat");
-    }
+	/* Code của Lâm */
+	void BackToConversationList()
+	{
+		// isShowChat = false;
+		Chats.ForEach(e => e.IsSelected = false);
+		_navigationManager.NavigateTo($"/chat");
+	}
 
-    /* TODO: Thay đổi cách code chỗ _selectedUser */
+	/* TODO: Thay đổi cách code chỗ _selectedUser */
 
-    /* Code của Cường */
-    [Parameter]
-    public string? _id { get; set; }
+	/* Code của Cường */
+	[Parameter]
+	public string? _id { get; set; }
 
-    private string value2;
-    private bool _loadingUsers = false;
-    private Conversation? _selectedUser = null;
-    private Message? _newIncomingMessage = null;
-    private HubConnection? hubConnection;
+	//private AuthenticationState
+	private string value2;
+	private bool _loadingUsers = false;
+	private Conversation? _selectedUser = null;
+	private MessageDTO? _newIncomingMessage = null;
+	private HubConnection _hubConnection;
+	private bool isConnected => _hubConnection.State == HubConnectionState.Connected;
 
-    // Khi nào run thì đổi
-    // = IList.Empty<Conversation>();
-    public List<Conversation> Chats = new List<Conversation>();
-    private IList<String> states = Constant.states;
+	// Khi nào run thì đổi
+	// = IList.Empty<Conversation>();
+	public List<Conversation> Chats = new List<Conversation>();
+	private IList<String> states = Constant.states;
 
-    protected override async Task OnInitializedAsync()
-    {
+	protected override async Task OnParametersSetAsync()
+	{
+		await GetSelectedConversation();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
         foreach(var chat in Chats)
         {
             chat.IsSelected = false;
         }
-        @* base.OnInitialized();
-        if (!AuthenticationState.IsAuthenticated)
+        base.OnInitialized();
+        
+		@*if (!AuthenticationState.IsAuthenticated)
         {
             NavigationManager.NavigateTo("/");
         }
@@ -158,20 +171,20 @@
                 StateHasChanged();
             }
         } *@
-		await GetConversation();
+		await GetAllConversations();
 	}
 
 	//private async Task<bool>
 
 	private async Task<IEnumerable<string>> Search2(string value)
 	{
-		// In real life use an asynchronous function for fetching data from an api.
+	// In real life use an asynchronous function for fetching data from an api.
 		await Task.Delay(5);
 
-		// if text is null or empty, don't return values (drop-down will not open)
+        // if text is null or empty, don't return values (drop-down will not open)
 		if (string.IsNullOrEmpty(value))
 			return new string[0];
-		// return chat room
+			// return chat room
 		return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
 	}
 
@@ -183,7 +196,7 @@
 
 	private async Task OnUserSelected(Conversation user)
 	{
-		/* Code của BC*/
+	/* Code của BC*/
 		_selectedUser = user;
 
 		var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
@@ -203,19 +216,69 @@
 		{
 			chatUser.IsSelected = true;
 		}
+		await JSRuntime.InvokeAsync<string>("console.log", "select usser", _selectedUser);
+
 		_navigationManager.NavigateTo($"/chat/{user.conversationId}");
 
 		/* Code của Lâm */
 		// isShowChat = true;
 	}
 
-	private void ConfigureConnection()
+	private HubConnection ConfigureConnection()
 	{
 		//Tạo hub connection, listen
+		// var hubConnection = new HubConnectionBuilder()
+		// 					.WithUrl(_navigationManager.ToAbsoluteUri("/message-hub"),
+		// 								options => options.AccessTokenProvider = () => Task.FromResult(AuthenticationState.Token))
+		// 					.Build();
+		return null;
+	}
+
+	private async Task<bool> GetSelectedConversation()
+	{
+		if (_id == null) return await Task.FromResult(false);
+		else
+		{
+			bool success;
+			string erroMessage;
+			try
+			{
+				HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+				httpRequestMessage.Method = new HttpMethod("GET");
+				httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/" + _id);
+				var response = await _http.SendAsync(httpRequestMessage);
+
+				if (response.IsSuccessStatusCode)
+				{
+					var responseContent = await response.Content.ReadAsStringAsync();
+					var respond = JsonConvert.DeserializeObject<ApiResponse<Conversation>>(responseContent);
+					success = true;
+					try
+					{
+						if (respond.Data != null)
+						{
+							_selectedUser = respond.Data;
+
+						}
+					}
+					catch (Exception e)
+					{
+						erroMessage = e.Message;
+					}
+
+				}
+			}
+			catch (Exception ex)
+			{
+				success = false;
+				erroMessage = ex.Message;
+			}
+			return await Task.FromResult(true);
+		}
 
 	}
 
-	private async Task<bool> GetConversation()
+	private async Task<bool> GetAllConversations()
 	{
 		bool success;
 		string erroMessage;
@@ -243,7 +306,7 @@
 					erroMessage = e.Message;
 				}
 
-				await JSRuntime.InvokeAsync<string>("console.log", "group get", respond.Data);
+				//await JSRuntime.InvokeAsync<string>("console.log", "group get", respond.Data);
 			}
 		}
 		catch (Exception ex)

@@ -50,7 +50,11 @@
     font-size: 14px;
     color: gray;
 }
-
+.list-group-item {
+    font-family: SVN-Poppins;
+    font-size: 18px;
+    justify-content: center;
+}
 .chat-container {
     height: 100%;
     width: 100%;
@@ -72,6 +76,7 @@
 
 .messages-list {
     flex: 1; /* expanded */
+    height: inherit;
     overflow-y: scroll;
 }
 
@@ -125,12 +130,19 @@
     margin-bottom: 1rem;
 }
 
+.justify-content-end {
+    display: flex;
+    justify-content: end;
+}
+.justify-content-start {
+    display: flex;
+    justify-content: start;
+}
 .single-msg {
     padding: 10px 12px;
     border-radius: 10px;
     font-size: 16px;
     font-family: SVN-Poppins;
-
     margin-bottom: 6px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -149,13 +161,16 @@
     font-family: SVN-Poppins;
 
     font-size: 11px;
-    color: black;
 }
 
 .me .msg-dt {
     display: block;
     width: 100%;
     text-align: right;
+    color: white;
+}
+.other .msg-dt{
+    color: black;
 }
 
 /*
