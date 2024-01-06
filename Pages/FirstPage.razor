@@ -48,7 +48,6 @@
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-
             }
             else
             {
@@ -58,6 +57,7 @@
                 _navigationManager.NavigateTo("/login");
             }
         }
+
         else
         {
             _navigationManager.NavigateTo("/login");

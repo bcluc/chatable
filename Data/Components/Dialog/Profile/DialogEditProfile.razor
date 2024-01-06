@@ -9,6 +9,8 @@
 @inject IDialogService DialogService
 @inject HttpClient _http
 
+<link rel="stylesheet" href="/css/DialogProfile.css">
+
 @* ai test nhớ điền mail vô nha *@
 <MudDialog class="custom-dialog-content">
     <DialogContent>
@@ -40,7 +42,7 @@
                         </div>
 
                         <div class="infor">
-                            <p style=" font-size: 18px; font-weight: 500;"> Thông tin cá nhân </p>
+                            <p style=" font-size: 18px; font-weight: 500; margin-top: 80px;"> Thông tin cá nhân </p>
                             <div style="margin-top: 10px;"> 
                                 <MudText Style="font-size: 16px">Tên hiển thi</MudText>
                                 <MudTextField Required="true" RequiredError="Bạn cần điền tên hiển thị!"
@@ -117,80 +119,7 @@
         </div>
     </DialogActions>
 </MudDialog>
-<style>
-    .mud-dialog .mud-dialog-content
-    {
-        padding: 8px 0;
-    }
 
-    .dialog-edit-profile
-    {
-        height: 700px;
-    }
-    .custom-dialog-content {
-        padding 0;
-        margin: 0;
-        align-content: center;
-        height: 700px;
-    }
-
-    .nopadding {
-        padding: 0;
-    }
-    .content {
-        height: 500px;
-        width: 450px;
-        overflow-y: scroll;
-    }
-    .photos {
-        position: relative;
-        width: 100%;
-        text-align: center;
-    }
-    .infor {
-        margin-top: 20px;
-        height: 300px;
-        max-height: 300px; 
-        padding: 10px 20px;
-    }
-
-    .bottom-right-button {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        margin-bottom: 10px;
-        margin-right: 10px;
-        display: flex;
-        width: 100%;
-        align-items: center;
-        justify-content: end;
-
-    }
-    .btn-save {
-        color: white;
-        background-color: #3559E0;
-    }
-    .btn-save-hover:hover{
-        background-color: #4876FF;
-    }
-
-    .btn-save-disable:disabled {
-        background-color: #63B8FF;
-
-    }
-    .mud-input-control-input-container 
-    {
-        background-color: white !important;
-    }
-
-    .erro {
-        display: flex;
-        width: 100%;
-        margin: 10px 0px;
-        color: red;
-        font-size: 14px;
-    }
-</style>
 
 
 @code {
@@ -233,12 +162,12 @@
 
 @code {
 
-    User currentUser = Constant.currentUser;
+    UserInfor currentUser;
     bool CanUpdate = false;
     string erroMessage;
 
     UpdateUserForm model = new UpdateUserForm();
-   
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -269,7 +198,7 @@
                     // Show success message
                     await DialogService.ShowMessageBox("Bạn đã cập nhập thông tin thành công!", "Thành công");
 
-                   
+
                 }
                 else
                 {
@@ -278,7 +207,7 @@
                     erroMessage = result.Message.ToString();
                 }
             }
-            
+
         }
         catch (Exception ex)
         {
@@ -292,7 +221,7 @@
         DialogService.Show<DialogProfile>("Thông tin cá nhân");
     }
 
-    private void  OnGenderChanged(string selectedgender)
+    private void OnGenderChanged(string selectedgender)
     {
         model.GenderChanged = selectedgender;
         if (CanUpdate == false)
@@ -338,25 +267,24 @@
         }
 
         //call api save change
-        if(currentUser.fullName != null && currentUser.email != null )
+        if (currentUser.fullName != null && currentUser.email != null)
         {
             try
             {
+
                 currentUser.gender = model.GenderChanged;
                 string serializedUser = JsonConvert.SerializeObject(currentUser);
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
                 httpRequestMessage.Method = new HttpMethod("PUT");
                 httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User");
-
                 httpRequestMessage.Content = new StringContent(serializedUser);
-
                 httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
                 var response = await _http.SendAsync(httpRequestMessage);
 
                 if (response.IsSuccessStatusCode)
                 {
                     // Show success message
-                    await DialogService.ShowMessageBox("Bạn đã cập nhập thông tin thành công!", "Thành công");
+                    await DialogService.ShowMessageBox("Thông báo","Bạn đã cập nhập thông tin thành công!");
 
                     // Close the dialog
                     MudDialog.Close(DialogResult.Ok(true));
@@ -380,10 +308,37 @@
         return await Task.FromResult(true);
     }
 
+    private async Task<UserInfor> GetCurUser()
+    {
+        UserInfor curUser = new UserInfor();
+        try
+        {
+            var response = await _http.GetAsync(Constant.uriHost + "User/CurrentUser");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (responseContent != null)
+                {
+                    ApiResponse<UserInfor> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<UserInfor>>(responseContent);
+                    curUser = apiResponse.Data;
+                    return curUser;
+                }
+                return null;
+
+            }
+            return null;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return null;
+        }
+    }
 
     private async Task LoadProfile()
     {
-        // currentUser = await GetCurUser();
+        currentUser = await GetCurUser();
 
         if (currentUser != null)
         {
@@ -391,7 +346,7 @@
             model.EmailChanged = currentUser.email;
             model.dobChanged = currentUser.dob;
             model.GenderChanged = currentUser.gender;
-           
+
             StateHasChanged();
         }
     }

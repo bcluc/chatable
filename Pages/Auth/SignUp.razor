@@ -120,19 +120,7 @@
         </div>
     </footer>
 </div>
-
 @code {
-    RegisterAccountForm model = new RegisterAccountForm();
-    private bool _processing = false;
-    bool success;
-    string erroMessage;
-
-    InputType PasswordInput = InputType.Password;
-    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-    bool isShow;
-
-    Boolean isMale = true;
-    DialogOptions disableBackdropClick = new DialogOptions() { DisableBackdropClick = true };
     public class RegisterAccountForm
     {
         [Required(ErrorMessage = "Tên người dùng là bắt buộc.")]
@@ -159,6 +147,20 @@
         [Compare(nameof(password), ErrorMessage = "Mật khẩu và nhập lại mật khẩu không khớp.")]
         public string confirmPassword { get; set; }
     }
+}
+@code {
+    RegisterAccountForm model = new RegisterAccountForm();
+    private bool _processing = false;
+    bool success;
+    string erroMessage;
+
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    bool isShow;
+
+    Boolean isMale = true;
+    DialogOptions disableBackdropClick = new DialogOptions() { DisableBackdropClick = true };
+    
 
     void togglePasswordVisibility()
     {
@@ -185,7 +187,6 @@
         }
         try
         {
-
             string serializedUser = JsonConvert.SerializeObject(model);
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("POST");
