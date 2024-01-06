@@ -18,81 +18,10 @@
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
 @inject IJSRuntime jsRuntime
+@inject UserService userService
 
 
 <link rel="stylesheet" href="/css/AuthTemplate.css">
-
-@* <style>
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-}
-
-.container {
-height: 100%;
-display: flex;
-flex-direction: column;
-}
-
-.header {
-padding: 16px 0;
-display: flex;
-justify-content: center;
-}
-
-.login-section {
-background: white url(/img/login-backgroud.png) no-repeat fixed center center;
-background-size: cover;
-flex:1;
-display: flex;
-align-items: start;
-justify-content: center;
-}
-
-.over-lay {
-width: 42vw;
-padding: 10px 20px 20px 20px;
-border-radius: 30px;
-}
-
-.login-button {
-border-radius: 30px;
-padding: 10px 0;
-color: white;
-background-color: #3559E0;
-font-size: 18px;
-font-weight: 500;
-text-transform: none;
-}
-
-.login-button:hover {
-background-color: #4CB9E7;
-}
-
-a {
-display: inline;
-font-weight: 500;
-font-size: 16px;
-}
-
-a:hover {
-text-decoration: underline;
-color: #4CB9E7;
-cursor: pointer;
-}
-
-/* Thay đổi border-radius của Outlined MudTextField */
-.mud-input-outlined-border {
-border-radius: 12px !important;
-}
-
-/* Thay đổi margin-top mặc định 6px Outlined MudTextField thành 0px*/
-.mud-input-control {
-margin-top: 4px;
-}
-
-</style> *@
 
 <div class="container">
     <div class="header">
@@ -174,6 +103,19 @@ margin-top: 4px;
 nhubaole
 LeBaoNhu71!
 *@
+@code {
+    public class LoginForm
+    {
+        [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
+        public string userName { get; set; }
+
+        [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
+        public string password { get; set; }
+
+
+    }
+
+}
 
 
 
@@ -205,19 +147,6 @@ LeBaoNhu71!
     bool success;
     private bool _processing = false;
     String erroMessage;
-
-    public class LoginForm
-    {
-        [Required(ErrorMessage = "Bạn cần nhập tên đăng nhập")]
-        public string userName { get; set; }
-
-        [Required(ErrorMessage = "Bạn cần nhập mật khẩu")]
-        public string password { get; set; }
-
-
-    }
-
-    
 
     // lần đầu
     private async Task<bool> LoginUser(EditContext context)

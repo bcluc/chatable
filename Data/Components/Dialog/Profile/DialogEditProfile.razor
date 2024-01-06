@@ -14,7 +14,7 @@
 @* ai test nhớ điền mail vô nha *@
 <MudDialog class="custom-dialog-content">
     <DialogContent>
-            @if (currentUser == null)
+            @if (currentUserInfor == null)
             {
             <p>Loading</p>
             }
@@ -24,7 +24,7 @@
                         <div Class="photos">
                             <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
                             <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
-                                <MudImage Src="@currentUser.avatarUrl"></MudImage>
+                                <MudImage Src="@currentUserInfor.avatarUrl"></MudImage>
                             </MudAvatar>
                             <MudFileUpload T="IFormFile" FilesChanged="UploadFiles">
                                 <ButtonTemplate>
@@ -37,12 +37,11 @@
                                 </ButtonTemplate>
                             </MudFileUpload>
 
-                        
-                            
+                                                 
                         </div>
 
                         <div class="infor">
-                            <p style=" font-size: 18px; font-weight: 500; margin-top: 80px;"> Thông tin cá nhân </p>
+                            <p style=" font-size: 18px; font-weight: 500; margin-top: 10px;"> Thông tin cá nhân </p>
                             <div style="margin-top: 10px;"> 
                                 <MudText Style="font-size: 16px">Tên hiển thi</MudText>
                                 <MudTextField Required="true" RequiredError="Bạn cần điền tên hiển thị!"
@@ -162,9 +161,11 @@
 
 @code {
 
-    UserInfor currentUser;
+    User curUser;
+    UserInfor currentUserInfor;
     bool CanUpdate = false;
     string erroMessage;
+
 
     UpdateUserForm model = new UpdateUserForm();
 
@@ -197,8 +198,6 @@
                 {
                     // Show success message
                     await DialogService.ShowMessageBox("Bạn đã cập nhập thông tin thành công!", "Thành công");
-
-
                 }
                 else
                 {
@@ -226,7 +225,7 @@
         model.GenderChanged = selectedgender;
         if (CanUpdate == false)
         {
-            CanUpdate = (currentUser.gender != model.GenderChanged) ? true : false;
+            CanUpdate = (currentUserInfor.gender != model.GenderChanged) ? true : false;
         }
     }
     private void OnDobChanged(DateTime? newDate)
@@ -234,7 +233,7 @@
         model.dobChanged = newDate;
         if (CanUpdate == false)
         {
-            if (currentUser.dob != model.dobChanged.GetValueOrDefault())
+            if (currentUserInfor.dob != model.dobChanged.GetValueOrDefault())
             {
                 CanUpdate = true;
             }
@@ -246,8 +245,8 @@
         {
             if (model.FullNameChanged != null && model.EmailChanged != null)
             {
-                if (model.FullNameChanged != currentUser.fullName ||
-                    model.EmailChanged != currentUser.email)
+                if (model.FullNameChanged != currentUserInfor.fullName ||
+                    model.EmailChanged != currentUserInfor.email)
                 {
                     CanUpdate = true;
                 }
@@ -258,22 +257,23 @@
     private async Task<bool> SaveChange()
     {
         //gán các giá trị đã thay đổi vô current user
-        currentUser.fullName = model.FullNameChanged;
-        currentUser.email = model.EmailChanged;
-        currentUser.gender = model.GenderChanged;
+        currentUserInfor.fullName = model.FullNameChanged;
+        currentUserInfor.email = model.EmailChanged;
+        currentUserInfor.gender = model.GenderChanged;
         if (model.dobChanged.HasValue)
         {
-            currentUser.dob = model.dobChanged.GetValueOrDefault();
+            currentUserInfor.dob = model.dobChanged.GetValueOrDefault();
         }
 
         //call api save change
-        if (currentUser.fullName != null && currentUser.email != null)
+
+        if (currentUserInfor.fullName != null && currentUserInfor.email != null)
         {
             try
             {
 
-                currentUser.gender = model.GenderChanged;
-                string serializedUser = JsonConvert.SerializeObject(currentUser);
+                currentUserInfor.gender = model.GenderChanged;
+                string serializedUser = JsonConvert.SerializeObject(currentUserInfor);
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
                 httpRequestMessage.Method = new HttpMethod("PUT");
                 httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User");
@@ -285,6 +285,9 @@
                 {
                     // Show success message
                     await DialogService.ShowMessageBox("Thông báo","Bạn đã cập nhập thông tin thành công!");
+
+                    await GetCurUser();
+                    Constant.currentUser = curUser;
 
                     // Close the dialog
                     MudDialog.Close(DialogResult.Ok(true));
@@ -308,21 +311,22 @@
         return await Task.FromResult(true);
     }
 
-    private async Task<UserInfor> GetCurUser()
+    private async Task<User> GetCurUser()
     {
-        UserInfor curUser = new UserInfor();
+        User user = new User();
         try
         {
-            var response = await _http.GetAsync(Constant.uriHost + "User/CurrentUser");
+            var response = await _http.GetAsync(Constant.uriHost + "User/currentUser");
 
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 if (responseContent != null)
                 {
-                    ApiResponse<UserInfor> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<UserInfor>>(responseContent);
+                    ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
                     curUser = apiResponse.Data;
-                    return curUser;
+                    curUser = curUser;
+                    return user;
                 }
                 return null;
 
@@ -331,24 +335,37 @@
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
             return null;
         }
     }
 
+
     private async Task LoadProfile()
     {
-        currentUser = await GetCurUser();
+        await GetCurUser();
 
-        if (currentUser != null)
+        if (curUser!= null)
         {
-            model.FullNameChanged = currentUser.fullName;
-            model.EmailChanged = currentUser.email;
-            model.dobChanged = currentUser.dob;
-            model.GenderChanged = currentUser.gender;
+            currentUserInfor = new UserInfor();
 
-            StateHasChanged();
+            currentUserInfor.fullName = curUser.fullName;
+            currentUserInfor.avatarUrl = curUser.avatarUrl;
+            currentUserInfor.email = curUser.email;
+            currentUserInfor.gender = curUser.gender;
+            currentUserInfor.dob = curUser.dob.GetValueOrDefault();
+
+            if (currentUserInfor != null)
+            {
+                model.FullNameChanged = currentUserInfor.fullName;
+                model.EmailChanged = currentUserInfor.email;
+                model.dobChanged = currentUserInfor.dob;
+                model.GenderChanged = currentUserInfor.gender;
+
+                StateHasChanged();
+            }
         }
+
+        
     }
 
 }
