@@ -12,7 +12,7 @@ builder.Services.AddMudServices();
 builder.Services.AddHttpClient();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddSingleton<AppData>();
-builder.Services.AddSingleton<UserService>();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

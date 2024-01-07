@@ -200,7 +200,6 @@
             if (response.IsSuccessStatusCode)
             {
                 success = true;
-
                 OpenDialog();
             }
             else
@@ -227,6 +226,5 @@
     public void NavigateToLogin()
     {
         NavigationManager.NavigateTo("/login");
-        Console.WriteLine("Navigate to login");
     }
 }

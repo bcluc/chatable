@@ -15,6 +15,7 @@
 @using Newtonsoft.Json;
 @using System.Web;
 
+
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
 @inject AppData appData;
@@ -23,6 +24,7 @@
 
 @code {
     Token token = new Token();
+    User curUser;
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,13 +50,33 @@
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 Constant.token = token;
-                _navigationManager.NavigateTo("/chat");
+                curUser = new User();
+
+                curUser = await GetCurUser();
+
+                if (curUser != null)
+                {
+                    if (curUser.avatarUrl== null)
+                    {
+                       setNullAvt(curUser.gender);
+                    }
+
+                    Constant.currentUser = curUser;
+                    _navigationManager.NavigateTo("/chat");
+
+                }
+                else
+                {
+                    _navigationManager.NavigateTo("/login");
+
+                }
             }
             else
             {
                 string resBody = await response.Content.ReadAsStringAsync();
                 dynamic result = JsonConvert.DeserializeObject(resBody);
                 Console.WriteLine(result.message);
+               
                 _navigationManager.NavigateTo("/login");
             }
         }
@@ -63,5 +85,41 @@
         {
             _navigationManager.NavigateTo("/login");
         }
+    }
+
+    private async Task<User> GetCurUser()
+    {
+        User curUser = new User();
+        try
+        {
+            var response = await _http.GetAsync(Constant.uriHost + "User/CurrentUser");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (responseContent != null)
+                {
+                    ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+                    curUser = apiResponse.Data;
+                    return curUser;
+                }
+                return null;
+
+            }
+            return null;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+    private void setNullAvt(string gender)
+    {
+        if (gender == "Nữ")
+        {
+            curUser.avatarUrl = Constant.defaultImgFemale;
+
+        }
+        else curUser.avatarUrl = Constant.defaultImgMale;
     }
 }

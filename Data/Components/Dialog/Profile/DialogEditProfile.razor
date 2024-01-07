@@ -48,7 +48,7 @@
                                       @bind-Value="@model.FullNameChanged" For="@(() => model.FullNameChanged)"
                                       TextChanged="CheckChange"
                                                   Variant="Variant.Outlined" Margin="Margin.Dense" 
-                                                  Style="background-color: white; border-radius: 8px; border-width: 2px; border-color: #ECEDF0"
+                                                  Style="background-color: white; border-radius: 8px; border-width: 2px; border-color: #ECEDF0; margin-top: 5px;"
                                                   HelperText="Sử dụng tên thật để bạn bè dễ dàng nhận diện hơn"></MudTextField>
                                 <MudDivider></MudDivider>
                             </div>
@@ -59,7 +59,7 @@
                                       TextChanged="CheckChange"
                                       Required="true" RequiredError ="Bạn cần điền Email!" 
                                               Variant="Variant.Outlined" Margin="Margin.Dense"
-                                              Style="background-color: white; border-radius: 8px; border-width: 2px;border-color: #ECEDF0"></MudTextField>
+                                      Style="background-color: white; border-radius: 8px; border-width: 2px;border-color: #ECEDF0; margin-top: 5px"></MudTextField>
 
                             </div>
                             <div style="margin-top: 10px">
@@ -89,12 +89,12 @@
 
                                 <MudDatePicker MaxDate="DateTime.Now"
                                                Variant="Variant.Outlined"
-                                               Style="background-color: white; border-radius:8px; border-width: 2px; border-color: #ECEDF0 "
+                                       Style="background-color: white; border-radius:8px; border-width: 2px; border-color: #ECEDF0 ;margin-top: 5px"
                                        Date="@model.dobChanged"
                                                DateChanged="OnDobChanged"
                                        For="@(() => model.dobChanged)"
                                                DisableToolbar="true"
-                                               DateFormat="dd.MM.yyyy"  
+                                               DateFormat="dd / MM / yyyy"  
                                                Required="true"
                                                RequiredError="Hãy chọn ngày sinh của bạn"
                                                Class="top0" >
