@@ -1,9 +1,13 @@
-﻿@using Chatable.Data.Entitles;
+﻿@using AgoraRTC.Models
+@using Chatable.DI
+@using Chatable.Data.Components.Dialog.Lam
+@using Chatable.Data.Entitles;
 @using Chatable.Data.Components.Dialog.Profile;
 @using Chatable.Data.Entitles.Model;
 @using System.Globalization;
 @using System.Net.Http;
 @using Chatable.Data.Entitles.Respond
+@using Microsoft.AspNetCore.SignalR.Client
 @using Newtonsoft.Json;
 
 @inject HttpClient _http
@@ -13,10 +17,10 @@
 
 <link rel="stylesheet" href="/css/MainLayout.css">
 
-@* <MudThemeProvider @bind-IsDarkMode="@themeOn" />
-<MudDialogProvider />
-<MudSnackbarProvider />
- *@
+<audio id="audioPlayer" loop>
+    <source src="assets/audio/nhac_chuong_do_choi_dien_thoai.mp3" type="audio/mp3" />
+</audio>
+
 
 <div class="sidebar">
     <div class="user">
@@ -39,18 +43,6 @@
         
     <div class="bottom-list">
         <ul>
-            @* @for (int i = 3; i <= 4; ++i)
-            {
-                var currentIndex = i;             
-                <li class="@(currentPageIndex == i ? "current-page" : "")"
-                    @onclick="() => changeCurrentPageIndex(currentIndex)">
-                    <a href="@menuItems[i].page">
-                        <logo class="@menuItems[i].icon"/>
-                        <p>@menuItems[i].title</p>
-                    </a>
-                </li>
-            } *@
-
             <li class="@(currentPageIndex == 3 ? "current-page" : "")"
                 @onclick="() => changeCurrentPageIndex(3)">
                 <a href="@menuItems[3].page">
@@ -120,8 +112,17 @@
 
 @using Chatable.Data.Components.Dialog;
 
+@inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
+
+@inject CurrentUser CurrentUser
+@inject CallHubManager CallHubManager
+@inject MessageHubManager MessageHubManager
+
+@implements IAsyncDisposable
+
 @code {
-    User currentUser = Constant.currentUser;
+    User currentUser;
     bool themeOn = false;
     private void OpenDialog()
     {
@@ -133,5 +134,129 @@
         var options = new DialogOptions { CloseOnEscapeKey = true };
         DialogService.Show<LogoutDialog>("Xác nhận", options);
     }
+
+    /* Lâm */
+    protected override void OnInitialized()
+    {
+        currentUser = CurrentUser.currentUser!;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("Hello MainLayout");
+
+        await SetUpMessageHub();
+        await SetUpCallHub();
+    }
     
+    public async Task SetUpMessageHub()
+    {
+        // Connect Message-Hub
+        MessageHubManager.HubConnection = new HubConnectionBuilder()
+        	.WithUrl($"https://localhost:7124/messages-hub?access_token={Constant.token.accessToken}")
+        	.Build();
+
+        await MessageHubManager.HubConnection.StartAsync();
+        // Console.WriteLine($"messageHubConnection = {messageHubConnection.ConnectionId}");
+    }
+
+    public async Task SetUpCallHub()
+    {
+        CallHubManager.HubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7124/call-hub")
+            .Build();
+
+        await CallHubManager.HubConnection.StartAsync();
+
+        await CallHubManager.HubConnection.SendAsync("AddMapping", CurrentUser.currentUser!.userName);
+
+        CallHubManager.HubConnection.On<string, PeerInfo, string, string>("inviteCall", (callerId, callerInfo, typeCall, roomId) =>
+        {
+            // Console.WriteLine("CallHubManager.isIdle: " + CallHubManager.isIdle);
+            @* Console.WriteLine("Nhận cuộc gọi từ " + callerInfo.Name); *@
+            if (CallHubManager.isIdle)
+            {
+                CallHubManager.isIdle = false;
+                InvokeAsync(() => OpenNotificationDialog(callerId, callerInfo, typeCall, roomId));
+            }
+            else
+            {
+                // Người nhận đang ở trong cuộc gọi khác
+                CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerId, "inAnotherCall");
+            }
+
+        });
+
+        CallHubManager.HubConnection.On<string>("missingCall", callerId =>
+        {
+            // Console.WriteLine("Đã bỏ lỡ cuộc gọi từ " + callerId);
+            InvokeAsync(() => dialogReference!.Close(DialogResult.Cancel()));
+        });
+    }
+
+    IDialogReference? dialogReference;
+
+    public async void OpenNotificationDialog(string callerId, PeerInfo callerInfo, string typeCall, string roomId)
+    {
+        DialogOptions options = new DialogOptions
+            {
+                FullWidth = false,
+                CloseOnEscapeKey = false,
+                DisableBackdropClick = true,
+                NoHeader = true,
+            };
+
+        DialogParameters keyValues = new DialogParameters();
+        keyValues.Add("callerName", callerInfo.Name);
+        keyValues.Add("callerAvt", callerInfo.AvatarUrl);
+        keyValues.Add("typeCall", typeCall);
+
+        dialogReference = DialogService.Show<CallDialog>("", keyValues, options);
+        var result = await dialogReference.Result;
+
+        if (result.Canceled)
+        {
+            Console.WriteLine("Nhận được một cuộc gọi nhỡ");
+            CallHubManager.isIdle = true;
+        }
+
+        if (result.Data as string == "reject")
+        {
+            // Từ chối cuộc gọi
+            await CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerId, "rejectCall");
+            CallHubManager.isIdle = true;
+        }
+        if (result.Data as string == "accept")
+        {
+            // Chấp nhận cuộc gọi
+            // Console.WriteLine("Accept Call");
+            await CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerId, "acceptCall");
+
+            await JSRuntime.InvokeVoidAsync(
+                "joinRoomGoiDien",
+                roomId,
+                CurrentUser.currentUser!.fullName,
+                /* Constant.currentUser.avatarUrl, */
+                "user-test",
+                typeCall,
+                DotNetObjectReference.Create(this)
+            );
+
+        }
+    }
+
+    [JSInvokable]
+    public void setIdleToTrue()
+    {
+        // Console.WriteLine("setIdleToTrue");
+        CallHubManager.isIdle = true;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await MessageHubManager.HubConnection!.DisposeAsync();
+        await CallHubManager.HubConnection!.DisposeAsync();
+        Console.WriteLine("Bye MainLayout");
+    }
+
 }

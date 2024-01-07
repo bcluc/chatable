@@ -54,10 +54,10 @@
 				{
 					<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
 					@onclick="() => OnUserSelected(chat)">
-						<img class="coversation-img mr-3" src="@chat.Avatar" />
+						<img class="coversation-img mr-3" src="@chat.conversationAvatar" />
 						<div class="d-flex justify-start flex-column" style="flex: 1">
 							<div class="d-flex">
-								<p class="coversation-name">@chat.Name</p>
+								<p class="coversation-name">@chat.conversationName</p>
 								<MudSpacer/>
 								<p style="color: gray;">@chat.lastMessage.sendAt</p>
 							</div>
@@ -97,6 +97,8 @@
 
 </div>
 
+@implements IAsyncDisposable
+
 @code {
 
 	/* Code của Lâm */
@@ -118,8 +120,6 @@
 	private bool _loadingUsers = false;
 	private Conversation? _selectedUser = null;
 	private MessageDTO? _newIncomingMessage = null;
-	private HubConnection _hubConnection;
-	private bool isConnected => _hubConnection.State == HubConnectionState.Connected;
 
 	// Khi nào run thì đổi
 	// = IList.Empty<Conversation>();
@@ -137,7 +137,6 @@
         {
             chat.IsSelected = false;
         }
-        base.OnInitialized();
         
 		@*if (!AuthenticationState.IsAuthenticated)
         {
@@ -174,17 +173,15 @@
 		await GetAllConversations();
 	}
 
-	//private async Task<bool>
-
 	private async Task<IEnumerable<string>> Search2(string value)
 	{
-	// In real life use an asynchronous function for fetching data from an api.
+		// In real life use an asynchronous function for fetching data from an api.
 		await Task.Delay(5);
 
-        // if text is null or empty, don't return values (drop-down will not open)
+		// if text is null or empty, don't return values (drop-down will not open)
 		if (string.IsNullOrEmpty(value))
 			return new string[0];
-			// return chat room
+		// return chat room
 		return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
 	}
 
@@ -196,7 +193,7 @@
 
 	private async Task OnUserSelected(Conversation user)
 	{
-	/* Code của BC*/
+		/* Code của BC*/
 		_selectedUser = user;
 
 		var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
@@ -216,22 +213,7 @@
 		{
 			chatUser.IsSelected = true;
 		}
-		await JSRuntime.InvokeAsync<string>("console.log", "select usser", _selectedUser);
-
 		_navigationManager.NavigateTo($"/chat/{user.conversationId}");
-
-		/* Code của Lâm */
-		// isShowChat = true;
-	}
-
-	private HubConnection ConfigureConnection()
-	{
-		//Tạo hub connection, listen
-		// var hubConnection = new HubConnectionBuilder()
-		// 					.WithUrl(_navigationManager.ToAbsoluteUri("/message-hub"),
-		// 								options => options.AccessTokenProvider = () => Task.FromResult(AuthenticationState.Token))
-		// 					.Build();
-		return null;
 	}
 
 	private async Task<bool> GetSelectedConversation()
@@ -359,6 +341,9 @@
 		}
 		return await Task.FromResult(true);
 	}
-
 	
+	public async ValueTask DisposeAsync()
+	{
+
+	}
 }

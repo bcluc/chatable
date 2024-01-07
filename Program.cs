@@ -1,6 +1,7 @@
 using Blazored.LocalStorage;
 using Chatable;
 using Chatable.Data.Entitles.Model;
+using Chatable.DI;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor.Services;
@@ -11,7 +12,12 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 builder.Services.AddHttpClient();
 builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddSingleton<AppData>();
+
+builder.Services.AddScoped<AppData>();
+builder.Services.AddScoped<CurrentUser>();
+builder.Services.AddScoped<CallHubManager>();
+builder.Services.AddScoped<MessageHubManager>();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

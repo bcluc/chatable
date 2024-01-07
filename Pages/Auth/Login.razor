@@ -1,8 +1,9 @@
-﻿@layout LoginLayout
-
+﻿@layout EmptyLayout
+@page "/"
 @page "/login"
 
 @using System.ComponentModel.DataAnnotations;
+@using Chatable.DI
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
 @using Chatable.Data.Entitles.Respond
@@ -175,7 +176,7 @@ nhubaole
 LeBaoNhu71!
 *@
 
-
+@inject CurrentUser CurrentUser
 
 @code {
   
@@ -217,8 +218,6 @@ LeBaoNhu71!
 
     }
 
-
-
     // lần đầu
     private async Task<bool> LoginUser(EditContext context)
     {
@@ -247,8 +246,6 @@ LeBaoNhu71!
                     {
                         await _localStorageService.SetItemAsync("access_token", user.Data.accessToken);
                         Constant.token = user.Data;
-                        await jsRuntime.InvokeAsync<string>("console.log", "access token", Constant.token);
-                       
                     }
                 }
                 catch (Exception e)
@@ -269,9 +266,9 @@ LeBaoNhu71!
             {
                 usr = await GetCurUser();
                 if (usr.avatarUrl == null) setNullAvt(usr.gender);
-                Constant.currentUser = usr;
+                CurrentUser.currentUser = usr;
 
-                await jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
+                // await jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
                 _navigationManager.NavigateTo("/chat");
             }
         }

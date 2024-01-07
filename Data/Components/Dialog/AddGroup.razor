@@ -1,4 +1,5 @@
-﻿@using Chatable.Data.Components;
+﻿@using Chatable.DI
+@using Chatable.Data.Components;
 @using System.ComponentModel.DataAnnotations;
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
@@ -57,9 +58,12 @@
         </div>
     </DialogActions>
 </MudDialog>
+
+@inject CurrentUser CurrentUser
+
 @code {
     // test
-    private User currentUser = Constant.currentUser;
+    private User currentUser;
     public IList<User> userList = Constant.usersList;
     private IList<String> states = Constant.states;
 
@@ -79,12 +83,15 @@
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     void Close() => MudDialog.Close(DialogResult.Ok(true));
-    
+
 
     // reset list khi mở dialog
     // có thể không cần khi lấy được list từ server
     protected override void OnInitialized()
     {
+        currentUser = CurrentUser.currentUser!;
+
+        //
         foreach(User user in userList)
         {
             user.IsSelected = false;

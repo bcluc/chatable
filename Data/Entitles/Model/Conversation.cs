@@ -1,25 +1,31 @@
-﻿using System.ComponentModel;
-
-namespace Chatable.Data.Entitles.Model
+﻿namespace Chatable.Data.Entitles.Model
 {
     public class Conversation
     {
 
-        public string Name = "Unknow";
+        public string conversationName { get; set; }
 
-        public string Avatar = Constant.defaultImgMale;
+        public string conversationAvatar { get; set; }
 
-		public string? conversationId { get; set; }
+        public string? conversationId { get; set; }
         public LastMessageDTO? lastMessage { get; set; }
         public string conversationType { get; set; }
         public bool IsSelected { get; set; }
         public Conversation() { }
 
-        public Conversation(string? id,  string conversationType, LastMessageDTO? lastMessage)
+        public Conversation(
+            string? id,  
+            string conversationType, 
+            LastMessageDTO? lastMessage, 
+            string conversationName,
+            string conversationAvatar
+        )
         {
             conversationId = id;
             this.lastMessage = lastMessage;
             this.conversationType = conversationType;
+            this.conversationName = conversationName;
+            this.conversationAvatar = conversationAvatar;
         }
         
     }
