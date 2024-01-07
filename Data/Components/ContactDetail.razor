@@ -1,4 +1,5 @@
-﻿@using Chatable.Data.Entitles.Model;
+﻿@using Chatable.DI
+@using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.Respond;
 @using Microsoft.AspNetCore.Components.Forms
@@ -62,6 +63,8 @@ else
         <UserList Loading="@_loadingUsers" Chats="@userList" OnUserSelected="OnUserSelected" />
     </div>
 </div>
+
+@inject CurrentUser CurrentUser
 
 @code{
 
@@ -136,6 +139,6 @@ else
             throw new ArgumentNullException(nameof(user));
         }
         // go to conversation link với type là peer
-        _navigationManager.NavigateTo("/chat/" + Constant.currentUser.userName +"_" +user.userName);
+        _navigationManager.NavigateTo("/chat/" + CurrentUser.currentUser!.userName + "_" + user.userName);
     }
 }

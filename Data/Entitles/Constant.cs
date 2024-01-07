@@ -22,7 +22,8 @@ namespace Chatable.Data.Entitles
         //public const string uriHost = "http://localhost:5275/api/v1/";
         public const string uriHost = "https://localhost:7124/api/v1/";
 
-
+        public const string uriBaseUserAvt = "https://goexjtmckylmpnrbxtcn.supabase.co/storage/v1/object/public/users-avatar/";
+        public const string uriBaseGroupAvt = "https://goexjtmckylmpnrbxtcn.supabase.co/storage/v1/object/public/groups-avatar/";
 
         public static readonly IList<String> states = new ReadOnlyCollection<String>
         (new List<String>
@@ -43,7 +44,7 @@ namespace Chatable.Data.Entitles
         new User("nhihuynh", "Công chúa Elsa","", "", DateTime.Now,"Nữ"),
         };
 
-        private static User _currentUser = new User("unknow", "Unknow", "", defaultImgMale, DateTime.Now, "Nam");
+        //private static User _currentUser = new User("unknow", "Unknow", "", defaultImgMale, DateTime.Now, "Nam");
         private static Token _token = new Token();
 
         public static readonly Message visibleMessage = new("0", "BC", "1", DateTime.Now, "Text", "Say hi");
@@ -52,10 +53,10 @@ namespace Chatable.Data.Entitles
 
         public static readonly Peer oppositeUser = new Peer("nhubaole", "Trần Lê Hoàng Lâm", "Nam", "2023-11-19 07:58:48.084+00","BC_nhubaole");
 
-        public static User currentUser {
-            get { return _currentUser; }
-            set { _currentUser = value; }
-        }
+        //public static User currentUser {
+        //    get { return _currentUser; }
+        //    set { _currentUser = value; }
+        //}
         public static Token token
         {
             get { return _token; }

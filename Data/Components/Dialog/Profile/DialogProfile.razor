@@ -1,4 +1,5 @@
-﻿@using Chatable.Data.Entitles.Model;
+﻿@using Chatable.DI
+@using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles;
 @using System.Globalization;
 @using System.Net.Http;
@@ -68,11 +69,18 @@
     </DialogActions>
 </MudDialog>
 
+@inject CurrentUser CurrentUser
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    User currentUser = Constant.currentUser;
+    User currentUser;
+
+    protected override void OnInitialized()
+    {
+        currentUser = CurrentUser.currentUser!;
+    }
+
     private void OpenEditDialog()
 
     //jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
