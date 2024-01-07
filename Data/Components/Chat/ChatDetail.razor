@@ -29,9 +29,9 @@ Chi tiết chat gồm 3 phần
         <MudIconButton id="back-btn" Class="mr-3" OnClick="BackToConversationList">
             <i class="fa-solid fa-chevron-left fa-lg"></i>
         </MudIconButton>
-        <img class="coversation-img mr-3" src="@SelectedConversation.Avatar" />
+        <img class="coversation-img mr-3" src="@SelectedConversation.conversationAvatar" />
         <div class="d-flex flex-column" style="width: 160px">
-            <p class="receiver-name">@SelectedConversation.Name</p>
+            <p class="receiver-name">@SelectedConversation.conversationName</p>
             <p class="receiver-status">Đang hoạt động</p>
         </div>
         <MudSpacer />
@@ -171,25 +171,43 @@ Chi tiết chat gồm 3 phần
     private bool _loadingMessages = false;
     private bool _loadingConversation = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeAsync<string>("console.log", "init", "true");
+
+        if(SelectedConversation is null) await GetSelectedConversation();
+    }
     protected override async Task OnParametersSetAsync()
     {
+        await JSRuntime.InvokeAsync<string>("console.log", "parameter change - conversation", SelectedConversation);
+        await JSRuntime.InvokeAsync<string>("console.log", "parameter change - id", Id);
+        await JSRuntime.InvokeAsync<string>("console.log", "parameter change - mess", NewIncomingMessage);
+
+
+        if (SelectedConversation is null)
+        {
+            await GetSelectedConversation();
+            await JSRuntime.InvokeAsync<string>("console.log", "get conversation when null", SelectedConversation);
+        }
         if (NewIncomingMessage is not null)
         {
             //_messages.Add(NewIncomingMessage);
             await OnIncomingMessageRecieved.InvokeAsync();
             _scrollToBottom = true;
         }
-
         if (SelectedConversation is not null && SelectedConversation.conversationId != previousSelectedUserId)
         {
             previousSelectedUserId = SelectedConversation.conversationId;
             await GetConversationMessages();
+            await JSRuntime.InvokeAsync<string>("console.log", "get conversation when not null", SelectedConversation);
             _scrollToBottom = true;
         }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await JSRuntime.InvokeAsync<string>("console.log", "after render", SelectedConversation);
+
         if (_scrollToBottom)
         {
             _scrollToBottom = false;
@@ -227,7 +245,7 @@ Chi tiết chat gồm 3 phần
                         }
                         else
                         {
-                            _infoMessage = $"Không có cuộc trò chuyện nào giữa bạn và {SelectedConversation.Name}";
+                            _infoMessage = $"Không có cuộc trò chuyện nào giữa bạn và {SelectedConversation.conversationName}";
                         }
                     }
                     catch (Exception e)
@@ -277,13 +295,10 @@ Chi tiết chat gồm 3 phần
                         {
                             _messages = respond.Data;
                             _infoMessage = null;
-
-                            await JSRuntime.InvokeAsync<string>("console.log", "mess get", respond.Data);
-                            await JSRuntime.InvokeAsync<string>("console.log", "mess get", _messages);
                         }
                         else
                         {
-                            _infoMessage = $"Không có cuộc trò chuyện nào giữa bạn và {SelectedConversation.Name}";
+                            _infoMessage = $"Không có cuộc trò chuyện nào giữa bạn và {SelectedConversation.conversationName}";
                         }
                     }
                     catch (Exception e)

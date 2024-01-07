@@ -47,13 +47,12 @@ else
 } *@
 
 <div class="contact-container">
-
     <div class="header">
         <MudIconButton id="back-btn" Class="mr-3" OnClick="BackToLeft">
             <i class="fa-solid fa-chevron-left fa-lg"></i>
         </MudIconButton>
         <MudIcon Icon=@_titleIcon Disabled="true" aria-label="@_titleIcon" Style="margin:5px" />
-        <h4 class="contact-p">@Id</h4>
+        <h4 class="contact-p">@_titleText</h4>
     </div>
 
     <MudDivider/>
@@ -108,7 +107,7 @@ else
     //     }
 
     //     return await Task.FromResult(true);
-		// }
+    // }
 
     protected override void OnParametersSet()
     {
@@ -136,6 +135,7 @@ else
             throw new ArgumentNullException(nameof(user));
         }
         // go to conversation link với type là peer
-        _navigationManager.NavigateTo("/chat/" + Constant.currentUser.userName +"_" +user.userName);
+        _navigationManager.NavigateTo("/chat/" + user.userName);
+        //_navigationManager.NavigateTo("/chat/" + Constant.currentUser.userName +"_" +user.userName);
     }
 }

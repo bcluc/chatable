@@ -13,8 +13,8 @@ namespace Chatable.Data.Entitles.Model
         public Peer(string userName, string fullName, string gender, string lastTimeOnline, string? conversationId)
         {
             UserName = userName;
-            Name = fullName;
-            Avatar = getDefaultAvt(gender);
+            conversationName = fullName;
+            conversationAvatar = getDefaultAvt(gender);
             Gender = gender;
             LastTimeOnline = DateTime.Now;
             base.conversationId = conversationId;

@@ -1,6 +1,9 @@
 ﻿@page "/chat"
 @page "/chat/{_id?}"
 @using Chatable.Data.Components;
+@using Chatable.Data.Components.Chat
+@using Chatable.Data.Components.Dialog.AddGroup
+@using Chatable.Data.Components.Search
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.DTO
 @using Chatable.Data.Entitles.Model;
@@ -54,10 +57,10 @@
 				{
 					<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
 					@onclick="() => OnUserSelected(chat)">
-						<img class="coversation-img mr-3" src="@chat.Avatar" />
+						<img class="coversation-img mr-3" src="@chat.conversationAvatar" />
 						<div class="d-flex justify-start flex-column" style="flex: 1">
 							<div class="d-flex">
-								<p class="coversation-name">@chat.Name</p>
+								<p class="coversation-name">@chat.conversationName</p>
 								<MudSpacer/>
 								<p style="color: gray;">@chat.lastMessage.sendAt</p>
 							</div>
@@ -119,6 +122,8 @@
 	private Conversation? _selectedUser = null;
 	private MessageDTO? _newIncomingMessage = null;
 	private HubConnection _hubConnection;
+	private string _previousSelectedUserId = "";
+
 	private bool isConnected => _hubConnection.State == HubConnectionState.Connected;
 
 	// Khi nào run thì đổi
@@ -128,15 +133,21 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
-		await GetSelectedConversation();
+		if(_selectedUser is null && _id is not null)	await GetSelectedConversation();
+		if (_selectedUser is not null && _selectedUser.conversationId != _previousSelectedUserId)
+		{
+			_previousSelectedUserId = _selectedUser.conversationId;
+			await GetSelectedConversation();
+		}
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
-        foreach(var chat in Chats)
-        {
-            chat.IsSelected = false;
-        }
+		foreach(var chat in Chats)
+		{
+			chat.IsSelected = false;
+			if (chat.conversationId == _id) chat.IsSelected = true;
+		}
         base.OnInitialized();
         
 		@*if (!AuthenticationState.IsAuthenticated)
@@ -174,8 +185,10 @@
 		await GetAllConversations();
 	}
 
-	//private async Task<bool>
-
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!Chats.Any()) await base.OnInitializedAsync();
+	}
 	private async Task<IEnumerable<string>> Search2(string value)
 	{
 	// In real life use an asynchronous function for fetching data from an api.
@@ -191,7 +204,7 @@
 	private void OpenAddGroupDialog()
 	{
 		var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
-		DialogService.Show<Data.Components.Dialog.AddGroup>("Tạo nhóm", options);
+		DialogService.Show<AddGroup>("Tạo nhóm", options);
 	}
 
 	private async Task OnUserSelected(Conversation user)
@@ -210,7 +223,6 @@
 		if (chatUser is null)
 		{
 			user.IsSelected = true;
-			Chats.Add(user);
 		}
 		else
 		{

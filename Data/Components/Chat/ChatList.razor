@@ -21,9 +21,9 @@
             <li class="list-group-item @(chat.IsSelected ? "user-select" : "user-unselect")" @onclick="() => HandleUserClick(chat)">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
-                        <MudImage Src=@chat.Avatar></MudImage>
+                        <MudImage Src=@chat.conversationAvatar></MudImage>
                     </MudAvatar>
-                    <h4 class="user-name">@chat.Name</h4>
+                    <h4 class="user-name">@chat.conversationName</h4>
                 </div>
                 </li>
         }
