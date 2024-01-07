@@ -6,7 +6,7 @@ function phatNhacChuong() {
     audio.play();
 }
 
-function moCuaSoGoiDien(callerId, callerName, callerAvt, receiverId, receiverName, receiverAvt, typeCall, instanceObject) {
+function moCuaSoGoiDien(callerId, callerName, callerAvt, receiverId, receiverName, receiverAvt, typeCall, conversationType, instanceObject) {
 
     myInstanceObject = instanceObject;
 
@@ -15,7 +15,7 @@ function moCuaSoGoiDien(callerId, callerName, callerAvt, receiverId, receiverNam
 
     // Cửa sổ con
     const roomId = callerId + "." + receiverId;
-    var urlToOpen = `https://localhost:7154/groupCall/${roomId}/${callerName}/${callerAvt}/${typeCall}/${receiverName}/${receiverAvt}`;
+    var urlToOpen = `https://localhost:7154/groupCall/${roomId}/${callerName}/${callerAvt}/${typeCall}/${conversationType}/${receiverName}/${receiverAvt}`;
     window.open(urlToOpen, "_blank", "left = " + left + ", top = " + top + ", width=1280, height=720");
 
     // Đăng ký sự kiện nhận thông điệp từ cửa sổ con

@@ -44,7 +44,6 @@ namespace Chatable.Data.Entitles
         new User("nhihuynh", "Công chúa Elsa","", "", DateTime.Now,"Nữ"),
         };
 
-        //private static User _currentUser = new User("unknow", "Unknow", "", defaultImgMale, DateTime.Now, "Nam");
         private static Token _token = new Token();
 
         public static readonly Message visibleMessage = new("0", "BC", "1", DateTime.Now, "Text", "Say hi");
@@ -53,10 +52,6 @@ namespace Chatable.Data.Entitles
 
         public static readonly Peer oppositeUser = new Peer("nhubaole", "Trần Lê Hoàng Lâm", "Nam", "2023-11-19 07:58:48.084+00","BC_nhubaole");
 
-        //public static User currentUser {
-        //    get { return _currentUser; }
-        //    set { _currentUser = value; }
-        //}
         public static Token token
         {
             get { return _token; }
