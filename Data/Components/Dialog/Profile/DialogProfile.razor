@@ -4,10 +4,13 @@
 @using System.Net.Http;
 @using Chatable.Data.Entitles.Respond
 @using Newtonsoft.Json;
+@using Microsoft.AspNetCore.Components.Forms
 
 @inject IDialogService DialogService
 @inject HttpClient _http
 @inject IJSRuntime jsRuntime
+@inject IDialogService Dialog
+
 
 
 <link rel="stylesheet" href="/css/DialogProfile.css">
@@ -26,7 +29,7 @@
                     <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
                         <MudImage Src="@currentUser.avatarUrl"></MudImage>
                     </MudAvatar>
-                    <MudFileUpload T="IFormFile" FilesChanged="UploadFile">
+                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
                         <ButtonTemplate>
                             <MudIconButton HtmlTag="label"
                                            Color="Color.Info"
@@ -75,6 +78,9 @@
 
     User currentUser = Constant.currentUser;
 
+    List<IBrowserFile> selectedFiles = new List<IBrowserFile>();
+    String avatar; 
+
     private void OpenEditDialog()
 
     //jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
@@ -82,11 +88,77 @@
         MudDialog.Close(DialogResult.Ok(true));
         DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân");
     }
-    private void UploadFile()
-    {
-        
-    }
 
+    private async void UploadFile(IBrowserFile file)
+    {
+        try
+        {
+
+            using var fileStream = file.OpenReadStream();
+
+            if (fileStream != null)
+            {
+                selectedFiles.Add(file);
+
+                await UpAvatar(file);
+            }
+            else
+            {
+                await OpenErroDialog();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Xử lý các lỗi khác nếu có
+            await OpenErroDialog();
+        }
+
+    }
+    private async Task UpAvatar(IBrowserFile file)
+    {
+
+        try
+        {
+
+            using var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
+
+            var response = await _http.PostAsync(Constant.uriHost + "User/UploadAvatar", content);
+
+            // Kiểm tra xem yêu cầu có thành công không
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (responseContent != null)
+                {
+                    ApiResponse<String> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
+                    avatar = apiResponse.Data;
+                    Constant.currentUser.avatarUrl = avatar;
+                    NotifyStateChanged();
+                }
+
+            }
+            else
+            {
+                // Xử lý lỗi nếu có
+                Console.WriteLine($"Error uploading file. Status code: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Xử lý lỗi nếu có
+            Console.WriteLine($"Error uploading file: {ex.Message}");
+        }
+
+
+    }
+    private void NotifyStateChanged() => StateHasChanged();
+   
+    private async Task OpenErroDialog()
+    {
+        var dialog = DialogService.Show<ErroUpImage>("Thông báo");
+        var result = await dialog.Result;
+    }
 }
 
    

@@ -49,7 +49,20 @@
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                Constant.token = token;
+                var responseToken = JsonConvert.DeserializeObject<ApiResponse<Token>>(responseContent);
+
+                if (responseToken.Data!= null)
+                {
+                    await _iLocalStorageService.SetItemAsync("access_token", responseToken.Data.accessToken);
+                    await _iLocalStorageService.SetItemAsync("refresh_token", responseToken.Data.refreshToken);
+
+                    token.accessToken = responseToken.Data.accessToken;
+                    token.refreshToken = responseToken.Data.refreshToken;
+
+                    Constant.token = token;
+                }
+
+                
                 curUser = new User();
 
                 curUser = await GetCurUser();
