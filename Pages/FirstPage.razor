@@ -1,6 +1,10 @@
 ﻿@layout EmptyLayout
+@page "/"
+
 
 @using System.ComponentModel.DataAnnotations;
+@using Blazored.LocalStorage
+@using Chatable.DI
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
 @using Chatable.Data.Entitles.Respond
@@ -12,21 +16,28 @@
 @using Newtonsoft.Json;
 @using System.Web;
 
+
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
 @inject AppData appData;
+@inject IJSRuntime jsRuntime
+@inject ILocalStorageService _iLocalStorageService;
+@inject CurrentUser CurrentUser;
 
 @code {
     Token token = new Token();
+    User curUser;
 
     protected override async Task OnInitializedAsync()
     {
+        string storedAccessToken = await _iLocalStorageService.GetItemAsync<string>("access_token");
+        string storedRefreshToken = await _iLocalStorageService.GetItemAsync<string>("refresh_token");
 
-        if (!String.IsNullOrEmpty(appData.refresh) && !String.IsNullOrEmpty(appData.access))
+
+        if (!String.IsNullOrEmpty(storedAccessToken) && !String.IsNullOrEmpty(storedRefreshToken))
         {
-            token.refreshToken = appData.refresh;
-            token.accessToken = appData.access;
-            Constant.token = token;
+            token.accessToken = storedAccessToken;
+            token.refreshToken = storedRefreshToken;
 
             string serializedToken = JsonConvert.SerializeObject(token);
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
@@ -36,22 +47,94 @@
             httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
             var response = await _http.SendAsync(httpRequestMessage);
+            await _iLocalStorageService.SetItemAsync("respose", response.StatusCode);
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
+                var responseToken = JsonConvert.DeserializeObject<ApiResponse<Token>>(responseContent);
 
+                if (responseToken.Data!= null)
+                {
+                    await _iLocalStorageService.SetItemAsync("access_token", responseToken.Data.accessToken);
+                    await _iLocalStorageService.SetItemAsync("refresh_token", responseToken.Data.refreshToken);
+
+                    token.accessToken = responseToken.Data.accessToken;
+                    token.refreshToken = responseToken.Data.refreshToken;
+
+                    Constant.token = token;
+                }
+
+                
+                curUser = new User();
+
+                curUser = await GetCurUser();
+
+                if (curUser != null)
+                {
+                    if (curUser.avatarUrl== null)
+                    {
+                       setNullAvt(curUser.gender);
+                    }
+
+                    CurrentUser.currentUser = curUser;
+                    _navigationManager.NavigateTo("/chat");
+
+                }
+                else
+                {
+                    _navigationManager.NavigateTo("/login");
+
+                }
             }
             else
             {
                 string resBody = await response.Content.ReadAsStringAsync();
                 dynamic result = JsonConvert.DeserializeObject(resBody);
                 Console.WriteLine(result.message);
+               
                 _navigationManager.NavigateTo("/login");
             }
         }
+
         else
         {
             _navigationManager.NavigateTo("/login");
         }
+    }
+
+    private async Task<User> GetCurUser()
+    {
+        User curUser = new User();
+        try
+        {
+            var response = await _http.GetAsync(Constant.uriHost + "User/CurrentUser");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (responseContent != null)
+                {
+                    ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+                    curUser = apiResponse.Data;
+                    return curUser;
+                }
+                return null;
+
+            }
+            return null;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+    private void setNullAvt(string gender)
+    {
+        if (gender == "Nữ")
+        {
+            curUser.avatarUrl = Constant.defaultImgFemale;
+
+        }
+        else curUser.avatarUrl = Constant.defaultImgMale;
     }
 }

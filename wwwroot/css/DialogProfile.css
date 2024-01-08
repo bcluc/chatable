@@ -1,0 +1,94 @@
+﻿@import url('Theme.css');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: SVN-Poppins;
+}
+.mud-dialog .mud-dialog-content {
+    padding: 8px 0;
+}
+
+.dialog-edit-profile {
+    height: 700px;
+}
+
+.custom-dialog-content {
+    padding 0;
+    margin: 0;
+    align-content: center;
+    height: 700px;
+}
+
+.nopadding {
+    padding: 0;
+}
+
+.content {
+    height: 500px;
+    width: 450px;
+    overflow-y: scroll;
+}
+
+.photos {
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+.infor {
+    margin-top: 20px;
+    height: 250px;
+    max-height: 300px;
+    padding: 10px 20px;
+}
+
+.horizental {
+    display: flex;
+    align-items: center;
+}
+.bottom-right-button {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: end;
+}
+.toEdit {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.btn-save {
+    color: white;
+    background-color: #3559E0;
+}
+
+.btn-save-hover:hover {
+    background-color: #4876FF;
+}
+
+.btn-save-disable:disabled {
+    background-color: #63B8FF;
+}
+
+.mud-input-control-input-container {
+    background-color: white !important;
+}
+
+.erro {
+    display: flex;
+    width: 100%;
+    margin: 10px 0px;
+    color: red;
+    font-size: 14px;
+}
+
