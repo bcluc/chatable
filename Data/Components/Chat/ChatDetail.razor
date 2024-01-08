@@ -31,6 +31,9 @@ Chi tiết chat gồm 3 phần
         <MudIconButton id="back-btn" Class="mr-3" OnClick="BackToConversationList">
             <i class="fa-solid fa-chevron-left fa-lg"></i>
         </MudIconButton>
+        @*         <img class="coversation-img mr-3" src="@SelectedConversation.conversationAvatar" />*@
+         <div class="d-flex flex-column" style="width: 160px">
+            <p class="receiver-name">@_testString</p>
         <img class="coversation-img mr-3" src="@SelectedConversation.conversationAvatar" />
         <div class="d-flex flex-column" style="width: 160px">
             <p class="receiver-name">@SelectedConversation.conversationName</p>
@@ -42,7 +45,8 @@ Chi tiết chat gồm 3 phần
         </MudIconButton>
         <MudIconButton OnClick=@(() => Call("video")) Style="border-radius: 8px">
             <i class="fa-solid fa-video fa-xl" style="color: #0091ff;"></i>
-        </MudIconButton>
+        </MudIconButton>		
+
     </div>
 
     <MudDivider></MudDivider>
@@ -156,7 +160,7 @@ Chi tiết chat gồm 3 phần
     /* Code của Cường */
     private User currentUser;
     [Parameter]
-    public Conversation? SelectedConversation { get; set; }
+    public Conversation? SelectedConversation { get; set; } = new Conversation();
 
     [Parameter]
     public string? Id {get; set;}
@@ -169,8 +173,10 @@ Chi tiết chat gồm 3 phần
 
     private List<MessageDTO> _messages = new List<MessageDTO>();
 
+    private string _testString = "";
+
     private string _newMessage = "";
-    private string? _errorMessage;
+    private string? _errorMessage = "";
     private string? _infoMessage;
     private string previousSelectedUserId = "";
     private bool _scrollToBottom = false;
@@ -189,25 +195,43 @@ Chi tiết chat gồm 3 phần
         });
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        //await JSRuntime.InvokeAsync<string>("console.log", "init detail", "true");
+
+        if(SelectedConversation is null) await GetSelectedConversation();
+    }
     protected override async Task OnParametersSetAsync()
     {
+        // await JSRuntime.InvokeAsync<string>("console.log", "parameter change detatil - conversation", SelectedConversation);
+        // await JSRuntime.InvokeAsync<string>("console.log", "parameter change detal - id", Id);
+        // await JSRuntime.InvokeAsync<string>("console.log", "parameter change detail - mess", NewIncomingMessage);
+
+
+        if (SelectedConversation is null)
+        {
+            await GetSelectedConversation();
+            //await JSRuntime.InvokeAsync<string>("console.log", "get conversation when null", SelectedConversation);
+        }
         if (NewIncomingMessage is not null)
         {
             //_messages.Add(NewIncomingMessage);
             await OnIncomingMessageRecieved.InvokeAsync();
             _scrollToBottom = true;
         }
-
         if (SelectedConversation is not null && SelectedConversation.conversationId != previousSelectedUserId)
         {
             previousSelectedUserId = SelectedConversation.conversationId;
             await GetConversationMessages();
+            //await JSRuntime.InvokeAsync<string>("console.log", "get conversation when not null", SelectedConversation);
             _scrollToBottom = true;
         }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        //await JSRuntime.InvokeAsync<string>("console.log", "after render detail", Id);
+        if (SelectedConversation is null) await GetSelectedConversation();
         if (_scrollToBottom)
         {
             _scrollToBottom = false;
@@ -240,9 +264,11 @@ Chi tiết chat gồm 3 phần
                     {
                         if (respond.Data != null)
                         {
-                            SelectedConversation = respond.Data;
-                            _infoMessage = null;
 
+                            SelectedConversation = respond.Data;
+                            //await JSRuntime.InvokeAsync<string>("console.log", "get conver detail", SelectedConversation);
+                            _testString = respond.Data.conversationId;
+                            _infoMessage = null;
                         }
                         else
                         {
@@ -296,9 +322,6 @@ Chi tiết chat gồm 3 phần
                         {
                             _messages = respond.Data;
                             _infoMessage = null;
-
-                            await JSRuntime.InvokeAsync<string>("console.log", "mess get", respond.Data);
-                            await JSRuntime.InvokeAsync<string>("console.log", "mess get", _messages);
                         }
                         else
                         {

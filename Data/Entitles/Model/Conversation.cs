@@ -3,6 +3,7 @@
     public class Conversation
     {
 
+        public string? conversationName { get; set; }
         public string conversationName { get; set; }
 
         public string conversationAvatar { get; set; }
@@ -11,7 +12,11 @@
         public LastMessageDTO? lastMessage { get; set; }
         public string conversationType { get; set; }
         public bool IsSelected { get; set; }
-        public Conversation() { }
+        public Conversation() {
+            conversationId = conversationId ?? "anoymous";
+            conversationName = conversationName ?? "Người dùng";
+            conversationAvatar = conversationAvatar ?? Constant.defaultImgMale;
+        }
 
         public Conversation(
             string? id,  

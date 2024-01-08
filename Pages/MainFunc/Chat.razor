@@ -1,6 +1,9 @@
 ﻿@page "/chat"
 @page "/chat/{_conversationType?}/{_id?}"
 @using Chatable.Data.Components;
+@using Chatable.Data.Components.Chat
+@using Chatable.Data.Components.Dialog.AddGroup
+@using Chatable.Data.Components.Search
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.DTO
 @using Chatable.Data.Entitles.Model;
@@ -87,7 +90,7 @@
 
 			<ChatDetail 
 				Id = "@_id"
-				SelectedConversation="@_selectedUser"
+				SelectedConversation="@_selectedConversation"
 			BackToConversationList="BackToConversationList"
 			NewIncomingMessage="@_newIncomingMessage"
 			OnIncomingMessageRecieved="()=> _newIncomingMessage = null" />
@@ -121,7 +124,7 @@
 	//private AuthenticationState
 	private string value2;
 	private bool _loadingUsers = false;
-	private Conversation? _selectedUser = null;
+	private Conversation? _selectedConversation = null;
 	private MessageDTO? _newIncomingMessage = null;
 
 	// Khi nào run thì đổi
@@ -131,16 +134,25 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
-		await GetSelectedConversation();
+		// await JSRuntime.InvokeAsync<string>("console.log", "parameter change - conversation", _selectedConversation);
+		// await JSRuntime.InvokeAsync<string>("console.log", "parameter change - id", _id);
+		// await JSRuntime.InvokeAsync<string>("console.log", "parameter change - mess", _newIncomingMessage);
+
+		if(_selectedConversation is null)	await GetSelectedConversation();
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
-        foreach(var chat in Chats)
-        {
-            chat.IsSelected = false;
-        }
-        
+		//await JSRuntime.InvokeAsync<string>("console.log", "init chat", "true");
+		
+		await GetAllConversations();
+		foreach(var chat in Chats)
+		{
+			chat.IsSelected = false;
+			if (chat.conversationId == _id) chat.IsSelected = true;
+		}
+		//await JSRuntime.InvokeAsync<string>("console.log", "list chat", Chats);
+
 		@*if (!AuthenticationState.IsAuthenticated)
         {
             NavigationManager.NavigateTo("/");
@@ -173,9 +185,12 @@
                 StateHasChanged();
             }
         } *@
-		await GetAllConversations();
 	}
 
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!Chats.Any()) await base.OnInitializedAsync();
+	}
 	private async Task<IEnumerable<string>> Search2(string value)
 	{
 		// In real life use an asynchronous function for fetching data from an api.
@@ -191,13 +206,14 @@
 	private void OpenAddGroupDialog()
 	{
 		var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
-		DialogService.Show<Data.Components.Dialog.AddGroup>("Tạo nhóm", options);
+		DialogService.Show<AddGroup>("Tạo nhóm", options);
 	}
 
 	private async Task OnUserSelected(Conversation user)
 	{
 		/* Code của BC*/
-		_selectedUser = user;
+		_selectedConversation = user;
+		_id = user.conversationId;
 
 		var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
 		if (selectedChatUser is not null)
@@ -210,14 +226,20 @@
 		if (chatUser is null)
 		{
 			user.IsSelected = true;
-			Chats.Add(user);
 		}
 		else
 		{
 			chatUser.IsSelected = true;
 		}
-		_navigationManager.NavigateTo($"/chat/{user.conversationType}/{user.conversationId}");
+		//await JSRuntime.InvokeAsync<string>("console.log", "select usser", _selectedConversation);
+
+		_navigationManager.NavigateTo($"/chat/{user.conversationId}");
+
+		/* Code của Lâm */
+		// isShowChat = true;
 	}
+
+	
 
 	private async Task<bool> GetSelectedConversation()
 	{
@@ -243,7 +265,7 @@
 					{
 						if (respond.Data != null)
 						{
-							_selectedUser = respond.Data;
+							_selectedConversation = respond.Data;
 
 						}
 					}
@@ -303,51 +325,5 @@
 		return await Task.FromResult(true);
 	}
 
-	private async Task<bool> GetGroup()
-	{
-		bool success;
-		string erroMessage;
-		List<Group> groups = new List<Group>();
-		try
-		{
-			HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-			httpRequestMessage.Method = new HttpMethod("GET");
-			httpRequestMessage.RequestUri = new Uri(Constant.uriHost+ "Group");
-			var response = await _http.SendAsync(httpRequestMessage);
-
-			if (response.IsSuccessStatusCode)
-			{
-				var responseContent = await response.Content.ReadAsStringAsync();
-				var respond = JsonConvert.DeserializeObject<GroupGetResponse>(responseContent);
-				success = true;
-				try
-				{
-					if (respond.Data != null)
-					{
-						foreach (var group in respond.Data)
-						{
-							Chats.Add(group);
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					erroMessage = e.Message;
-				}
-
-				//await JSRuntime.InvokeAsync<string>("console.log", "group get", respond.ListGroup);
-			}
-		}
-		catch (Exception ex)
-		{
-			success = false;
-			erroMessage = ex.Message;
-		}
-		return await Task.FromResult(true);
-	}
 	
-	public async ValueTask DisposeAsync()
-	{
-
-	}
 }

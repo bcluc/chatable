@@ -61,3 +61,75 @@
     display: flex;
     align-items: flex-start;
 }
+
+.friend-request-card {
+    display: flex;
+    width: 100%;
+    padding: 20px;
+    flex-direction: row;
+    align-items: center;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.6); /** This shadow is no good... **/
+}
+    .profile-picture
+{
+    width: 100px;
+    height: 100px;
+    border-radius: 100%;
+    margin-right: 27px;
+    overflow: hidden;
+}
+    
+    .profile-picture .img
+
+{
+    width: 100px;
+    height: 100%;
+}
+                     }
+h1, h2, h3 {
+    font-family: SVN-Poppins;
+    font-weight: 900;
+}
+
+h3 {
+    color: #4E787E;
+    text-transform: uppercase;
+    font-size: 19px;
+    letter-spacing: 2px;
+    margin-top: 40px;
+}
+.button {
+    font-family: SVN-Poppins;
+    border-radius: 100px;
+    width: 100%;
+    padding: 14px 10px;
+    border: none;
+    font-size: 12px;
+    transition: background .3s;
+    cursor: pointer;
+}
+    .button &:first-child {
+    margin-bottom: 14px;
+}
+
+    .button .button-primary {
+        background: #3A9BDE;
+        color: #fff;
+    }
+        .button .button-primary &:hover {
+            background: darken(#3A9BDE, 10%);
+        }
+
+    .button .button-secondary {
+        background: #6F8493;
+        color: #fff;
+    }
+        .button .button-secondary &:hover {
+            background: darken(#6F8493, 10%);
+        }
+
+
+
+    

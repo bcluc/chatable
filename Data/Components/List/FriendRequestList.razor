@@ -1,0 +1,60 @@
+﻿@using Chatable.Data.Entitles;
+@using Chatable.Data.Entitles.DTO
+@using Chatable.Data.Entitles.Model;
+<link rel="stylesheet" href="/css/ChatList.css">
+
+<div class="list-group list-group-flush">
+
+    @if (Loading)
+    {
+        <li class="list-group-item">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...
+        </li>
+    }
+    else
+    {
+        @foreach (var request in Requests)
+        {
+            <li class="list-group-item " @onclick="() => HandleUserClick(request)">
+                <div class="friend-request-card">
+                        <MudAvatar>
+                            <MudImage Src=@Constant.defaultImgGroup></MudImage>
+                        </MudAvatar>
+                    <div class="user-details">
+                        <h4>@request.senderId</h4>
+                        <h4>Đã gửi bạn lời mời kết bạn</h4>
+                    </div>
+                    <div class="friend-request-actions">
+                        <button class="button button-primary">Chấp nhận</button>
+                        <button class="button button-secondary">Từ chối</button>
+                    </div>
+                </div>
+@*                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+                    <MudAvatar>
+                        <MudImage Src=@Constant.defaultImgGroup></MudImage>
+                    </MudAvatar>
+                    <h4 class="user-name">@request.senderId</h4>
+                </div> *@
+            </li>
+        }
+    }
+</div>
+
+@code {
+    private User currentUser = Constant.currentUser;
+    [Parameter]
+    public IEnumerable<FriendRequestDTO> Requests { get; set; } = Enumerable.Empty<FriendRequestDTO>();
+
+    [Parameter]
+    public bool Loading { get; set; }
+
+    [Parameter]
+    public EventCallback<FriendRequestDTO> OnFriendRequestSelected { get; set; }
+
+    private async Task HandleUserClick(FriendRequestDTO friendReq)
+    {
+        await OnFriendRequestSelected.InvokeAsync(friendReq);
+    }
+
+}
