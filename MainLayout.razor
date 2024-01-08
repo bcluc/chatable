@@ -124,6 +124,7 @@
 @code {
     User currentUser;
     bool themeOn = false;
+
     private void OpenDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
@@ -170,19 +171,19 @@
 
         await CallHubManager.HubConnection.SendAsync("AddMapping", CurrentUser.currentUser!.userName);
 
-        CallHubManager.HubConnection.On<string, PeerInfo, string, string>("inviteCall", (callerId, callerInfo, typeCall, roomId) =>
+        CallHubManager.HubConnection.On<string, PeerInfo, string, string>("inviteCall", (callerConnectionId, callerInfo, typeCall, roomId) =>
         {
             // Console.WriteLine("CallHubManager.isIdle: " + CallHubManager.isIdle);
             @* Console.WriteLine("Nhận cuộc gọi từ " + callerInfo.Name); *@
             if (CallHubManager.isIdle)
             {
                 CallHubManager.isIdle = false;
-                InvokeAsync(() => OpenNotificationDialog(callerId, callerInfo, typeCall, roomId));
+                InvokeAsync(() => OpenNotificationDialog(callerConnectionId, callerInfo, typeCall, roomId));
             }
             else
             {
                 // Người nhận đang ở trong cuộc gọi khác
-                CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerId, "inAnotherCall");
+                CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerConnectionId, "inAnotherCall");
             }
 
         });
@@ -196,7 +197,7 @@
 
     IDialogReference? dialogReference;
 
-    public async void OpenNotificationDialog(string callerId, PeerInfo callerInfo, string typeCall, string roomId)
+    public async void OpenNotificationDialog(string callerConnectionId, PeerInfo callerInfo, string typeCall, string roomId)
     {
         DialogOptions options = new DialogOptions
             {
@@ -223,14 +224,16 @@
         if (result.Data as string == "reject")
         {
             // Từ chối cuộc gọi
-            await CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerId, "rejectCall");
+            await CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerConnectionId, "rejectCall");
             CallHubManager.isIdle = true;
         }
         if (result.Data as string == "accept")
         {
             // Chấp nhận cuộc gọi
             // Console.WriteLine("Accept Call");
-            await CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerId, "acceptCall");
+            await CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerConnectionId, "acceptCall");
+
+            Console.WriteLine(CurrentUser.currentUser);
 
             await JSRuntime.InvokeVoidAsync(
                 "joinRoomGoiDien",

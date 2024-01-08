@@ -6,7 +6,7 @@ function tatNhacChuong() {
 function thietLapKhiDongCuocGoi() {
     console.log("thietLapKhiDongCuocGoi()");
     onbeforeunload = function () {
-        // console.log("finishCall");
+         // console.log("finishCall");
         tatNhacChuong();
         finishCall();
     }

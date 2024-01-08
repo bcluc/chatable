@@ -37,10 +37,10 @@ Chi tiết chat gồm 3 phần
             <p class="receiver-status">Đang hoạt động</p>
         </div>
         <MudSpacer />
-        <MudIconButton Class="mr-2" OnClick=@(() => CallPeer("voice")) Style="border-radius: 8px">
+        <MudIconButton Class="mr-2" OnClick=@(() => Call("voice")) Style="border-radius: 8px">
             <i class="fa-solid fa-phone fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
-        <MudIconButton OnClick=@(() => CallPeer("video")) Style="border-radius: 8px">
+        <MudIconButton OnClick=@(() => Call("video")) Style="border-radius: 8px">
             <i class="fa-solid fa-video fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
     </div>
@@ -102,8 +102,6 @@ Chi tiết chat gồm 3 phần
             </ul>
         </div>
     </div>
-   
-    
 
     <div>
 
@@ -384,12 +382,12 @@ Chi tiết chat gồm 3 phần
     }
 
     //
-    private async Task CallPeer(string typeCall)
+    private async Task Call(string typeCall)
     {
         HubConnection callHubConnection = CallHubManager.HubConnection!;
 
         var roomId = CurrentUser.currentUser!.userName + Id;
-        Console.WriteLine("CurrentUser.currentUser!.userName: " + CurrentUser.currentUser!.userName);
+        // Console.WriteLine("CurrentUser.currentUser!.userName: " + CurrentUser.currentUser!.userName);
 
         CallHubManager.isIdle = false;
 
@@ -402,9 +400,17 @@ Chi tiết chat gồm 3 phần
             SelectedConversation!.conversationName,
             "user-test",
             typeCall,
+            SelectedConversation.conversationType,
             DotNetObjectReference.Create(this)
         );
 
         await JSRuntime.InvokeVoidAsync("phatNhacChuong");
+    }
+
+    [JSInvokable]
+    public void setIdleToTrue()
+    {
+        // Console.WriteLine("setIdleToTrue");
+        CallHubManager.isIdle = true;
     }
 }

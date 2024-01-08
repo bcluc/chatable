@@ -9,12 +9,14 @@
     <source src="assets/audio/ringing-151670.mp3" type="audio/mp3" />
 </audio>
 
+@using Chatable.Data.Entitles;
+
 <MudDialog Style="max-width: 370px; border-radius: 20px;">
 
     <DialogContent>
 
         <div class="d-flex justify-center align-center mt-4 mb-3">
-            <MudImage Src="@("https://image.tmdb.org/t/p/w440_and_h660_face/" + callerAvt)" Height="100" Width="100" ObjectFit="@ObjectFit.Cover" Alt="Avatar Caller" Class="rounded-circle" />
+            <MudImage Src="@(Constant.uriBaseUserAvt + callerAvt)" Height="100" Width="100" ObjectFit="@ObjectFit.Cover" Alt="Avatar Caller" Class="rounded-circle" />
         </div>
 
         <MudText Align="Align.Center" Class="title">
@@ -35,7 +37,6 @@
                 Đồng ý
             </MudText>
         </div>
-
 
     </DialogContent>
 

@@ -2,7 +2,9 @@
 @*
 Non-optional parameters or literal routes cannot appear after optional parameters
 *@
-@page "/groupCall/{roomId}/{peerName}/{peerAvatar}/{typeCall}/{receiverName?}/{receiverAvt?}"
+@page "/groupCall/{roomId}/{peerName}/{peerAvatar}/{typeCall}/{conversationType?}/{receiverName?}/{receiverAvt?}"
+
+
 
 <link rel="stylesheet" type="text/css" href="css/lam/group_call.css" />
 
@@ -60,8 +62,6 @@ else
         Kết thúc sau @countdownSeconds giây
     </p>
 }
-
-
 
 <div id="my-frame">
     @if (isProcessing) 
@@ -155,11 +155,16 @@ else
 </div>
 }
 
+@using Chatable.Data.Entitles.Respond
+@using Chatable.Data.Entitles.Response
 @using Microsoft.AspNetCore.SignalR.Client;
 @using AgoraRTC.Models
+@using Newtonsoft.Json
 
 @inject IJSRuntime JSRuntime
 @inject ISnackbar Snackbar
+
+@inject HttpClient _http
 
 @implements IDisposable
 
@@ -180,6 +185,9 @@ else
 
     [Parameter]
     public string typeCall { get; set; } = "";
+
+    [Parameter]
+    public string? conversationType { get; set; } = "";
 
     public string? remoteId { get; set; }
 
@@ -224,37 +232,78 @@ else
 
         await hubCallConnection.StartAsync();
 
+        int rejectionCount = 0;
+        /*
+         * Biến này dùng cho trường hợp gọi nhóm
+         * Đếm số lượng các thành viên từ chối cuộc gọi nhóm
+         * Nếu rejectionCount = memberIds - 1 thì cancel cuộc gọi
+        */
+
         hubCallConnection.On<string>("receiverResponse", response =>
         {
-            timer!.Dispose();
-            timer = null;
 
-            JSRuntime.InvokeVoidAsync("tatNhacChuong");
-
-            switch (response)
+            if (conversationType == "Peer")
             {
-                case "acceptCall":
-                    status = "Đã kết nối";
-                    break;
-                case "rejectCall":
-                    status = "Không trả lời";
-                    hubRoomConnection!.SendAsync("LeaveRoom", roomId);
-                    JSRuntime.InvokeVoidAsync("finishCall");
-                    JSRuntime.InvokeVoidAsync("leaveAndRemoveLocalStream");
-                    break;
+                timer!.Dispose();
+                timer = null;
 
-                case "inAnotherCall":
-                    status = "đang ở trong cuộc gọi khác";
+                JSRuntime.InvokeVoidAsync("tatNhacChuong");
+
+                switch (response)
+                {
+                    case "acceptCall":
+                        status = "Đã kết nối";
+                        break;
+                    case "rejectCall":
+                        status = "Không trả lời";
+                        hubRoomConnection!.SendAsync("LeaveRoom", roomId);
+                        JSRuntime.InvokeVoidAsync("finishCall");
+                        JSRuntime.InvokeVoidAsync("leaveAndRemoveLocalStream");
+                        break;
+
+                    case "inAnotherCall":
+                        status = "đang ở trong cuộc gọi khác";
+                        hubRoomConnection!.SendAsync("LeaveRoom", roomId);
+                        JSRuntime.InvokeVoidAsync("finishCall");
+                        JSRuntime.InvokeVoidAsync("leaveAndRemoveLocalStream");
+                        break;
+                }
+            }
+            else
+            {
+                switch (response)
+                {
+                    case "acceptCall":
+                        status = "Đã kết nối";
+                        timer!.Dispose();
+                        timer = null;
+
+                        JSRuntime.InvokeVoidAsync("tatNhacChuong");
+                        break;
+                    case "rejectCall":
+                        rejectionCount++;
+                        break;
+
+                    case "inAnotherCall":
+                        rejectionCount++;
+                        break;
+                }
+
+                if (rejectionCount == memberIds.Count - 1)
+                {
+                    status = "Các thành viên đang bận hoặc từ chối cuộc gọi";
+                    JSRuntime.InvokeVoidAsync("tatNhacChuong");
+
                     hubRoomConnection!.SendAsync("LeaveRoom", roomId);
                     JSRuntime.InvokeVoidAsync("finishCall");
                     JSRuntime.InvokeVoidAsync("leaveAndRemoveLocalStream");
-                    break;
+                }
             }
+
 
             InvokeAsync(StateHasChanged);
 
         });
-
     }
 
     bool isFirst = true;
@@ -345,6 +394,8 @@ else
         }
     }
 
+    List<string> memberIds;
+
     protected override async Task OnParametersSetAsync()
     {
         await setupRoomHub();
@@ -356,10 +407,67 @@ else
         {
             await setupCallHub();
             PeerInfo myClientCallInfo = new PeerInfo(peerName, peerAvatar);
-            await hubCallConnection!.SendAsync("SendCallTo", remoteId, myClientCallInfo, typeCall, roomId);
+
+            Console.WriteLine($"conversationType = {conversationType}");
+
+            if (conversationType == "Group")
+            {
+                memberIds = await GetGroupMemberUsername(remoteId!);
+                foreach (var memberId in memberIds)
+                {
+                    // Console.WriteLine(memberId);
+                    if (memberId != peerId)
+                    {
+                        /* peerId là username của người gọi */
+                        await hubCallConnection!.SendAsync("SendCallTo", memberId, myClientCallInfo, typeCall, roomId);
+                    }
+                }
+            } 
+            else
+            {
+                await hubCallConnection!.SendAsync("SendCallTo", remoteId, myClientCallInfo, typeCall, roomId);
+            }
+
             timer = new Timer(Countdown, null, 1000, 1000);
         }
     }
+
+    async Task<List<string>> GetGroupMemberUsername(string groupId)
+    {
+        string erroMessage;
+        try
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + $"Group/{groupId}/Member");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<UserResponse>>>(responseContent);
+                try
+                {
+                    if (respond!.Data != null)
+                    {
+                        return respond.Data.Select(e => e.UserName).ToList();
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+                //await JSRuntime.InvokeAsync<string>("console.log", "group get", respond.Data);
+            }
+        }
+        catch (Exception ex)
+        {
+            erroMessage = ex.Message;
+        }
+        return new List<string>();
+    }
+
 
     private void Countdown(object? state)
     {
@@ -387,8 +495,24 @@ else
     }
 
     public async void handleMissingCall() {
-        // Console.WriteLine("SendMissingCallMessageTo");
-        await hubCallConnection!.SendAsync("SendMissingCallMessageTo", remoteId, peerId);
+        if (conversationType == "Group")
+        {
+            foreach (var memberId in memberIds)
+            {
+                // Console.WriteLine(memberId);
+                if (memberId != peerId)
+                {
+                    /* peerId là username của người gọi */
+                    await hubCallConnection!.SendAsync("SendMissingCallMessageTo", memberId, peerId);
+                }
+            }
+        }
+        else
+        {
+            // Console.WriteLine("SendMissingCallMessageTo");
+            await hubCallConnection!.SendAsync("SendMissingCallMessageTo", remoteId, peerId);
+        }
+
         await JSRuntime.InvokeVoidAsync("tatNhacChuong");
     }
 
@@ -404,7 +528,7 @@ else
         await JSRuntime.InvokeVoidAsync("window.close");
     }
 
-        public void ToggleMic()
+    public void ToggleMic()
     {
         isMicOn = !isMicOn;
         JSRuntime.InvokeVoidAsync("toggleMic");
@@ -415,7 +539,6 @@ else
         isVideoOn = !isVideoOn;
         JSRuntime.InvokeVoidAsync("toggleVideo");
     }
-
 
     public async void Dispose()
     {
