@@ -55,29 +55,27 @@
     font-size: 18px;
     justify-content: center;
 }
+
 .chat-container {
-    height: 100%;
-    width: 100%;
+    flex: 1; /* expanded */
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
-    flex: 1;
     position: relative;
-    z-index: -2;
     background-color: #F2F2FA;
 }
+
 .water-mark-img {
     position: fixed;
     height: 60%;
-    z-index: -1;
 }
 
-
 .messages-list {
-    flex: 1; /* expanded */
-    height: inherit;
+    position: absolute;
+    height: 100%;
+    width: 100%;
     overflow-y: scroll;
+    padding: 20px;
 }
 
 

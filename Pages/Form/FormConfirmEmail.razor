@@ -1,7 +1,8 @@
 @page "/confirm"
-@layout LoginLayout
+@layout EmptyLayout
 
 @using System.ComponentModel.DataAnnotations;
+@using Chatable.DI
 @using Microsoft.AspNetCore.Components.Forms;
 @using System.Net.Http;
 @using Newtonsoft.Json;
@@ -47,7 +48,7 @@
                                                 class="imgHero">
                                                 <a href="#" style="text-decoration:none" target="_blank">
                                                     <img alt="" border="0" src="@curUser.avatarUrl" class="img-avt"
-                                                        width="200px">
+                                                        width="200">
                                                 </a>
                                             </td>
                                         </tr>
@@ -206,7 +207,14 @@
     </tbody>
 </table>
 
+@inject CurrentUser CurrentUser
 
 @code {
-    User curUser = Constant.currentUser;
+    User curUser;
+
+
+    protected override void OnInitialized()
+    {
+        curUser = CurrentUser.currentUser!;
+    }
 }

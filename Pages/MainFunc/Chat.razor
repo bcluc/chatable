@@ -1,5 +1,5 @@
 ﻿@page "/chat"
-@page "/chat/{_id?}"
+@page "/chat/{_conversationType?}/{_id?}"
 @using Chatable.Data.Components;
 @using Chatable.Data.Components.Chat
 @using Chatable.Data.Components.Dialog.AddGroup
@@ -100,6 +100,8 @@
 
 </div>
 
+@implements IAsyncDisposable
+
 @code {
 
 	/* Code của Lâm */
@@ -116,15 +118,14 @@
 	[Parameter]
 	public string? _id { get; set; }
 
+	[Parameter]
+	public string? _conversationType { get; set; }
+
 	//private AuthenticationState
 	private string value2;
 	private bool _loadingUsers = false;
 	private Conversation? _selectedConversation = null;
 	private MessageDTO? _newIncomingMessage = null;
-	private HubConnection _hubConnection;
-	private string _previousSelectedUserId = "";
-
-	private bool isConnected => _hubConnection.State == HubConnectionState.Connected;
 
 	// Khi nào run thì đổi
 	// = IList.Empty<Conversation>();
@@ -238,15 +239,7 @@
 		// isShowChat = true;
 	}
 
-	private HubConnection ConfigureConnection()
-	{
-		//Tạo hub connection, listen
-		// var hubConnection = new HubConnectionBuilder()
-		// 					.WithUrl(_navigationManager.ToAbsoluteUri("/message-hub"),
-		// 								options => options.AccessTokenProvider = () => Task.FromResult(AuthenticationState.Token))
-		// 					.Build();
-		return null;
-	}
+	
 
 	private async Task<bool> GetSelectedConversation()
 	{
@@ -259,7 +252,8 @@
 			{
 				HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
 				httpRequestMessage.Method = new HttpMethod("GET");
-				httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/" + _id);
+				// FIX TẠM
+				httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/" + _conversationType + "/" + _id);
 				var response = await _http.SendAsync(httpRequestMessage);
 
 				if (response.IsSuccessStatusCode)

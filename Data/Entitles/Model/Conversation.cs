@@ -1,11 +1,10 @@
-﻿using System.ComponentModel;
-
-namespace Chatable.Data.Entitles.Model
+﻿namespace Chatable.Data.Entitles.Model
 {
     public class Conversation
     {
 
         public string? conversationName { get; set; }
+        public string conversationName { get; set; }
 
         public string conversationAvatar { get; set; }
 
@@ -19,13 +18,19 @@ namespace Chatable.Data.Entitles.Model
             conversationAvatar = conversationAvatar ?? Constant.defaultImgMale;
         }
 
-        public Conversation(string? id,  string conversationType, LastMessageDTO? lastMessage, string conversationName, string conversationAvatar)
+        public Conversation(
+            string? id,  
+            string conversationType, 
+            LastMessageDTO? lastMessage, 
+            string conversationName,
+            string conversationAvatar
+        )
         {
             conversationId = id;
             this.lastMessage = lastMessage;
             this.conversationType = conversationType;
-            this.conversationAvatar = conversationAvatar;
             this.conversationName = conversationName;
+            this.conversationAvatar = conversationAvatar;
         }
         
     }
