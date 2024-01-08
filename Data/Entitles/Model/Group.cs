@@ -12,9 +12,9 @@ namespace Chatable.Data.Entitles.Model
         public Group(string groupId, string groupName, string adminId, string createdAt)
         {
             conversationId = groupId;
-            Name = groupName;
+            conversationName = groupName;
             AdminId = adminId;
-            Avatar = Constant.defaultImgGroup;
+            conversationAvatar = Constant.defaultImgGroup;
             CreatedAt = DateTime.Parse(createdAt);
             conversationType = "Group";
         }

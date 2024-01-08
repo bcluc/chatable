@@ -2,6 +2,7 @@
 @page "/login"
 
 @using System.ComponentModel.DataAnnotations;
+@using Chatable.DI
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
 @using Chatable.Data.Entitles.Respond
@@ -115,7 +116,7 @@ LeBaoNhu71!
 
 }
 
-
+@inject CurrentUser CurrentUser
 
 @code {
   
@@ -176,8 +177,6 @@ LeBaoNhu71!
                         await _localStorageService.SetItemAsync("refresh_token", user.Data.refreshToken);
 
                         Constant.token = user.Data;
-                        await jsRuntime.InvokeAsync<string>("console.log", "access token", Constant.token);
-                       
                     }
                 }
                 catch (Exception e)
@@ -198,9 +197,9 @@ LeBaoNhu71!
             {
                 usr = await GetCurUser();
                 if (usr.avatarUrl == null) setNullAvt(usr.gender);
-                Constant.currentUser = usr;
+                CurrentUser.currentUser = usr;
 
-                await jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
+                // await jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
                 _navigationManager.NavigateTo("/chat");
             }
         }

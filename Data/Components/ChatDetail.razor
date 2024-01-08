@@ -1,4 +1,5 @@
-﻿@using Chatable.Data.Entitles.DTO
+﻿@using Chatable.DI
+@using Chatable.Data.Entitles.DTO
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.Respond;
@@ -6,6 +7,7 @@
 @using System.Text.Json;
 @using System.Text.Json.Serialization;
 @using System.Net.Http;
+@using Microsoft.AspNetCore.SignalR.Client
 @using Newtonsoft.Json;
 
 @inject HttpClient Client
@@ -29,79 +31,76 @@ Chi tiết chat gồm 3 phần
         <MudIconButton id="back-btn" Class="mr-3" OnClick="BackToConversationList">
             <i class="fa-solid fa-chevron-left fa-lg"></i>
         </MudIconButton>
-        <img class="coversation-img mr-3" src="@SelectedConversation.Avatar" />
+        <img class="coversation-img mr-3" src="@SelectedConversation.conversationAvatar" />
         <div class="d-flex flex-column" style="width: 160px">
-            <p class="receiver-name">@SelectedConversation.Name</p>
+            <p class="receiver-name">@SelectedConversation.conversationName</p>
             <p class="receiver-status">Đang hoạt động</p>
         </div>
         <MudSpacer />
-        <MudIconButton Class="mr-2" Style="border-radius: 8px">
+        <MudIconButton Class="mr-2" OnClick=@(() => Call("voice")) Style="border-radius: 8px">
             <i class="fa-solid fa-phone fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
-        <MudIconButton Style="border-radius: 8px">
+        <MudIconButton OnClick=@(() => Call("video")) Style="border-radius: 8px">
             <i class="fa-solid fa-video fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
     </div>
 
     <MudDivider></MudDivider>
-    <div class="chat-container">
+ <div class="chat-container">
         <img src="@Constant.waterMark" class="water-mark-img" />
         <div class="messages-list">
-           
-            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="header d-flex justify-content-between bg-danger">
+                <span class="text-white">@_errorMessage</span>
+                <button class="btn btn-danger btn-sm" @onclick="() => _errorMessage = null">x</button>
+            </div>
+        }
+        @if (!string.IsNullOrWhiteSpace(_infoMessage))
+        {
+            <div class="header d-flex justify-content-between bg-warning">
+                <span class="text-white">@_infoMessage</span>
+            </div>
+        }
+        <ul id="messages-ul" style="padding: 5px">
+            @if (_loadingMessages)
             {
-                <div class="header d-flex justify-content-between bg-danger">
-                    <span class="text-white">@_errorMessage</span>
-                    <button class="btn btn-danger btn-sm" @onclick="() => _errorMessage = null">x</button>
-                </div>
+                <li class="list-group-item">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Loading messages...
+                </li>
             }
-            @if (!string.IsNullOrWhiteSpace(_infoMessage))
+            else
             {
-                <div class="header d-flex justify-content-between bg-warning">
-                    <span class="text-white">@_infoMessage</span>
-                </div>
-            }
-            <ul id="messages-ul" style="padding: 5px">
-                @if (_loadingMessages)
+                @foreach (var msg in _messages)
                 {
-                    <li class="list-group-item">
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        Loading messages...
+                    var isMyMessage = msg.SenderId == currentUser.userName;
+                    var isToday = msg.SendAt.Date == DateTime.Today.Date;
+
+                    var cls = $"justify-content-{(isMyMessage ? "end" : "start")}";
+
+                    <li class="d-flex @cls">
+                        <p class="single-msg @(isMyMessage ? "me" : "other")">
+                            @msg.Content
+                            <br>
+                            <small class="msg-dt">
+                                @if (isToday)
+                                {
+                                    <span>@msg.SendAt.ToShortTimeString()</span>
+                                }
+                                else
+                                {
+                                    <span>@msg.SendAt.ToShortDateString() | @msg.SendAt.ToShortTimeString()</span>
+                                }
+                            </small>
+                        </p>
                     </li>
                 }
-                else
-                {
-                    @foreach (var msg in _messages)
-                    {
-                        var incoming = msg.SenderId == currentUser.userName;
-                        var isToday = msg.SendAt.Date == DateTime.Today.Date;
-
-                        var cls = $"justify-content-{(incoming ? "start" : "end")}";
-
-
-                        <li class="d-flex @cls">
-                            <p class="single-msg @(incoming ? "other" : "me")">
-                                @msg.Content
-                                <br>
-                                <small class="msg-dt">
-                                    @if (isToday)
-                                    {
-                                        <span>@msg.SendAt.ToShortTimeString()</span>
-                                    }
-                                    else
-                                    {
-                                        <span>@msg.SendAt.ToShortDateString() | @msg.SendAt.ToShortTimeString()</span>
-                                    }
-                                </small>
-                            </p>
-                        </li>
-                    }
-                }
-            </ul>
-        </div>
+            }
+        </ul>
     </div>
-   
-    
+    </div>
 
     <div>
 
@@ -132,11 +131,21 @@ Chi tiết chat gồm 3 phần
         *@
         <div id="message-input">
             <MudTextField Placeholder="Nhập tin nhắn" @bind-Value="_newMessage" Variant="Variant.Text" DisableUnderLine="true"></MudTextField>
-            <button class="btn-send mx-4" type="submit">Gửi</button>
+            <button class="btn-send mx-4" @onclick="SendMessage">Gửi</button>
         </div>
     </div>
 
 </div>
+
+<style>
+
+</style>
+
+@inject CallHubManager CallHubManager
+@inject MessageHubManager MessageHubManager
+@inject CurrentUser CurrentUser
+
+@inject IJSRuntime JsRuntime
 
 @code {
 
@@ -144,13 +153,10 @@ Chi tiết chat gồm 3 phần
     [Parameter]
     public EventCallback BackToConversationList { get; set; }
 
-
     /* Code của Cường */
-    private User currentUser = Constant.currentUser;
-
+    private User currentUser;
     [Parameter]
     public Conversation? SelectedConversation { get; set; }
-
 
     [Parameter]
     public string? Id {get; set;}
@@ -170,6 +176,18 @@ Chi tiết chat gồm 3 phần
     private bool _scrollToBottom = false;
     private bool _loadingMessages = false;
     private bool _loadingConversation = false;
+
+    protected override void OnInitialized()
+    {
+        currentUser = CurrentUser.currentUser!;
+
+        MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceived", message =>
+        {
+            Console.WriteLine("MessageReceived: " + message.Content);
+            _messages.Add(message);
+            InvokeAsync(StateHasChanged);
+        });
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -196,6 +214,7 @@ Chi tiết chat gồm 3 phần
             //await JsRuntime.InvokeVoidAsync("window.scrollToLastMessage");
         }
     }
+
     //Get SelectedConversation
     private async Task<bool> GetSelectedConversation()
     {
@@ -227,7 +246,7 @@ Chi tiết chat gồm 3 phần
                         }
                         else
                         {
-                            _infoMessage = $"Không có cuộc trò chuyện nào giữa bạn và {SelectedConversation.Name}";
+                            _infoMessage = $"Không có cuộc trò chuyện nào giữa bạn và {SelectedConversation.conversationName}";
                         }
                     }
                     catch (Exception e)
@@ -283,7 +302,7 @@ Chi tiết chat gồm 3 phần
                         }
                         else
                         {
-                            _infoMessage = $"Không có cuộc trò chuyện nào giữa bạn và {SelectedConversation.Name}";
+                            _infoMessage = $"Không có cuộc trò chuyện nào giữa bạn và {SelectedConversation.conversationName}";
                         }
                     }
                     catch (Exception e)
@@ -328,7 +347,7 @@ Chi tiết chat gồm 3 phần
                 {
                     if (respond.Data != null)
                     {
-                       // SelectedUser = respond.Data;
+                        // SelectedUser = respond.Data;
                     }
                 }
                 catch (Exception e)
@@ -346,32 +365,55 @@ Chi tiết chat gồm 3 phần
         return await Task.FromResult(true);
     }
 
-
-    private async Task HandleSendMessageSubmit()
+    private async Task SendMessage()
     {
         if (!string.IsNullOrWhiteSpace(_newMessage))
         {
-            //var sendMessageDto = new Message(Guid.NewGuid().ToString(), "1", SelectedUser!.UserName, DateTime.Now, "Text", _newMessage);
-
-
-            //var response = await GetClient().PostAsJsonAsync("api/messages", sendMessageDto, JsonConverter.JsonSerializerOptions);
-
-            // ADD Message
-            /*
-            if (response.IsSuccessStatusCode)
+            if (SelectedConversation!.conversationType == "Peer")
             {
-                var messageDto = new MessageDto(SelectedUser!.Id, AuthenticationState.User.Id, _newMessage, DateTime.Now);
-                _messages.Add(messageDto);
-                _scrollToBottom = true;
-                _newMessage = "";
-                _errorMessage = null;
-                _infoMessage = null;
+                await MessageHubManager.HubConnection!.SendAsync("SendPeerMessage", Id, "text", _newMessage);
             }
-           else
+            else
             {
-                _errorMessage = "Error sending message";
+                await MessageHubManager.HubConnection!.SendAsync("SendGroupMessage", Id, "text", _newMessage);
             }
-            */
+
+            _messages.Add(new MessageDTO(currentUser.userName, "text", _newMessage, DateTime.UtcNow, ""));
+            await JsRuntime.InvokeVoidAsync("cuon");
+            _newMessage = "";
         }
+    }
+
+    //
+    private async Task Call(string typeCall)
+    {
+        HubConnection callHubConnection = CallHubManager.HubConnection!;
+
+        var roomId = CurrentUser.currentUser!.userName + Id;
+        // Console.WriteLine("CurrentUser.currentUser!.userName: " + CurrentUser.currentUser!.userName);
+
+        CallHubManager.isIdle = false;
+
+        await JSRuntime.InvokeVoidAsync(
+            "moCuaSoGoiDien",
+            CurrentUser.currentUser.userName,
+            CurrentUser.currentUser.fullName,
+            "user-nhubaole",
+            Id,
+            SelectedConversation!.conversationName,
+            "user-test",
+            typeCall,
+            SelectedConversation.conversationType,
+            DotNetObjectReference.Create(this)
+        );
+
+        await JSRuntime.InvokeVoidAsync("phatNhacChuong");
+    }
+
+    [JSInvokable]
+    public void setIdleToTrue()
+    {
+        // Console.WriteLine("setIdleToTrue");
+        CallHubManager.isIdle = true;
     }
 }

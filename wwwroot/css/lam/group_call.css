@@ -1,0 +1,140 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 85vh;
+}
+
+.avatar-100 {
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-150 {
+    height: 150px;
+    width: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-200 {
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-card {
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    top: 0px;
+    background-color: whitesmoke;
+}
+
+.ending-call-banner {
+    height: 100%;
+    border-radius: 14px;
+}
+
+.mud-typography-h3 {
+    font-size: 1.6rem;
+    line-height: 1.167;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.mud-typography-h5 {
+    font-size: 1.2rem;
+    line-height: 1.334;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+#my-frame {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    height: 230px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #013366;
+}
+
+#controls {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    /* bottom position */
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#count-down {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+}
+
+.button-27 {
+    appearance: none;
+    border-radius: 14px;
+    border: none;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    cursor: pointer;
+    line-height: normal;
+    margin: 0;
+    min-width: 0;
+    outline: none;
+    padding: 20px;
+    text-decoration: none;
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    will-change: transform;
+}
+
+.button-27:disabled {
+    pointer-events: none;
+}
+
+.button-27:hover {
+    box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+    transform: translateY(0px);
+}
+
+.button-27:active {
+    box-shadow: none;
+    transform: translateY(2px);
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    grid-auto-rows: 588px;
+    gap: 12px;
+}
+
+.grid-item {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #013366;
+}
