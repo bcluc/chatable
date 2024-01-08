@@ -79,7 +79,7 @@ else
             }
             else if(Id == "friendRequestList")
             {
-                <FriendRequestList Loading="@_loadingList" Groups="@_requestList" OnFriendRequestSelected="OnRequestSelected" />
+                <FriendRequestList Loading="@_loadingList" Requests="@_requestList" OnFriendRequestSelected="OnRequestSelected" />
             }
         }
     </div>
@@ -124,7 +124,7 @@ else
         {
             _titleText = "Danh sách lời mời kết bạn";
             _titleIcon = @Icons.Material.Filled.Email;
-            
+            await GetFriendReqList();
         }
     }
 
@@ -145,7 +145,7 @@ else
             throw new ArgumentNullException(nameof(group));
         }
         // go to conversation link với type là peer
-        _navigationManager.NavigateTo("/chat/" + group.GroupName);
+        _navigationManager.NavigateTo("/chat/" + group.GroupId);
         //_navigationManager.NavigateTo("/chat/" + Constant.currentUser.userName +"_" +user.userName);
     }
     private async Task OnRequestSelected(FriendRequestDTO request)
@@ -268,6 +268,7 @@ else
                 {
                     if (respond.Data != null)
                     {
+                        await JSRuntime.InvokeAsync<string>("console.log", "friend req get", respond.Data);
                         _requestList = respond.Data;
                     }
                 }

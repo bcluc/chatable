@@ -14,28 +14,27 @@
     }
     else
     {
-        @foreach (var group in Groups)
+        @foreach (var request in Requests)
         {
-
-            <li class="list-group-item " @onclick="() => HandleUserClick(group)">
+            <li class="list-group-item " @onclick="() => HandleUserClick(request)">
                 <div class="friend-request-card">
                     <div class="profile-picture">
-                        <img src="https://thepracticaldev.s3.amazonaws.com/i/sldkglekmnqc4outtfqd.jpg">
+                        <img src="@Constant.defaultImgFemale">
                     </div>
                     <div class="user-details">
-                        <h1>Love Graysosdfsdfsdfsdfsdfsdfsdfsdn</h1>
-                        <h2>13 Mutual Friends</h2>
+                        <h4>@request.senderId</h4>
+                        <h4>Đã gửi bạn lời mời kết bạn</h4>
                     </div>
                     <div class="friend-request-actions">
-                        <button class="button button-primary">Accept</button>
-                        <button class="button button-secondary">Decline</button>
+                        <button class="button button-primary">Chấp nhận</button>
+                        <button class="button button-secondary">Từ chối</button>
                     </div>
                 </div>
-                @* <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+@*                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
                         <MudImage Src=@Constant.defaultImgGroup></MudImage>
                     </MudAvatar>
-                    <h4 class="user-name">@group.GroupName</h4>
+                    <h4 class="user-name">@request.senderId</h4>
                 </div> *@
             </li>
         }
@@ -45,7 +44,7 @@
 @code {
     private User currentUser = Constant.currentUser;
     [Parameter]
-    public IEnumerable<FriendRequestDTO> Groups { get; set; } = Enumerable.Empty<FriendRequestDTO>();
+    public IEnumerable<FriendRequestDTO> Requests { get; set; } = Enumerable.Empty<FriendRequestDTO>();
 
     [Parameter]
     public bool Loading { get; set; }
@@ -57,4 +56,5 @@
     {
         await OnFriendRequestSelected.InvokeAsync(friendReq);
     }
+
 }
