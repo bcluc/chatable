@@ -28,7 +28,7 @@ namespace Chatable.Data.Entitles
         public static readonly IList<String> states = new ReadOnlyCollection<String>
         (new List<String>
         {
-        "Alabama", "Alaska", "American Samoa"
+            "Alabama", "Alaska", "American Samoa"
         });
 
         public static readonly List<Conversation> chats = new List<Conversation>
