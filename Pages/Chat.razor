@@ -1,5 +1,5 @@
 ﻿@page "/chat"
-@page "/chat/{_id?}"
+@page "/chat/{_conversationType?}/{_id?}"
 @using Chatable.Data.Components;
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.DTO
@@ -115,6 +115,9 @@
 	[Parameter]
 	public string? _id { get; set; }
 
+	[Parameter]
+	public string? _conversationType { get; set; }
+
 	//private AuthenticationState
 	private string value2;
 	private bool _loadingUsers = false;
@@ -213,7 +216,7 @@
 		{
 			chatUser.IsSelected = true;
 		}
-		_navigationManager.NavigateTo($"/chat/{user.conversationId}");
+		_navigationManager.NavigateTo($"/chat/{user.conversationType}/{user.conversationId}");
 	}
 
 	private async Task<bool> GetSelectedConversation()
@@ -227,7 +230,8 @@
 			{
 				HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
 				httpRequestMessage.Method = new HttpMethod("GET");
-				httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/" + _id);
+				// FIX TẠM
+				httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/" + _conversationType + "/" + _id);
 				var response = await _http.SendAsync(httpRequestMessage);
 
 				if (response.IsSuccessStatusCode)

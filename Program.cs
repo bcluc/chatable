@@ -15,6 +15,7 @@ builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<AppData>();
 builder.Services.AddScoped<CurrentUser>();
+
 builder.Services.AddScoped<CallHubManager>();
 builder.Services.AddScoped<MessageHubManager>();
 
