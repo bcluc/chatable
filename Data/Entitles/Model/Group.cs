@@ -3,20 +3,21 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Chatable.Data.Entitles.Model
 {
-    public class Group : Conversation
+    public class Group
     {
-        //public string GroupName { get; set; }
+        public string GroupName { get; set; }
+        public string GroupId {  get; set; }
+        public string Avatar {  get; set; }
         public string AdminId { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<string> MemberList { get; set; }
         public Group(string groupId, string groupName, string adminId, string createdAt)
         {
-            conversationId = groupId;
-            conversationName = groupName;
+            GroupId = groupId;
+            GroupName = groupName;
             AdminId = adminId;
-            conversationAvatar = Constant.defaultImgGroup;
+            Avatar = Constant.defaultImgGroup;
             CreatedAt = DateTime.Parse(createdAt);
-            conversationType = "Group";
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿@using Chatable.Data.Entitles.Model;
+﻿@using Chatable.Data.Components.List
+@using Chatable.Data.Entitles.DTO
+@using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.Respond;
 @using Microsoft.AspNetCore.Components.Forms
@@ -58,7 +60,28 @@ else
     <MudDivider/>
 
     <div class="contact-list">
-        <UserList Loading="@_loadingUsers" Chats="@userList" OnUserSelected="OnUserSelected" />
+        @if(_loadingList)
+        {
+            <div>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading list...
+            </div>
+        }
+        else
+        {
+            @if(Id == "friendList")
+            {
+                <UserList Loading="@_loadingList" Chats="@_friendList" OnUserSelected="OnUserSelected" />
+            }
+            else if (Id == "groupList")
+            {
+                <GroupList Loading="@_loadingList" Groups="@_groupList" OnGroupSelected="OnGroupSelected"/>
+            }
+            else if(Id == "friendRequestList")
+            {
+                <FriendRequestList Loading="@_loadingList" Groups="@_requestList" OnFriendRequestSelected="OnRequestSelected" />
+            }
+        }
     </div>
 </div>
 
@@ -76,66 +99,195 @@ else
     private string _titleText = "";
     private string _titleIcon = "";
 
+    private bool _loadingList = false;
+    private List<UserDTO> _friendList = new List<UserDTO>();
+    private List<Group> _groupList = new List<Group>();
+    public IList<FriendRequestDTO> _requestList = new List<FriendRequestDTO>();
 
-    private bool _loadingUsers = false;
-    public IList<User> userList = Constant.usersList;
 
-    // Note: chữa lỗi cho BC
 
-    // protected override async Task OnInitializedAsync()
-    // {
-
-    //     await getContentType();
-    // }
-
-    // private async Task<bool> getContentType()
-    // {
-    //     if(Id == "friendList")
-    //     {
-    //         _titleText = "Danh sách bạn bè";
-    //         _titleIcon = @Icons.Material.Filled.Group;
-    //     }
-    //     else if (Id == "groupList")
-    //     {
-    //         _titleText = "Danh sách nhóm";
-    //         _titleIcon = @Icons.Material.Filled.Groups;
-    //     }
-    //     else if (Id == "friendRequestList")
-    //     {
-    //         _titleText = "Danh sách lời mời kết bạn";
-    //         _titleIcon = @Icons.Material.Filled.Email;
-    //     }
-
-    //     return await Task.FromResult(true);
-    // }
-
-    protected override void OnParametersSet()
-    {
+    protected override async Task OnParametersSetAsync()
+    {    
         if (Id == "friendList")
         {
             _titleText = "Danh sách bạn bè";
             _titleIcon = @Icons.Material.Filled.Group;
+            await GetFriendList();
         }
         else if (Id == "groupList")
         {
             _titleText = "Danh sách nhóm";
             _titleIcon = @Icons.Material.Filled.Groups;
+            await GetGroupList();
         }
         else if (Id == "friendRequestList")
         {
             _titleText = "Danh sách lời mời kết bạn";
             _titleIcon = @Icons.Material.Filled.Email;
+            
         }
     }
 
-    private async Task OnUserSelected(User user)
+    private async Task OnUserSelected(UserDTO user)
     {
         if (user is null)
         {
             throw new ArgumentNullException(nameof(user));
         }
         // go to conversation link với type là peer
-        _navigationManager.NavigateTo("/chat/" + user.userName);
+        _navigationManager.NavigateTo("/chat/" + user.UserName);
         //_navigationManager.NavigateTo("/chat/" + Constant.currentUser.userName +"_" +user.userName);
     }
+    private async Task OnGroupSelected(Group group)
+    {
+        if (group is null)
+        {
+            throw new ArgumentNullException(nameof(group));
+        }
+        // go to conversation link với type là peer
+        _navigationManager.NavigateTo("/chat/" + group.GroupName);
+        //_navigationManager.NavigateTo("/chat/" + Constant.currentUser.userName +"_" +user.userName);
+    }
+    private async Task OnRequestSelected(FriendRequestDTO request)
+    {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+        // go to conversation link với type là peer
+        _navigationManager.NavigateTo("/chat/" + request.senderId); 
+        //_navigationManager.NavigateTo("/chat/" + Constant.currentUser.userName +"_" +user.userName);
+    }
+
+    // get friend list
+    private async Task<bool> GetFriendList()
+    {
+        bool success;
+        string erroMessage;
+        try
+        {
+            _loadingList = true;
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Friend");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<UserDTO>>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        _friendList = respond.Data;
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        finally
+        {
+            _loadingList = false;
+        }
+        return await Task.FromResult(true);
+    }
+    // get group list
+    private async Task<bool> GetGroupList()
+    {
+        bool success;
+        string erroMessage;
+        try
+        {
+            _loadingList = true;
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Group");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<Group>>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        _groupList = respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        finally
+        {
+            _loadingList = false;
+        }
+        return await Task.FromResult(true);
+    }
+    // get friendReq list
+    private async Task<bool> GetFriendReqList()
+    {
+        bool success;
+        string erroMessage;
+        try
+        {
+            _loadingList = true;
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Received");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<FriendRequestDTO>>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        _requestList = respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        finally
+        {
+            _loadingList = false;
+        }
+        return await Task.FromResult(true);
+    }
+
 }

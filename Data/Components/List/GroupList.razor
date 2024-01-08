@@ -1,4 +1,5 @@
 ﻿@using Chatable.Data.Entitles;
+@using Chatable.Data.Entitles.DTO
 @using Chatable.Data.Entitles.Model;
 <link rel="stylesheet" href="/css/ChatList.css">
 
@@ -13,14 +14,14 @@
     }
     else
     {
-        @foreach (var chat in Chats)
+        @foreach (var group in Groups)
         {
-            <li class="list-group-item @(chat.IsSelected ? "user-select" : "")" @onclick="() => HandleUserClick(chat)">
+            <li class="list-group-item " @onclick="() => HandleUserClick(group)">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
-                        <MudImage Src=@chat.avatarUrl></MudImage>
+                        <MudImage Src=@Constant.defaultImgGroup></MudImage>
                     </MudAvatar>
-                    <h4 class="user-name">@chat.fullName</h4>
+                    <h4 class="user-name">@group.GroupName</h4>
                 </div>
             </li>
         }
@@ -30,16 +31,16 @@
 @code {
     private User currentUser = Constant.currentUser;
     [Parameter]
-    public IEnumerable<User> Chats { get; set; } = Enumerable.Empty<User>();
+    public IEnumerable<Group> Groups { get; set; } = Enumerable.Empty<Group>();
 
     [Parameter]
     public bool Loading { get; set; }
 
     [Parameter]
-    public EventCallback<User> OnUserSelected { get; set; }
+    public EventCallback<Group> OnGroupSelected { get; set; }
 
-    private async Task HandleUserClick(User chat)
+    private async Task HandleUserClick(Group group)
     {
-        await OnUserSelected.InvokeAsync(chat);
+        await OnGroupSelected.InvokeAsync(group);
     }
 }

@@ -61,3 +61,31 @@
     display: flex;
     align-items: flex-start;
 }
+
+.friend-request-card {
+    display: flex;
+    width: 100%;
+    padding: 20px;
+    flex-direction: row;
+    align-items: center;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.6); /** This shadow is no good... **/
+}
+    .profile-picture
+{
+    width: 100px;
+    height: 100px;
+    border-radius: 100%;
+    margin-right: 27px;
+    overflow: hidden;
+}
+    
+    img
+
+{
+    width: 100px;
+    height: 100%;
+}
+                     }
+    

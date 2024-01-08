@@ -331,48 +331,5 @@
 		return await Task.FromResult(true);
 	}
 
-	private async Task<bool> GetGroup()
-	{
-		bool success;
-		string erroMessage;
-		List<Group> groups = new List<Group>();
-		try
-		{
-			HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-			httpRequestMessage.Method = new HttpMethod("GET");
-			httpRequestMessage.RequestUri = new Uri(Constant.uriHost+ "Group");
-			var response = await _http.SendAsync(httpRequestMessage);
-
-			if (response.IsSuccessStatusCode)
-			{
-				var responseContent = await response.Content.ReadAsStringAsync();
-				var respond = JsonConvert.DeserializeObject<GroupGetResponse>(responseContent);
-				success = true;
-				try
-				{
-					if (respond.Data != null)
-					{
-						foreach (var group in respond.Data)
-						{
-							Chats.Add(group);
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					erroMessage = e.Message;
-				}
-
-				//await JSRuntime.InvokeAsync<string>("console.log", "group get", respond.ListGroup);
-			}
-		}
-		catch (Exception ex)
-		{
-			success = false;
-			erroMessage = ex.Message;
-		}
-		return await Task.FromResult(true);
-	}
-
 	
 }
