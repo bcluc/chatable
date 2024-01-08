@@ -4,7 +4,6 @@
     {
 
         public string? conversationName { get; set; }
-        public string conversationName { get; set; }
 
         public string conversationAvatar { get; set; }
 
