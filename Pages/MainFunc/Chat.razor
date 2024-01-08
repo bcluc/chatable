@@ -90,7 +90,7 @@
 
 			<ChatDetail 
 				Id = "@_id"
-				SelectedConversation="@_selectedUser"
+				SelectedConversation="@_selectedConversation"
 			BackToConversationList="BackToConversationList"
 			NewIncomingMessage="@_newIncomingMessage"
 			OnIncomingMessageRecieved="()=> _newIncomingMessage = null" />
@@ -119,7 +119,7 @@
 	//private AuthenticationState
 	private string value2;
 	private bool _loadingUsers = false;
-	private Conversation? _selectedUser = null;
+	private Conversation? _selectedConversation = null;
 	private MessageDTO? _newIncomingMessage = null;
 	private HubConnection _hubConnection;
 	private string _previousSelectedUserId = "";
@@ -133,23 +133,25 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
-		if(_selectedUser is null && _id is not null)	await GetSelectedConversation();
-		if (_selectedUser is not null && _selectedUser.conversationId != _previousSelectedUserId)
-		{
-			_previousSelectedUserId = _selectedUser.conversationId;
-			await GetSelectedConversation();
-		}
+		// await JSRuntime.InvokeAsync<string>("console.log", "parameter change - conversation", _selectedConversation);
+		// await JSRuntime.InvokeAsync<string>("console.log", "parameter change - id", _id);
+		// await JSRuntime.InvokeAsync<string>("console.log", "parameter change - mess", _newIncomingMessage);
+
+		if(_selectedConversation is null)	await GetSelectedConversation();
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
+		//await JSRuntime.InvokeAsync<string>("console.log", "init chat", "true");
+		
+		await GetAllConversations();
 		foreach(var chat in Chats)
 		{
 			chat.IsSelected = false;
 			if (chat.conversationId == _id) chat.IsSelected = true;
 		}
-        base.OnInitialized();
-        
+		//await JSRuntime.InvokeAsync<string>("console.log", "list chat", Chats);
+
 		@*if (!AuthenticationState.IsAuthenticated)
         {
             NavigationManager.NavigateTo("/");
@@ -182,7 +184,6 @@
                 StateHasChanged();
             }
         } *@
-		await GetAllConversations();
 	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -191,13 +192,13 @@
 	}
 	private async Task<IEnumerable<string>> Search2(string value)
 	{
-	// In real life use an asynchronous function for fetching data from an api.
+		// In real life use an asynchronous function for fetching data from an api.
 		await Task.Delay(5);
 
-        // if text is null or empty, don't return values (drop-down will not open)
+		// if text is null or empty, don't return values (drop-down will not open)
 		if (string.IsNullOrEmpty(value))
 			return new string[0];
-			// return chat room
+		// return chat room
 		return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
 	}
 
@@ -209,8 +210,9 @@
 
 	private async Task OnUserSelected(Conversation user)
 	{
-	/* Code của BC*/
-		_selectedUser = user;
+		/* Code của BC*/
+		_selectedConversation = user;
+		_id = user.conversationId;
 
 		var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
 		if (selectedChatUser is not null)
@@ -228,7 +230,7 @@
 		{
 			chatUser.IsSelected = true;
 		}
-		await JSRuntime.InvokeAsync<string>("console.log", "select usser", _selectedUser);
+		//await JSRuntime.InvokeAsync<string>("console.log", "select usser", _selectedConversation);
 
 		_navigationManager.NavigateTo($"/chat/{user.conversationId}");
 
@@ -269,7 +271,7 @@
 					{
 						if (respond.Data != null)
 						{
-							_selectedUser = respond.Data;
+							_selectedConversation = respond.Data;
 
 						}
 					}
