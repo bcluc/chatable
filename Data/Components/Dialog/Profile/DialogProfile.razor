@@ -79,6 +79,8 @@
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     User currentUser;
+    List<IBrowserFile> selectedFiles = new List<IBrowserFile>();
+    String avatar;
 
     protected override void OnInitialized()
     {
@@ -137,7 +139,7 @@
                 {
                     ApiResponse<String> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
                     avatar = apiResponse.Data;
-                    Constant.currentUser.avatarUrl = avatar;
+                    CurrentUser.currentUser.avatarUrl = avatar;
                     NotifyStateChanged();
                 }
 

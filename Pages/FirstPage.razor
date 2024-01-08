@@ -1,9 +1,10 @@
-﻿@layout LoginLayout
+﻿@layout EmptyLayout
 @page "/"
 
 
 @using System.ComponentModel.DataAnnotations;
 @using Blazored.LocalStorage
+@using Chatable.DI
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
 @using Chatable.Data.Entitles.Respond
@@ -21,6 +22,7 @@
 @inject AppData appData;
 @inject IJSRuntime jsRuntime
 @inject ILocalStorageService _iLocalStorageService;
+@inject CurrentUser CurrentUser;
 
 @code {
     Token token = new Token();
@@ -74,7 +76,7 @@
                        setNullAvt(curUser.gender);
                     }
 
-                    Constant.currentUser = curUser;
+                    CurrentUser.currentUser = curUser;
                     _navigationManager.NavigateTo("/chat");
 
                 }

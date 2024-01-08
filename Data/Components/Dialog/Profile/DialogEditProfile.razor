@@ -165,16 +165,13 @@
 @code {
 
     User currentUser;
+    UserInfor currentUserInfor;
     bool CanUpdate = false;
     string erroMessage;
 
 
     UpdateUserForm model = new UpdateUserForm();
 
-    protected override void OnInitialized()
-    {
-        currentUser = CurrentUser.currentUser!;
-    }
 
     List<IBrowserFile> selectedFiles = new List<IBrowserFile>();
     String avatar;
@@ -182,6 +179,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        currentUser = CurrentUser.currentUser!;
         await LoadProfile();
     }
 
@@ -217,7 +215,7 @@
     {
         if (!CanUpdate)
         {
-            if (model.FullNameChanged != null && model.EmailChanged != null)
+            if (model.FullNameChanged != "" && model.EmailChanged != "")
             {
                 if (model.FullNameChanged != currentUserInfor.fullName ||
                     model.EmailChanged != currentUserInfor.email)
@@ -241,7 +239,7 @@
 
         //call api save change
 
-        if (currentUserInfor.fullName != null && currentUserInfor.email != null)
+        if (currentUserInfor.fullName != "" && currentUserInfor.email != "")
         {
             try
             {
@@ -261,7 +259,7 @@
                     await DialogService.ShowMessageBox("Thông báo","Bạn đã cập nhập thông tin thành công!");
 
                     await GetCurUser();
-                    Constant.currentUser = curUser;
+                    CurrentUser.currentUser = currentUser;
 
                     // Close the dialog
                     MudDialog.Close(DialogResult.Ok(true));
@@ -298,8 +296,8 @@
                 if (responseContent != null)
                 {
                     ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
-                    curUser = apiResponse.Data;
-                    curUser = curUser;
+                    currentUser = apiResponse.Data;
+                    CurrentUser.currentUser = currentUser;
                     return user;
                 }
                 return null;
@@ -316,15 +314,15 @@
 
     private async Task LoadProfile()
     {
-        if (curUser!= null)
+        if (currentUser!= null)
         {
             currentUserInfor = new UserInfor();
 
-            currentUserInfor.fullName = curUser.fullName;
-            currentUserInfor.avatarUrl = curUser.avatarUrl;
-            currentUserInfor.email = curUser.email;
-            currentUserInfor.gender = curUser.gender;
-            currentUserInfor.dob = curUser.dob.GetValueOrDefault();
+            currentUserInfor.fullName = currentUser.fullName;
+            currentUserInfor.avatarUrl = currentUser.avatarUrl;
+            currentUserInfor.email = currentUser.email;
+            currentUserInfor.gender = currentUser.gender;
+            currentUserInfor.dob = currentUser.dob.GetValueOrDefault();
 
             if (currentUserInfor != null)
             {
@@ -382,7 +380,7 @@
                 {
                     ApiResponse<String> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
                     avatar = apiResponse.Data;
-                    Constant.currentUser.avatarUrl = avatar;
+                    currentUser.avatarUrl = avatar;
                     NotifyStateChanged();
                     await LoadProfile();
                 }

@@ -24,7 +24,7 @@
 
 <div class="sidebar">
     <div class="user">
-        <img src="@(Constant.uriBaseUserAvt + currentUser.avatarUrl)" class="user_img" @onclick="OpenDialog" />
+        <img src="@currentUser.avatarUrl" class="user_img" @onclick="OpenDialog" />
         <p>@currentUser.fullName</p>
     </div>
     <ul>
