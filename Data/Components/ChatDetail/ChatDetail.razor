@@ -9,6 +9,7 @@
 @using System.Net.Http;
 @using Microsoft.AspNetCore.SignalR.Client
 @using Newtonsoft.Json;
+@using System.Net.Http.Headers
 
 @inject HttpClient Client
 @inject HttpClient _http
@@ -31,10 +32,12 @@ Chi tiết chat gồm 3 phần
         <MudIconButton id="back-btn" Class="mr-3" OnClick="BackToConversationList">
             <i class="fa-solid fa-chevron-left fa-lg"></i>
         </MudIconButton>
-        <img class="coversation-img mr-3" src="@SelectedConversation.conversationAvatar" />
+        <img class="coversation-img mr-3" src="@((SelectedConversation.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + SelectedConversation.conversationAvatar)" />
         <div class="d-flex flex-column" style="width: 160px">
             <p class="receiver-name">@SelectedConversation.conversationName</p>
-            <p class="receiver-status">Đang hoạt động</p>
+            @if (SelectedConversation.conversationType == "Peer") {
+                <p class="receiver-status">@onlineStatus</p>
+            }
         </div>
         <MudSpacer />
         <MudIconButton Class="mr-2" OnClick=@(() => Call("voice")) Style="border-radius: 8px">
@@ -46,60 +49,55 @@ Chi tiết chat gồm 3 phần
     </div>
 
     <MudDivider></MudDivider>
- <div class="chat-container">
-        <img src="@Constant.waterMark" class="water-mark-img" />
-        <div class="messages-list">
+    <div class="chat-container">
+            <img src="@Constant.waterMark" class="water-mark-img" />
+            <div class="messages-list">
 
-        @if (!string.IsNullOrWhiteSpace(_errorMessage))
-        {
-            <div class="header d-flex justify-content-between bg-danger">
-                <span class="text-white">@_errorMessage</span>
-                <button class="btn btn-danger btn-sm" @onclick="() => _errorMessage = null">x</button>
-            </div>
-        }
-        @if (!string.IsNullOrWhiteSpace(_infoMessage))
-        {
-            <div class="header d-flex justify-content-between bg-warning">
-                <span class="text-white">@_infoMessage</span>
-            </div>
-        }
-        <ul id="messages-ul" style="padding: 5px">
-            @if (_loadingMessages)
+            @if (!string.IsNullOrWhiteSpace(_errorMessage))
             {
-                <li class="list-group-item">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    Loading messages...
-                </li>
+                <div class="header d-flex justify-content-between bg-danger">
+                    <span class="text-white">@_errorMessage</span>
+                    <button class="btn btn-danger btn-sm" @onclick="() => _errorMessage = null">x</button>
+                </div>
             }
-            else
+            @if (!string.IsNullOrWhiteSpace(_infoMessage))
             {
-                @foreach (var msg in _messages)
+                <div class="header d-flex justify-content-between bg-warning">
+                    <span class="text-white">@_infoMessage</span>
+                </div>
+            }
+            <ul id="messages-ul" style="padding: 5px">
+                @if (_loadingMessages)
                 {
-                    var isMyMessage = msg.SenderId == currentUser.userName;
-                    var isToday = msg.SendAt.Date == DateTime.Today.Date;
-
-                    var cls = $"justify-content-{(isMyMessage ? "end" : "start")}";
-
-                    <li class="d-flex @cls">
-                        <p class="single-msg @(isMyMessage ? "me" : "other")">
-                            @msg.Content
-                            <br>
-                            <small class="msg-dt">
-                                @if (isToday)
-                                {
-                                    <span>@msg.SendAt.ToShortTimeString()</span>
-                                }
-                                else
-                                {
-                                    <span>@msg.SendAt.ToShortDateString() | @msg.SendAt.ToShortTimeString()</span>
-                                }
-                            </small>
-                        </p>
+                    <li class="list-group-item">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Loading messages...
                     </li>
                 }
-            }
-        </ul>
-    </div>
+                else
+                {
+                    @for (int i = 0; i<_messages.Count; ++i)
+                    {
+                        bool isFirst;
+                        bool isSameDateWithPreMsg;
+
+                        if (i == 0)
+                        {
+                            isFirst = true;
+                            isSameDateWithPreMsg = false;
+                        }
+                        else
+                        {
+                            isFirst = _messages[i].SenderId != _messages[i - 1].SenderId;
+                            isSameDateWithPreMsg = _messages[i].SentAt.Date == _messages[i - 1].SentAt.Date;
+                        }
+
+                        <MessageItem Msg="_messages[i]" IsFirstMsg="isFirst" IsSameDateWithPreMsg="isSameDateWithPreMsg" ConversationType="@SelectedConversation.conversationType"/>
+                    }
+
+                }
+            </ul>
+        </div>
     </div>
 
     <div>
@@ -107,20 +105,21 @@ Chi tiết chat gồm 3 phần
         <MudDivider />
 
         <div id="utils-message">
-            <MudIconButton DisableElevation="true">
-                <i class="fa-regular fa-image fa-xl"></i>
-            </MudIconButton>
+            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile" Accept="image/png, image/jpeg, image/jpg">
+                <ButtonTemplate>
+                    <MudIconButton HtmlTag="label"
+                                   DisableElevation="true"
+                                   for="@context.Id">
+                        <i class="fa-regular fa-image fa-xl"></i>
+                    </MudIconButton>
+                </ButtonTemplate>
+            </MudFileUpload>
+
             <MudIconButton DisableElevation="true"
                            Style=" margin-left: 2px">
-                <i class="fa-solid fa-paperclip fa-xl"></i>
+                <i class="fa-solid fa-film fa-xl"></i>
             </MudIconButton>
-            <MudIconButton Icon="@Icons.Material.Filled.ScreenshotMonitor" DisableElevation="true"
-                           Style=" margin-left: 2px">
-            </MudIconButton>
-            <MudIconButton DisableElevation="true"
-                           Style=" margin-left: 2px">
-                <i class="fa-regular fa-calendar-plus fa-xl"></i>
-            </MudIconButton>
+
         </div>
 
         <MudDivider />
@@ -177,26 +176,29 @@ Chi tiết chat gồm 3 phần
     private bool _loadingMessages = false;
     private bool _loadingConversation = false;
 
-    protected override async Task OnInitializedAsync()
+    private string onlineStatus = "";
+
+    protected override void OnInitialized()
     {
         currentUser = CurrentUser.currentUser!;
 
         MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceived", message =>
         {
-            Console.WriteLine("MessageReceived: " + message.Content);
+            // Console.WriteLine("MessageReceived: " + message.Content);
             _messages.Add(message);
             InvokeAsync(StateHasChanged);
         });
-        if (SelectedConversation is null) await GetSelectedConversation();
+
+        MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceivedFromGroup", message =>
+        {
+            // Console.WriteLine("MessageReceivedFromGroup: " + message.Content);
+            _messages.Add(message);
+            InvokeAsync(StateHasChanged);
+        });
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        if (SelectedConversation is null)
-        {
-            await GetSelectedConversation();
-            //await JSRuntime.InvokeAsync<string>("console.log", "get conversation when null", SelectedConversation);
-        }
         if (NewIncomingMessage is not null)
         {
             //_messages.Add(NewIncomingMessage);
@@ -210,11 +212,46 @@ Chi tiết chat gồm 3 phần
             await GetConversationMessages();
             _scrollToBottom = true;
         }
+
+        // Get Online status
+        string erroMessage;
+        try
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/OnlineStatus/" + Id);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        Console.WriteLine("Get Online Status Success");
+                        onlineStatus = respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Get Online Status FAIL");
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            erroMessage = ex.Message;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (SelectedConversation is null) await GetSelectedConversation();
         if (_scrollToBottom)
         {
             _scrollToBottom = false;
@@ -290,6 +327,7 @@ Chi tiết chat gồm 3 phần
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
                 httpRequestMessage.Method = new HttpMethod("GET");
                 httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/" + SelectedConversation.conversationType+"/" + SelectedConversation.conversationId+ "/Messages");
+                httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
                 var response = await _http.SendAsync(httpRequestMessage);
 
                 if (response.IsSuccessStatusCode)
@@ -303,9 +341,6 @@ Chi tiết chat gồm 3 phần
                         {
                             _messages = respond.Data;
                             _infoMessage = null;
-
-                            await JSRuntime.InvokeAsync<string>("console.log", "mess get", respond.Data);
-                            await JSRuntime.InvokeAsync<string>("console.log", "mess get", _messages);
                         }
                         else
                         {
@@ -376,6 +411,7 @@ Chi tiết chat gồm 3 phần
     {
         if (!string.IsNullOrWhiteSpace(_newMessage))
         {
+            // Console.WriteLine("_newMessage: " + _newMessage);
             if (SelectedConversation!.conversationType == "Peer")
             {
                 await MessageHubManager.HubConnection!.SendAsync("SendPeerMessage", Id, "text", _newMessage);
@@ -385,10 +421,34 @@ Chi tiết chat gồm 3 phần
                 await MessageHubManager.HubConnection!.SendAsync("SendGroupMessage", Id, "text", _newMessage);
             }
 
-            _messages.Add(new MessageDTO(currentUser.userName, "text", _newMessage, DateTime.UtcNow, ""));
-            await JsRuntime.InvokeVoidAsync("cuon");
+            _messages.Add(new MessageDTO(currentUser.userName, "text", _newMessage, DateTime.UtcNow, "", "", ""));
             _newMessage = "";
         }
+    }
+
+    private async Task UploadFile(IBrowserFile file)
+    {
+        // Console.WriteLine("file: " + file.ContentType);
+
+        if (IsImage(file.ContentType))
+        {
+            using var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
+
+            // Console.WriteLine("FE_SendPeerImage");
+            // await MessageHubManager.HubConnection!.SendAsync("SendPeerImage", Id, "image");
+        }
+        else
+        {
+            // Handle other file types
+            Console.WriteLine("Unsupported file type.");
+        }
+    }
+
+    private bool IsImage(string contentType)
+    {
+        // Check if the content type indicates an image (you may need to adjust/add more content types based on your needs)
+        return contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
     }
 
     //

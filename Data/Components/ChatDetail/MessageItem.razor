@@ -1,0 +1,123 @@
+﻿@using Chatable.DI
+@using Chatable.Data.Components.Dialog.Lam
+@using Chatable.Data.Entitles
+@using Chatable.Data.Entitles.DTO
+@using System.Net.Http.Headers
+@using Chatable.Data.Entitles.Model
+@using Chatable.Data.Entitles.Respond
+<li class="d-flex @cls @(IsFirstMsg ? "mt-3" : "")">
+    @if (isMyMessage)
+    {
+        <MudIconButton Class="forward mr-2" OnClick="() => ForwardMsg(Msg.MessageType)" Style="border-radius: 8px">
+            <i class="fa-solid fa-share fa-xl" style="color: #0091ff;"></i>
+        </MudIconButton>
+
+        <MudIconButton Class="forward mr-2"  Style="border-radius: 8px">
+            <i class=" fa-solid fa-heart fa-xl" style="color: #0091ff;"></i>
+        </MudIconButton>
+
+        if (Msg.MessageType != "text")
+        {
+            <MudIconButton Class="forward mr-2" Style="border-radius: 8px">
+                <i class="fa-solid fa-download fa-xl" style="color: #0091ff;"></i>
+            </MudIconButton>
+        }
+    }
+
+    @if (!isMyMessage && IsFirstMsg)
+    {
+        <img class="coversation-img mr-3" src="@(Constant.uriBaseUserAvt + Msg.SenderAvatar)" />
+    }
+
+    <p class="single-msg @(isMyMessage ? "me" : "other") @(Msg.MessageType + "-msg")"
+       style="@(!isMyMessage && !IsFirstMsg ? "margin-left: 62px" : "")">
+        @if (!isMyMessage && IsFirstMsg && ConversationType == "Group")
+        {
+            <span class="mb-2" style="font-size: 13px; color: gray">@Msg.SenderName</span>
+            <br />
+        }
+        @Msg.Content
+        <br />
+        <small class="msg-dt" style="color: @(isMyMessage ? "while" : "gray")">
+            @if (isToday || (IsSameDateWithPreMsg))
+            {
+                <span>@Msg.SentAt.ToShortTimeString()</span>
+            }
+            else
+            {
+                <span>@Msg.SentAt.ToShortDateString() | @Msg.SentAt.ToShortTimeString()</span>
+            }
+        </small>
+    </p>
+
+    @if (!isMyMessage)
+    {
+        <MudIconButton Class="forward ml-2" Style="border-radius: 8px">
+            <i class="fa-solid fa-share fa-xl" style="color: #0091ff;"></i>
+        </MudIconButton>
+        <MudIconButton Class="forward mr-2" Style="border-radius: 8px">
+            <i class=" fa-solid fa-heart fa-xl" style="color: #0091ff;"></i>
+        </MudIconButton>
+
+        if (Msg.MessageType != "text")
+        {
+            <MudIconButton Class="forward mr-2" Style="border-radius: 8px">
+                <i class="fa-solid fa-download fa-xl" style="color: #0091ff;"></i>
+            </MudIconButton>
+        }
+    }
+</li>
+
+@inject CurrentUser CurrentUser
+
+@inject IDialogService DialogService
+
+@inject HttpClient _http
+
+@using Newtonsoft.Json;
+
+@code {
+    [Parameter]
+    public MessageDTO Msg { get; set; }
+
+    [Parameter]
+    public bool IsFirstMsg { get; set; }
+
+    [Parameter]
+    public bool IsSameDateWithPreMsg { get; set; }
+
+    [Parameter]
+    public string ConversationType { get; set; }
+
+    public bool isMyMessage;
+    public bool isToday;
+    public string cls;
+
+    IDialogReference? dialogReference;
+
+    protected override void OnParametersSet()
+    {
+        
+        isMyMessage = Msg.SenderId == CurrentUser.currentUser!.userName;
+        isToday = Msg.SentAt.Date == DateTime.Today.Date;
+
+        cls = $"justify-content-{(isMyMessage ? "end" : "start")}";
+    }
+
+    private async Task ForwardMsg(string msgType)
+    {
+        DialogOptions options = new DialogOptions
+            {
+                FullWidth = false,
+                CloseOnEscapeKey = false,
+                DisableBackdropClick = true,
+                NoHeader = true,
+            };
+
+        DialogParameters keyValues = new DialogParameters();
+        keyValues.Add("Msg", Msg);
+
+        dialogReference = DialogService.Show<ForwardMessageDialog>("", keyValues, options);
+        var result = await dialogReference.Result;
+    }
+}

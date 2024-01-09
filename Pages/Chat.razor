@@ -1,6 +1,8 @@
 ﻿@page "/chat"
 @page "/chat/{_conversationType?}/{_id?}"
+@using Chatable.DI
 @using Chatable.Data.Components;
+@using Chatable.Data.Components.ChatDetail
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.DTO
 @using Chatable.Data.Entitles.Model;
@@ -52,14 +54,16 @@
 			{
 				@foreach (var chat in Chats)
 				{
+					string avatarUrl = (chat.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + chat.conversationAvatar;
 					<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
 					@onclick="() => OnUserSelected(chat)">
-						<img class="coversation-img mr-3" src="@chat.conversationAvatar" />
+
+						<img class="coversation-img mr-3" src="@avatarUrl" />
 						<div class="d-flex justify-start flex-column" style="flex: 1">
-							<div class="d-flex">
+							<div class="d-flex mb-1">
 								<p class="coversation-name">@chat.conversationName</p>
 								<MudSpacer/>
-								<p style="color: gray;">@chat.lastMessage.sendAt</p>
+								<p style="color: #AAA; font-weight: 400">@chat.lastMessage.sentAt.ToShortDateString()</p>
 							</div>
 							<p class="coversation-last-message">@chat.lastMessage.content</p>
 						</div>
@@ -98,6 +102,7 @@
 </div>
 
 @implements IAsyncDisposable
+@inject CurrentUser CurrentUser
 
 @code {
 
@@ -235,6 +240,8 @@
 			HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
 			httpRequestMessage.Method = new HttpMethod("GET");
 			httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation");
+			httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
 			var response = await _http.SendAsync(httpRequestMessage);
 
 			if (response.IsSuccessStatusCode)

@@ -1,6 +1,8 @@
 ﻿@using System.Net.Http;
+@using Chatable.DI
 @using Chatable.Data.Entitles
 @using Newtonsoft.Json;
+@using System.Net.Http.Headers
 
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
@@ -26,6 +28,9 @@
         font-size: 14px;
     }
 </style>
+
+@inject CurrentUser CurrentUser
+
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     string erroMessage;
@@ -37,6 +42,8 @@
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("POST");
             httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/Logout");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            
             var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)
