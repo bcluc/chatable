@@ -87,6 +87,10 @@
     font-family: SVN-Poppins;
     font-size: 14px;
     color: gray;
+    width: 215px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .user-select {

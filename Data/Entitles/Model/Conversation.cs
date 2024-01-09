@@ -34,15 +34,15 @@
         public string senderId { get; set; }
         public string messageType { get; set; }
         public string content { get; set; }
-        public DateTime sendAt { get; set; }
+        public DateTime sentAt { get; set; }
         public string? groupId { get; set; }
 
-		public LastMessageDTO(string senderId, string messageType, string content, DateTime sendAt, string? groupId)
+		public LastMessageDTO(string senderId, string messageType, string content, DateTime sentAt, string? groupId)
 		{
 			this.senderId = senderId;
 			this.messageType = messageType;
 			this.content = content;
-			this.sendAt = sendAt;
+			this.sentAt = sentAt;
 			this.groupId = groupId;
 		}
 	}
