@@ -9,6 +9,7 @@
 @using System.Text.Json.Serialization;
 @using System.Net.Http;
 @using Newtonsoft.Json;
+@using System.Net.Http.Headers;
 
 @inject HttpClient Client
 @inject HttpClient _http
@@ -152,6 +153,7 @@ else
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("GET");
             httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Friend");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
             var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)
@@ -196,6 +198,7 @@ else
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("GET");
             httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Group");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
             var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)
@@ -239,6 +242,7 @@ else
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("GET");
             httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Received");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
             var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)

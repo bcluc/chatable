@@ -1,10 +1,6 @@
 ﻿@layout EmptyLayout
-@page "/"
-
 
 @using System.ComponentModel.DataAnnotations;
-@using Blazored.LocalStorage
-@using Chatable.DI
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
 @using Chatable.Data.Entitles.Respond
@@ -16,22 +12,17 @@
 @using Newtonsoft.Json;
 @using System.Web;
 
-
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
 @inject AppData appData;
-@inject IJSRuntime jsRuntime
-@inject ILocalStorageService _iLocalStorageService;
-@inject CurrentUser CurrentUser;
 
 @code {
     Token token = new Token();
-    User curUser;
 
     protected override async Task OnInitializedAsync()
     {
 
-        if (!String.IsNullOrEmpty(storedAccessToken) && !String.IsNullOrEmpty(storedRefreshToken))
+        if (!String.IsNullOrEmpty(appData.refresh) && !String.IsNullOrEmpty(appData.access))
         {
             token.refreshToken = appData.refresh;
             token.accessToken = appData.access;

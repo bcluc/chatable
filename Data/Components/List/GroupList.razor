@@ -19,7 +19,7 @@
             <li class="list-group-item " @onclick="() => HandleUserClick(group)">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
-                        <MudImage Src=@Constant.defaultImgGroup></MudImage>
+                        <MudImage Src=@(Constant.uriBaseGroupAvt + group.Avatar)></MudImage>
                     </MudAvatar>
                     <h4 class="user-name">@group.GroupName</h4>
                 </div>

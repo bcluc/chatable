@@ -19,7 +19,7 @@
             <li class="list-group-item " @onclick="() => HandleUserClick(chat)">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
-                        <MudImage Src=@Constant.defaultImgFemale></MudImage>
+                        <MudImage Src=@(Constant.uriBaseUserAvt + chat.AvatarUrl)></MudImage>
                     </MudAvatar>
                     <h4 class="user-name">@chat.FullName</h4>
                 </div>
