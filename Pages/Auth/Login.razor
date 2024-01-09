@@ -14,6 +14,7 @@
 @using Microsoft.AspNetCore.Http
 @using Newtonsoft.Json;
 @using System.Web;
+@using System.Net.Http.Headers
 
 @inject Blazored.LocalStorage.ILocalStorageService _localStorageService
 @inject HttpClient _http
@@ -231,7 +232,6 @@ LeBaoNhu71!
             // httpRequestMessage.RequestUri = new Uri("http://localhost:5275/api/v1/Auth/login");
 
             httpRequestMessage.Content = new StringContent(serializedUser);
-
             httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
             var response = await _http.SendAsync(httpRequestMessage);
 
@@ -245,7 +245,7 @@ LeBaoNhu71!
                     if (user.Data != null)
                     {
                         await _localStorageService.SetItemAsync("access_token", user.Data.accessToken);
-                        Constant.token = user.Data;
+                        CurrentUser.token = user.Data;
                     }
                 }
                 catch (Exception e)
@@ -279,15 +279,22 @@ LeBaoNhu71!
         }
         return await Task.FromResult(true);
     }
+
     private async Task<User> GetCurUser()
     {
         User curUser = new User();
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.Method = new HttpMethod("GET");
+        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/CurrentUser");
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
         try
         {
-            var response = await _http.GetAsync(Constant.uriHost + "User/CurrentUser");
+            var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)
             {
+
                 var responseContent = await response.Content.ReadAsStringAsync();
                 if (responseContent != null)
                 {
