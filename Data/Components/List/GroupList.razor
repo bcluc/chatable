@@ -1,0 +1,45 @@
+﻿@using Chatable.DI
+@using Chatable.Data.Entitles;
+@using Chatable.Data.Entitles.Model;
+<link rel="stylesheet" href="/css/ChatList.css">
+
+<div class="list-group list-group-flush">
+
+    @if (Loading)
+    {
+        <li class="list-group-item">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...
+        </li>
+    }
+    else
+    {
+        @foreach (var group in Groups)
+        {
+            <li class="list-group-item " @onclick="() => HandleUserClick(group)">
+                <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+                    <MudAvatar>
+                        <MudImage Src=@Constant.defaultImgGroup></MudImage>
+                    </MudAvatar>
+                    <h4 class="user-name">@group.GroupName</h4>
+                </div>
+            </li>
+        }
+    }
+</div>
+@inject CurrentUser currentUser;
+@code {
+    [Parameter]
+    public IEnumerable<Group> Groups { get; set; } = Enumerable.Empty<Group>();
+
+    [Parameter]
+    public bool Loading { get; set; }
+
+    [Parameter]
+    public EventCallback<Group> OnGroupSelected { get; set; }
+
+    private async Task HandleUserClick(Group group)
+    {
+        await OnGroupSelected.InvokeAsync(group);
+    }
+}

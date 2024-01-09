@@ -177,7 +177,7 @@ Chi tiết chat gồm 3 phần
     private bool _loadingMessages = false;
     private bool _loadingConversation = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         currentUser = CurrentUser.currentUser!;
 
@@ -187,10 +187,16 @@ Chi tiết chat gồm 3 phần
             _messages.Add(message);
             InvokeAsync(StateHasChanged);
         });
+        if (SelectedConversation is null) await GetSelectedConversation();
     }
 
     protected override async Task OnParametersSetAsync()
     {
+        if (SelectedConversation is null)
+        {
+            await GetSelectedConversation();
+            //await JSRuntime.InvokeAsync<string>("console.log", "get conversation when null", SelectedConversation);
+        }
         if (NewIncomingMessage is not null)
         {
             //_messages.Add(NewIncomingMessage);
@@ -208,6 +214,7 @@ Chi tiết chat gồm 3 phần
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (SelectedConversation is null) await GetSelectedConversation();
         if (_scrollToBottom)
         {
             _scrollToBottom = false;

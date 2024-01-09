@@ -19,6 +19,8 @@ builder.Services.AddScoped<CurrentUser>();
 builder.Services.AddScoped<CallHubManager>();
 builder.Services.AddScoped<MessageHubManager>();
 
+builder.Services.AddSingleton<AppData>();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

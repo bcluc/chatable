@@ -1,8 +1,8 @@
 ﻿@using Chatable.DI
 @using Chatable.Data.Entitles;
+@using Chatable.Data.Entitles.DTO;
 @using Chatable.Data.Entitles.Model;
 <link rel="stylesheet" href="/css/ChatList.css">
-
 <div class="list-group list-group-flush">
 
     @if (Loading)
@@ -16,37 +16,29 @@
     {
         @foreach (var chat in Chats)
         {
-            <li class="list-group-item @(chat.IsSelected ? "user-select" : "")" @onclick="() => HandleUserClick(chat)">
+            <li class="list-group-item " @onclick="() => HandleUserClick(chat)">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
-                        <MudImage Src=@chat.avatarUrl></MudImage>
+                        <MudImage Src=@Constant.defaultImgFemale></MudImage>
                     </MudAvatar>
-                    <h4 class="user-name">@chat.fullName</h4>
+                    <h4 class="user-name">@chat.FullName</h4>
                 </div>
             </li>
         }
     }
 </div>
-
-@inject CurrentUser CurrentUser
-
+@inject CurrentUser currentUser;
 @code {
-    private User currentUser;
     [Parameter]
-    public IEnumerable<User> Chats { get; set; } = Enumerable.Empty<User>();
+    public IList<UserDTO> Chats { get; set; } = new List<UserDTO>();
 
     [Parameter]
     public bool Loading { get; set; }
 
     [Parameter]
-    public EventCallback<User> OnUserSelected { get; set; }
+    public EventCallback<UserDTO> OnUserSelected { get; set; }
 
-    protected override void OnInitialized()
-    {
-        currentUser = CurrentUser.currentUser!;
-    }
-
-    private async Task HandleUserClick(User chat)
+    private async Task HandleUserClick(UserDTO chat)
     {
         await OnUserSelected.InvokeAsync(chat);
     }
