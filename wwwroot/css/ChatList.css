@@ -1,5 +1,7 @@
 ﻿@import url('Theme.css');
-
+h4 {
+    font-family: SVN-Poppins;
+}
 .user-img {
     width: 56px;
     height: 56px;
@@ -61,3 +63,60 @@
     display: flex;
     align-items: flex-start;
 }
+
+.friend-request-card {
+    display: flex;
+    width: 100%;
+    padding: 20px;
+    flex-direction: row;
+    align-items: center;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 6px 5px 10px #d8d8d8; /** This shadow is no good... **/
+}
+
+.profile-picture {
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
+    margin-right: 27px;
+    overflow: hidden;
+}
+
+img {
+    width: 40px;
+    height: 100%;
+}
+.friend-request-actions {
+    margin-left: auto;
+    width: 180px;
+}
+.button {
+    font-family: SVN-Poppins;
+    border-radius: 100px;
+    width: 100%;
+    padding: 1px 10px;
+    border: none;
+    font-size: 12px;
+    font-weight: normal; 
+    transition: background .3s;
+    cursor: pointer;
+}
+.button:first-child
+{
+    margin-bottom: 14px;
+}
+
+    .button .button-primary {
+        background: var(--bg-color);
+    }
+        .button .button-primary:hover {
+            filter: brightness(85%);
+        }
+
+    .button .button-secondary {
+        background: var(--bg-color);
+    }
+        .button .button-secondary:hover {
+            filter: brightness(85%);
+        }

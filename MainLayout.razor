@@ -32,15 +32,15 @@
         {
             var currentIndex = i;
             <li class="@(currentPageIndex == i ? "current-page" : "")"
-                @onclick="() => changeCurrentPageIndex(currentIndex)">
-                <a href="@menuItems[i].page" >
+            @onclick="() => changeCurrentPageIndex(currentIndex)">
+                <a href="@menuItems[i].page">
                     <logo class="@menuItems[i].icon"></logo>
                     <p>@menuItems[i].title</p>
                 </a>
             </li>
         }
     </ul>
-        
+
     <div class="bottom-list">
         <ul>
             <li @onclick="() => OpenConfirmLogoutDialog()">
@@ -51,7 +51,7 @@
             </li>
         </ul>
     </div>
-       
+
 </div>
 <div class="main_container">
     @Body
@@ -127,7 +127,7 @@
     /* Lâm */
     protected override void OnInitialized()
     {
-        
+
     }
 
     protected override async Task OnInitializedAsync()
@@ -149,8 +149,8 @@
     {
         // Connect Message-Hub
         MessageHubManager.HubConnection = new HubConnectionBuilder()
-        	.WithUrl($"https://localhost:7124/messages-hub?access_token={CurrentUser.token!.accessToken}")
-        	.Build();
+            .WithUrl($"https://localhost:7124/messages-hub?access_token={CurrentUser.token!.accessToken}")
+            .Build();
 
         await MessageHubManager.HubConnection.StartAsync();
         // Console.WriteLine($"messageHubConnection = {messageHubConnection.ConnectionId}");
@@ -168,7 +168,7 @@
 
         CallHubManager.HubConnection.On<string, PeerInfo, string, string>("inviteCall", (callerConnectionId, callerInfo, typeCall, roomId) =>
         {
-            // Console.WriteLine("CallHubManager.isIdle: " + CallHubManager.isIdle);
+        // Console.WriteLine("CallHubManager.isIdle: " + CallHubManager.isIdle);
             @* Console.WriteLine("Nhận cuộc gọi từ " + callerInfo.Name); *@
             if (CallHubManager.isIdle)
             {

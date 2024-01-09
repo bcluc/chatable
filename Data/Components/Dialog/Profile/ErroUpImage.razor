@@ -1,0 +1,16 @@
+﻿@inject NavigationManager NavigationManager
+<MudDialog>
+    <DialogContent >
+        <MudText Style="margin-left: 10px">Hình ảnh bạn chọn quá lớn.</MudText>
+        <MudText Style="margin-left: 10px">Hãy chọn một hình khác.</MudText>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+}

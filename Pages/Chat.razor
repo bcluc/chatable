@@ -136,26 +136,23 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
-		await GetSelectedConversation();
+		if (_selectedUser is null) await GetSelectedConversation();
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
 		await GetAllConversations();
+		foreach (var chat in Chats)
+		{
+			chat.IsSelected = false;
+			if (chat.conversationId == _id) chat.IsSelected = true;
+		}
+	
 	}
-
-	private async Task<IEnumerable<string>> Search2(string value)
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		// In real life use an asynchronous function for fetching data from an api.
-		await Task.Delay(5);
-
-		// if text is null or empty, don't return values (drop-down will not open)
-		if (string.IsNullOrEmpty(value))
-			return new string[0];
-		// return chat room
-		return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+		if (!Chats.Any()) await base.OnInitializedAsync();
 	}
-
 	private void OpenAddGroupDialog()
 	{
 		var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
@@ -166,6 +163,8 @@
 	{
 		/* Code của BC*/
 		_selectedUser = user;
+		_id = user.conversationId;
+
 
 		var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
 		if (selectedChatUser is not null)
@@ -272,50 +271,6 @@
 		}
 		return await Task.FromResult(true);
 	}
-
-	private async Task<bool> GetGroup()
-	{
-		bool success;
-		string erroMessage;
-		List<Group> groups = new List<Group>();
-		try
-		{
-			HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-			httpRequestMessage.Method = new HttpMethod("GET");
-			httpRequestMessage.RequestUri = new Uri(Constant.uriHost+ "Group");
-			var response = await _http.SendAsync(httpRequestMessage);
-
-			if (response.IsSuccessStatusCode)
-			{
-				var responseContent = await response.Content.ReadAsStringAsync();
-				var respond = JsonConvert.DeserializeObject<GroupGetResponse>(responseContent);
-				success = true;
-				try
-				{
-					if (respond.Data != null)
-					{
-						foreach (var group in respond.Data)
-						{
-							Chats.Add(group);
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					erroMessage = e.Message;
-				}
-
-				//await JSRuntime.InvokeAsync<string>("console.log", "group get", respond.ListGroup);
-			}
-		}
-		catch (Exception ex)
-		{
-			success = false;
-			erroMessage = ex.Message;
-		}
-		return await Task.FromResult(true);
-	}
-	
 	public async ValueTask DisposeAsync()
 	{
 
