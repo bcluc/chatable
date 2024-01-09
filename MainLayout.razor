@@ -43,17 +43,10 @@
         
     <div class="bottom-list">
         <ul>
-            <li class="@(currentPageIndex == 3 ? "current-page" : "")"
-                @onclick="() => changeCurrentPageIndex(3)">
-                <a href="@menuItems[3].page">
-                    <logo class="@menuItems[3].icon" />
-                    <p>@menuItems[3].title</p>
-                </a>
-            </li>
             <li @onclick="() => OpenConfirmLogoutDialog()">
                 <a>
-                    <logo class="@menuItems[4].icon" />
-                    <p>@menuItems[4].title</p>
+                    <logo class="@menuItems[3].icon" />
+                    <p>@menuItems[3].title</p>
                 </a>
             </li>
         </ul>
@@ -89,11 +82,6 @@
             page = "setting",
             icon = "fa-solid fa-gear",
             title = "Cài đặt",
-        },
-        new MenuItem {
-            page = "contact",
-            icon = "fa-solid fa-moon",
-            title = "Chế độ",
         },
         new MenuItem {
             page = "",
@@ -139,22 +127,29 @@
     /* Lâm */
     protected override void OnInitialized()
     {
-        currentUser = CurrentUser.currentUser!;
+        
     }
 
     protected override async Task OnInitializedAsync()
     {
+
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
         Console.WriteLine("Hello MainLayout");
+
+        currentUser = CurrentUser.currentUser!;
 
         await SetUpMessageHub();
         await SetUpCallHub();
     }
-    
+
     public async Task SetUpMessageHub()
     {
         // Connect Message-Hub
         MessageHubManager.HubConnection = new HubConnectionBuilder()
-        	.WithUrl($"https://localhost:7124/messages-hub?access_token={Constant.token.accessToken}")
+        	.WithUrl($"https://localhost:7124/messages-hub?access_token={CurrentUser.token!.accessToken}")
         	.Build();
 
         await MessageHubManager.HubConnection.StartAsync();
