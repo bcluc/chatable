@@ -107,7 +107,7 @@
 @inject CallHubManager CallHubManager
 @inject MessageHubManager MessageHubManager
 
-@implements IAsyncDisposable
+@* @implements IAsyncDisposable *@
 
 @code {
     User currentUser;
@@ -132,17 +132,17 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Console.WriteLine("Hello MainLayout");
 
+        currentUser = CurrentUser.currentUser!;
+        Console.WriteLine("Hello SetUpMessageHub");
+
+        await SetUpMessageHub();
+        await SetUpCallHub();
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        Console.WriteLine("Hello MainLayout");
-
-        currentUser = CurrentUser.currentUser!;
-
-        await SetUpMessageHub();
-        await SetUpCallHub();
     }
 
     public async Task SetUpMessageHub()
@@ -228,14 +228,15 @@
             // Console.WriteLine("Accept Call");
             await CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerConnectionId, "acceptCall");
 
-            Console.WriteLine(CurrentUser.currentUser);
+            string avatar = CurrentUser.currentUser!.avatarUrl.Split('?')[0];
+            // Console.WriteLine("CurrentUser.currentUser!.avatarUrl = " + avatar);
 
             await JSRuntime.InvokeVoidAsync(
                 "joinRoomGoiDien",
                 roomId,
                 CurrentUser.currentUser!.fullName,
-                /* Constant.currentUser.avatarUrl, */
-                "user-test",
+                // "user-test",
+                avatar,
                 typeCall,
                 DotNetObjectReference.Create(this)
             );
@@ -250,11 +251,11 @@
         CallHubManager.isIdle = true;
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        await MessageHubManager.HubConnection!.DisposeAsync();
-        await CallHubManager.HubConnection!.DisposeAsync();
-        Console.WriteLine("Bye MainLayout");
-    }
+    // public async ValueTask DisposeAsync()
+    // {
+    //     await MessageHubManager.HubConnection!.DisposeAsync();
+    //     await CallHubManager.HubConnection!.DisposeAsync();
+    //     Console.WriteLine("Bye MainLayout");
+    // }
 
 }

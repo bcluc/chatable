@@ -106,38 +106,40 @@ Chi tiết chat gồm 3 phần
         </div>
     </div>
 
-    <div>
+    <MudDivider />
 
-        <MudDivider />
+    <div id="utils-message">
+        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile" Accept=".png, .jpg, .jpeg" Class="mr-1">
+            <ButtonTemplate>
+                <MudIconButton HtmlTag="label"
+                               DisableElevation="true"
+                               for="@context.Id">
+                    <i class="fa-regular fa-image fa-xl"></i>
+                </MudIconButton>
+            </ButtonTemplate>
+        </MudFileUpload>
 
-        <div id="utils-message">
-            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile" Accept="image/png, image/jpeg, image/jpg">
-                <ButtonTemplate>
-                    <MudIconButton HtmlTag="label"
-                                   DisableElevation="true"
-                                   for="@context.Id">
-                        <i class="fa-regular fa-image fa-xl"></i>
-                    </MudIconButton>
-                </ButtonTemplate>
-            </MudFileUpload>
+        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile" Accept=".mp4, .avi, .mov">
+            <ButtonTemplate>
+                <MudIconButton HtmlTag="label"
+                               DisableElevation="true"
+                               for="@context.Id">
+                    <i class="fa-solid fa-film fa-xl"></i>
+                </MudIconButton>
+            </ButtonTemplate>
+        </MudFileUpload>
 
-            <MudIconButton DisableElevation="true"
-                           Style=" margin-left: 2px">
-                <i class="fa-solid fa-film fa-xl"></i>
-            </MudIconButton>
+    </div>
 
-        </div>
+    <MudDivider />
 
-        <MudDivider />
-
-        @*
-        Không được xóa id="message-input",
-        nó dùng để phân biệt với các MudTextField khác để style
-        *@
-        <div id="message-input">
-            <MudTextField Placeholder="Nhập tin nhắn" @bind-Value="_newMessage" Variant="Variant.Text" DisableUnderLine="true"></MudTextField>
-            <button class="btn-send mx-4" @onclick="SendMessage">Gửi</button>
-        </div>
+    @*
+    Không được xóa id="message-input",
+    nó dùng để phân biệt với các MudTextField khác để style
+    *@
+    <div id="message-input">
+        <MudTextField Placeholder="Nhập tin nhắn" @bind-Value="_newMessage" Variant="Variant.Text" DisableUnderLine="true"></MudTextField>
+        <button class="btn-send mx-4" @onclick="SendMessage">Gửi</button>
     </div>
 
 </div>
@@ -149,8 +151,6 @@ Chi tiết chat gồm 3 phần
 @inject CallHubManager CallHubManager
 @inject MessageHubManager MessageHubManager
 @inject CurrentUser CurrentUser
-
-@inject IJSRuntime JsRuntime
 
 @code {
 
@@ -180,7 +180,6 @@ Chi tiết chat gồm 3 phần
     private string? _errorMessage;
     private string? _infoMessage;
     private string previousSelectedUserId = "";
-    private bool _scrollToBottom = false;
     private bool _loadingMessages = false;
     private bool _loadingConversation = false;
 
@@ -194,18 +193,33 @@ Chi tiết chat gồm 3 phần
 
         MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceived", message =>
         {
-            // Console.WriteLine("MessageReceived: " + message.Content);
+            Console.WriteLine("MessageReceived: " + message.Content);
             _messages.Add(message);
+            permitScroll = "smooth";
             InvokeAsync(StateHasChanged);
         });
 
         MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceivedFromGroup", message =>
         {
-            // Console.WriteLine("MessageReceivedFromGroup: " + message.Content);
+            Console.WriteLine("MessageReceivedFromGroup: " + message.Content);
             _messages.Add(message);
+            permitScroll = "smooth";
             InvokeAsync(StateHasChanged);
         });
     }
+      
+    string permitScroll = "";
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (permitScroll != "")
+        {
+            await Task.Delay(permitScroll == "instant" ? 0 : 300); // Độ trễ 1 giây
+            await JSRuntime.InvokeVoidAsync("scrollMessagesListToBottom", permitScroll);
+            permitScroll = "";
+        } 
+
+    }
+      
     protected override async Task OnParametersSetAsync()
     {
         Console.WriteLine("parameter-detail");
@@ -214,24 +228,23 @@ Chi tiết chat gồm 3 phần
         {
             //_messages.Add(NewIncomingMessage);
             await OnIncomingMessageRecieved.InvokeAsync();
-            _scrollToBottom = true;
         }
 
         if (SelectedConversation is not null && SelectedConversation.conversationId != previousSelectedUserId)
         {
             previousSelectedUserId = SelectedConversation.conversationId;
             await GetConversationMessages();
-            _scrollToBottom = true;
         }
 
         // Get Online status
-        string erroMessage;
-        
+        if (SelectedConversation.conversationType == "Peer")
+        {
+            string erroMessage;
             try
             {
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
                 httpRequestMessage.Method = new HttpMethod("GET");
-                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/OnlineStatus/" + CurrentUser.currentUser.userName);
+                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/OnlineStatus/" + Id);
                 httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
 
                 var response = await _http.SendAsync(httpRequestMessage);
@@ -244,7 +257,7 @@ Chi tiết chat gồm 3 phần
                     {
                         if (respond.Data != null)
                         {
-                            Console.WriteLine("Get Online Status Success");
+                            // Console.WriteLine("Get Online Status Success");
                             onlineStatus = respond.Data;
                         }
                     }
@@ -260,22 +273,8 @@ Chi tiết chat gồm 3 phần
             {
                 erroMessage = ex.Message;
             }
-        
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        Console.WriteLine("rener-detail");
-        Console.WriteLine("select", SelectedConversation);
-        if (SelectedConversation is null) await GetSelectedConversation();
-
-        if (_scrollToBottom)
-        {
-            _scrollToBottom = false;
-            //await JsRuntime.InvokeVoidAsync("window.scrollToLastMessage");
         }
     }
-
     //Get SelectedConversation
     private async Task<bool> GetSelectedConversation()
     {
@@ -380,6 +379,7 @@ Chi tiết chat gồm 3 phần
             }
             finally
             {
+                permitScroll = "smooth";
                 _loadingMessages = false;
             }
             return await Task.FromResult(true);
@@ -388,43 +388,43 @@ Chi tiết chat gồm 3 phần
     }
 
     // Get nguoi dung
-    private async Task<bool> GetUser()
-    {
-        bool success;
-        string erroMessage;
-        try
-        {
-            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-            httpRequestMessage.Method = new HttpMethod("GET");
-            httpRequestMessage.RequestUri = new Uri( Constant.uriHost + "User/{SelectedUser.conversationId}");
-            var response = await _http.SendAsync(httpRequestMessage);
+    // private async Task<bool> GetUser()
+    // {
+    //     bool success;
+    //     string erroMessage;
+    //     try
+    //     {
+    //         HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+    //         httpRequestMessage.Method = new HttpMethod("GET");
+    //         httpRequestMessage.RequestUri = new Uri( Constant.uriHost + "User/{SelectedUser.conversationId}");
+    //         var response = await _http.SendAsync(httpRequestMessage);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var respond = JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
-                success = true;
-                try
-                {
-                    if (respond.Data != null)
-                    {
-                        // SelectedUser = respond.Data;
-                    }
-                }
-                catch (Exception e)
-                {
-                    erroMessage = e.Message;
-                }
+    //         if (response.IsSuccessStatusCode)
+    //         {
+    //             var responseContent = await response.Content.ReadAsStringAsync();
+    //             var respond = JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+    //             success = true;
+    //             try
+    //             {
+    //                 if (respond.Data != null)
+    //                 {
+    //                     // SelectedUser = respond.Data;
+    //                 }
+    //             }
+    //             catch (Exception e)
+    //             {
+    //                 erroMessage = e.Message;
+    //             }
 
-            }
-        }
-        catch (Exception ex)
-        {
-            success = false;
-            erroMessage = ex.Message;
-        }
-        return await Task.FromResult(true);
-    }
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         success = false;
+    //         erroMessage = ex.Message;
+    //     }
+    //     return await Task.FromResult(true);
+    // }
 
     private async Task SendMessage()
     {
@@ -440,8 +440,11 @@ Chi tiết chat gồm 3 phần
                 await MessageHubManager.HubConnection!.SendAsync("SendGroupMessage", Id, "text", _newMessage);
             }
 
+            permitScroll = "instant";
+
             _messages.Add(new MessageDTO(currentUser.userName, "text", _newMessage, DateTime.UtcNow, "", "", ""));
             _newMessage = "";
+
         }
     }
 
@@ -449,28 +452,61 @@ Chi tiết chat gồm 3 phần
     {
         // Console.WriteLine("file: " + file.ContentType);
 
-        if (IsImage(file.ContentType))
-        {
-            using var content = new MultipartFormDataContent();
-            content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
+        string fileType = GetFileType(file);
 
-            // Console.WriteLine("FE_SendPeerImage");
-            // await MessageHubManager.HubConnection!.SendAsync("SendPeerImage", Id, "image");
+        using var content = new MultipartFormDataContent();
+        content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
+
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.Method = new HttpMethod("POST");
+        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + $"Conversation/{SelectedConversation.conversationType}/{SelectedConversation.conversationId}/Messages/{fileType}");
+        httpRequestMessage.Content = content;
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+        var response = await _http.SendAsync(
+            httpRequestMessage
+        );
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            if (responseContent != null)
+            {
+                ApiResponse<String> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
+                string imageUrl = apiResponse.Data;
+                _messages.Add(
+                    new MessageDTO(
+                        currentUser.userName,
+                        fileType,
+                        imageUrl,
+                        DateTime.UtcNow,
+                        "",
+                        "",
+                        ""
+                    )
+                );
+            }
+
         }
         else
         {
-            // Handle other file types
-            Console.WriteLine("Unsupported file type.");
+            // Xử lý lỗi nếu có
+            Console.WriteLine($"Error uploading file. Status code: {response.StatusCode}");
         }
     }
 
-    private bool IsImage(string contentType)
+    string GetFileType(IBrowserFile file)
     {
-        // Check if the content type indicates an image (you may need to adjust/add more content types based on your needs)
-        return contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+        if (file.ContentType.StartsWith("image", StringComparison.OrdinalIgnoreCase))
+        {
+            return "image";
+        }
+        if (file.ContentType.StartsWith("video", StringComparison.OrdinalIgnoreCase))
+        {
+            return "video";
+        }
+        return "unknow";
     }
 
-    //
     private async Task Call(string typeCall)
     {
         HubConnection callHubConnection = CallHubManager.HubConnection!;
@@ -480,14 +516,17 @@ Chi tiết chat gồm 3 phần
 
         CallHubManager.isIdle = false;
 
+        string callerAvatar = CurrentUser.currentUser!.avatarUrl.Split('?')[0];
+        string receiverAvatar = SelectedConversation!.conversationAvatar.Split('?')[0];
+
         await JSRuntime.InvokeVoidAsync(
             "moCuaSoGoiDien",
             CurrentUser.currentUser.userName,
             CurrentUser.currentUser.fullName,
-            "user-nhubaole",
+            callerAvatar,
             Id,
             SelectedConversation!.conversationName,
-            "user-test",
+            receiverAvatar,
             typeCall,
             SelectedConversation.conversationType,
             DotNetObjectReference.Create(this)
