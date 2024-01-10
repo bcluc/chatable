@@ -6,9 +6,12 @@
 @using Newtonsoft.Json;
 @using Microsoft.AspNetCore.Components.Forms
 @using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Headers
 
 @inject IDialogService DialogService
 @inject HttpClient _http
+@inject CurrentUser CurrentUser
+
 
 <link rel="stylesheet" href="/css/DialogProfile.css">
 
@@ -25,7 +28,7 @@
                         <div Class="photos">
                             <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
                             <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
-                                <MudImage Src="@currentUserInfor.avatarUrl"></MudImage>
+                            <MudImage Src="@(Constant.uriBaseUserAvt +currentUser.avatarUrl)"></MudImage>
                             </MudAvatar>
                     <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
                                 <ButtonTemplate>
@@ -160,7 +163,6 @@
     }
 }
 
-@inject CurrentUser CurrentUser
 
 @code {
 
@@ -244,13 +246,15 @@
             try
             {
 
-                currentUserInfor.gender = model.GenderChanged;
                 string serializedUser = JsonConvert.SerializeObject(currentUserInfor);
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
                 httpRequestMessage.Method = new HttpMethod("PUT");
                 httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User");
                 httpRequestMessage.Content = new StringContent(serializedUser);
+
                 httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
                 var response = await _http.SendAsync(httpRequestMessage);
 
                 if (response.IsSuccessStatusCode)
@@ -258,7 +262,7 @@
                     // Show success message
                     await DialogService.ShowMessageBox("Thông báo","Bạn đã cập nhập thông tin thành công!");
 
-                    await GetCurUser();
+                    currentUser = await GetCurUser();
                     CurrentUser.currentUser = currentUser;
 
                     // Close the dialog
@@ -288,7 +292,11 @@
         User user = new User();
         try
         {
-            var response = await _http.GetAsync(Constant.uriHost + "User/currentUser");
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/CurrentUser");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)
             {
@@ -296,8 +304,8 @@
                 if (responseContent != null)
                 {
                     ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
-                    currentUser = apiResponse.Data;
-                    CurrentUser.currentUser = currentUser;
+                    user = apiResponse.Data;
+
                     return user;
                 }
                 return null;
@@ -341,7 +349,6 @@
     {
         try
         {
-
             using var fileStream = file.OpenReadStream();
 
             if (fileStream != null)
@@ -366,11 +373,17 @@
     {
         try
         {
-
             using var content = new MultipartFormDataContent();
             content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
 
-            var response = await _http.PostAsync(Constant.uriHost + "User/UploadAvatar", content);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/UploadAvatar");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+            httpRequestMessage.Content = content;
+
+            var response = await _http.SendAsync(httpRequestMessage);
 
             // Kiểm tra xem yêu cầu có thành công không
             if (response.IsSuccessStatusCode)
@@ -381,8 +394,9 @@
                     ApiResponse<String> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
                     avatar = apiResponse.Data;
                     currentUser.avatarUrl = avatar;
-                    NotifyStateChanged();
-                    await LoadProfile();
+                    CurrentUser.currentUser = currentUser;
+                    StateHasChanged();
+                    //await LoadProfile();
                 }
 
             }

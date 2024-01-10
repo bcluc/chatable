@@ -1,0 +1,31 @@
+﻿@using System.Net
+@using System.Text
+
+<MudDialog DisableSidePadding="true">
+    <DialogContent>
+        <MudContainer Style="max-height: 300px; overflow-y: scroll">
+            <MudText Style="white-space: pre-wrap;">@LicenseText</MudText>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Ok">Quay về đăng nhập</MudButton>
+    </DialogActions>
+</MudDialog>
+    @code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public String userEmail { get; set; } = "";
+
+
+    private string LicenseText;
+
+    protected override void OnInitialized()
+    {
+        // Gán giá trị cho LicenseText sau khi có giá trị của userEmail
+        LicenseText = "Nếu đã tồn tại tài khoản cho email " + userEmail + " bạn sẽ nhận được email hướng dẫn đặt lại mật khẩu. Nếu chưa nhận được hãy kiểm tra lại thư mục spam.";
+    }
+   
+    private void Ok()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

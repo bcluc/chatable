@@ -49,5 +49,6 @@ namespace Chatable.Data.Entitles
 
         public static readonly Peer oppositeUser = new Peer("nhubaole", "Trần Lê Hoàng Lâm", "Nam", "2023-11-19 07:58:48.084+00","BC_nhubaole");
 
+        
     }
 }
