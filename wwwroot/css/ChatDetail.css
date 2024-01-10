@@ -80,7 +80,6 @@
     padding: 20px;
 }
 
-
 #utils-message {
     display: flex;
     padding: 4px;
@@ -153,8 +152,8 @@
     max-width: calc(100% - 170px);
 }
 
-.image-msg, .video-msg {
-    max-width: calc(100% - 200px);
+.image-msg, video-msg {
+    max-width: calc(100% - 225px);
 }
 
 .d-flex > .forward {

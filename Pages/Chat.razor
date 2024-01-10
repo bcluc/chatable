@@ -54,6 +54,7 @@
 			{
 				@foreach (var chat in Chats)
 				{
+					bool isToday = chat.lastMessage.sentAt.Date == DateTime.Today.Date;
 					string avatarUrl = (chat.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + chat.conversationAvatar;
 					<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
 					@onclick="() => OnUserSelected(chat)">
@@ -63,7 +64,7 @@
 							<div class="d-flex mb-1">
 								<p class="coversation-name">@chat.conversationName</p>
 								<MudSpacer/>
-								<p style="color: #AAA; font-weight: 400">@chat.lastMessage.sentAt.ToShortDateString()</p>
+								<p style="color: #AAA; font-weight: 400">@(isToday ? chat.lastMessage.sentAt.ToShortTimeString() : chat.lastMessage.sentAt.ToShortDateString())</p>
 							</div>
 							<p class="coversation-last-message">@chat.lastMessage.content</p>
 						</div>

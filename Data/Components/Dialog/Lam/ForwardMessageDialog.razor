@@ -38,7 +38,8 @@
 						<p class="coversation-name">@Chats[currentIndex].conversationName</p>
 						<MudSpacer/>
 						<MudButton Variant="Variant.Filled" Style="background-color: #0091FE; color: white; border-radius: 8px"
-								   OnClick="@(() => SendMessageTo(Chats[currentIndex].conversationId))"
+								   Disabled="@sentList[currentIndex]"
+								   OnClick="@(() => SendMessageTo(currentIndex))"
 								   DisableElevation="true">Gửi</MudButton>
 					</div>
 				}
@@ -50,11 +51,13 @@
 </MudDialog>
 
 @using Chatable.Data.Entitles.Respond
+@using Microsoft.AspNetCore.SignalR.Client
 @using Newtonsoft.Json;
 @using System.Net.Http.Headers
 
 @inject HttpClient _http
 @inject CurrentUser CurrentUser
+@inject MessageHubManager MessageHubManager
 
 @code {
 
@@ -114,9 +117,22 @@
 		return await Task.FromResult(true);
 	}
 
-	void SendMessageTo(string username)
+	void SendMessageTo(int chatIndex)
 	{
-		Console.WriteLine("forward to " + username);
+		string id = Chats[chatIndex].conversationId;
+		string type = Chats[chatIndex].conversationType;
+		Console.WriteLine("forward to " + id);
+
+		if (type == "Peer")
+		{
+			MessageHubManager.HubConnection!.SendAsync("SendPeerMessage", id, Msg.MessageType, Msg.Content);
+			sentList[chatIndex] = true;
+		}
+		else
+		{
+			MessageHubManager.HubConnection!.SendAsync("SendGroupMessage", id, Msg.MessageType, Msg.Content);
+			sentList[chatIndex] = true;
+		}
 	}
 
     void Submit() => MudDialog!.Close(DialogResult.Ok("accept"));
