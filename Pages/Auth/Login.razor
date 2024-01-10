@@ -3,6 +3,7 @@
 
 @using System.ComponentModel.DataAnnotations;
 @using Chatable.DI
+@using Chatable.Data.Components.Dialog.Password
 @using Chatable.Data.Components.Dialog.Profile
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
@@ -175,8 +176,6 @@ LeBaoNhu71!
                     {
                         await _localStorageService.SetItemAsync("access_token", user.Data.accessToken);
                         await _localStorageService.SetItemAsync("refresh_token", user.Data.refreshToken);
-
-                        Constant.token = user.Data;
                     }
                 }
                 catch (Exception e)
