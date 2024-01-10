@@ -1,0 +1,45 @@
+﻿@using Chatable.DI
+@using Chatable.Data.Entitles;
+@using Chatable.Data.Entitles.DTO;
+@using Chatable.Data.Entitles.Model;
+<link rel="stylesheet" href="/css/ChatList.css">
+<div class="list-group list-group-flush">
+
+    @if (Loading)
+    {
+        <li class="list-group-item">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...
+        </li>
+    }
+    else
+    {
+        @foreach (var chat in Chats)
+        {
+            <li class="list-group-item " @onclick="() => HandleUserClick(chat)">
+                <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+                    <MudAvatar>
+                        <MudImage Src=@(Constant.uriBaseUserAvt + chat.AvatarUrl)></MudImage>
+                    </MudAvatar>
+                    <h4 class="user-name">@chat.FullName</h4>
+                </div>
+            </li>
+        }
+    }
+</div>
+@inject CurrentUser currentUser;
+@code {
+    [Parameter]
+    public IList<UserDTO> Chats { get; set; } = new List<UserDTO>();
+
+    [Parameter]
+    public bool Loading { get; set; }
+
+    [Parameter]
+    public EventCallback<UserDTO> OnUserSelected { get; set; }
+
+    private async Task HandleUserClick(UserDTO chat)
+    {
+        await OnUserSelected.InvokeAsync(chat);
+    }
+}

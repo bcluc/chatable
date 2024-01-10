@@ -4,6 +4,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: SVN-Poppins
 }
 
 /*
@@ -87,6 +88,10 @@
     font-family: SVN-Poppins;
     font-size: 14px;
     color: gray;
+    width: 215px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .user-select {

@@ -24,7 +24,7 @@
 
 <div class="sidebar">
     <div class="user">
-        <img src="@currentUser.avatarUrl" class="user_img" @onclick="OpenDialog" />
+        <img src="@(Constant.uriBaseUserAvt + currentUser.avatarUrl)" class="user_img" @onclick="OpenDialog" />
         <p>@currentUser.fullName</p>
     </div>
     <ul>
@@ -32,33 +32,26 @@
         {
             var currentIndex = i;
             <li class="@(currentPageIndex == i ? "current-page" : "")"
-                @onclick="() => changeCurrentPageIndex(currentIndex)">
-                <a href="@menuItems[i].page" >
+            @onclick="() => changeCurrentPageIndex(currentIndex)">
+                <a href="@menuItems[i].page">
                     <logo class="@menuItems[i].icon"></logo>
                     <p>@menuItems[i].title</p>
                 </a>
             </li>
         }
     </ul>
-        
+
     <div class="bottom-list">
         <ul>
-            <li class="@(currentPageIndex == 3 ? "current-page" : "")"
-                @onclick="() => changeCurrentPageIndex(3)">
-                <a href="@menuItems[3].page">
+            <li @onclick="() => OpenConfirmLogoutDialog()">
+                <a>
                     <logo class="@menuItems[3].icon" />
                     <p>@menuItems[3].title</p>
                 </a>
             </li>
-            <li @onclick="() => OpenConfirmLogoutDialog()">
-                <a>
-                    <logo class="@menuItems[4].icon" />
-                    <p>@menuItems[4].title</p>
-                </a>
-            </li>
         </ul>
     </div>
-       
+
 </div>
 <div class="main_container">
     @Body
@@ -91,11 +84,6 @@
             title = "Cài đặt",
         },
         new MenuItem {
-            page = "contact",
-            icon = "fa-solid fa-moon",
-            title = "Chế độ",
-        },
-        new MenuItem {
             page = "",
             icon = "bx bx-log-out",
             title = "Đăng xuất",
@@ -119,7 +107,7 @@
 @inject CallHubManager CallHubManager
 @inject MessageHubManager MessageHubManager
 
-@implements IAsyncDisposable
+@* @implements IAsyncDisposable *@
 
 @code {
     User currentUser;
@@ -139,23 +127,30 @@
     /* Lâm */
     protected override void OnInitialized()
     {
-        currentUser = CurrentUser.currentUser!;
+
     }
 
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("Hello MainLayout");
 
+        currentUser = CurrentUser.currentUser!;
+        Console.WriteLine("Hello SetUpMessageHub");
+
         await SetUpMessageHub();
         await SetUpCallHub();
     }
-    
+
+    protected override async Task OnParametersSetAsync()
+    {
+    }
+
     public async Task SetUpMessageHub()
     {
         // Connect Message-Hub
         MessageHubManager.HubConnection = new HubConnectionBuilder()
-        	.WithUrl($"https://localhost:7124/messages-hub?access_token={Constant.token.accessToken}")
-        	.Build();
+            .WithUrl($"https://localhost:7124/messages-hub?access_token={CurrentUser.token!.accessToken}")
+            .Build();
 
         await MessageHubManager.HubConnection.StartAsync();
         // Console.WriteLine($"messageHubConnection = {messageHubConnection.ConnectionId}");
@@ -173,7 +168,7 @@
 
         CallHubManager.HubConnection.On<string, PeerInfo, string, string>("inviteCall", (callerConnectionId, callerInfo, typeCall, roomId) =>
         {
-            // Console.WriteLine("CallHubManager.isIdle: " + CallHubManager.isIdle);
+        // Console.WriteLine("CallHubManager.isIdle: " + CallHubManager.isIdle);
             @* Console.WriteLine("Nhận cuộc gọi từ " + callerInfo.Name); *@
             if (CallHubManager.isIdle)
             {
@@ -233,14 +228,15 @@
             // Console.WriteLine("Accept Call");
             await CallHubManager.HubConnection!.SendAsync("SendResponseCallTo", callerConnectionId, "acceptCall");
 
-            Console.WriteLine(CurrentUser.currentUser);
+            string avatar = CurrentUser.currentUser!.avatarUrl.Split('?')[0];
+            // Console.WriteLine("CurrentUser.currentUser!.avatarUrl = " + avatar);
 
             await JSRuntime.InvokeVoidAsync(
                 "joinRoomGoiDien",
                 roomId,
                 CurrentUser.currentUser!.fullName,
-                /* Constant.currentUser.avatarUrl, */
-                "user-test",
+                // "user-test",
+                avatar,
                 typeCall,
                 DotNetObjectReference.Create(this)
             );
@@ -255,11 +251,11 @@
         CallHubManager.isIdle = true;
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        await MessageHubManager.HubConnection!.DisposeAsync();
-        await CallHubManager.HubConnection!.DisposeAsync();
-        Console.WriteLine("Bye MainLayout");
-    }
+    // public async ValueTask DisposeAsync()
+    // {
+    //     await MessageHubManager.HubConnection!.DisposeAsync();
+    //     await CallHubManager.HubConnection!.DisposeAsync();
+    //     Console.WriteLine("Bye MainLayout");
+    // }
 
 }

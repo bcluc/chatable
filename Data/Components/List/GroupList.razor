@@ -14,40 +14,32 @@
     }
     else
     {
-        @foreach (var chat in Chats)
+        @foreach (var group in Groups)
         {
-            <li class="list-group-item @(chat.IsSelected ? "user-select" : "")" @onclick="() => HandleUserClick(chat)">
+            <li class="list-group-item " @onclick="() => HandleUserClick(group)">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
-                        <MudImage Src=@chat.avatarUrl></MudImage>
+                        <MudImage Src=@(Constant.uriBaseGroupAvt + group.Avatar)></MudImage>
                     </MudAvatar>
-                    <h4 class="user-name">@chat.fullName</h4>
+                    <h4 class="user-name">@group.GroupName</h4>
                 </div>
             </li>
         }
     }
 </div>
-
-@inject CurrentUser CurrentUser
-
+@inject CurrentUser currentUser;
 @code {
-    private User currentUser;
     [Parameter]
-    public IEnumerable<User> Chats { get; set; } = Enumerable.Empty<User>();
+    public IEnumerable<Group> Groups { get; set; } = Enumerable.Empty<Group>();
 
     [Parameter]
     public bool Loading { get; set; }
 
     [Parameter]
-    public EventCallback<User> OnUserSelected { get; set; }
+    public EventCallback<Group> OnGroupSelected { get; set; }
 
-    protected override void OnInitialized()
+    private async Task HandleUserClick(Group group)
     {
-        currentUser = CurrentUser.currentUser!;
-    }
-
-    private async Task HandleUserClick(User chat)
-    {
-        await OnUserSelected.InvokeAsync(chat);
+        await OnGroupSelected.InvokeAsync(group);
     }
 }

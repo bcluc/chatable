@@ -1,6 +1,8 @@
 ﻿@page "/chat"
 @page "/chat/{_conversationType?}/{_id?}"
+@using Chatable.DI
 @using Chatable.Data.Components;
+@using Chatable.Data.Components.ChatDetail
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.DTO
 @using Chatable.Data.Entitles.Model;
@@ -52,14 +54,17 @@
 			{
 				@foreach (var chat in Chats)
 				{
+					bool isToday = chat.lastMessage.sentAt.Date == DateTime.Today.Date;
+					string avatarUrl = (chat.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + chat.conversationAvatar;
 					<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
 					@onclick="() => OnUserSelected(chat)">
-						<img class="coversation-img mr-3" src="@chat.conversationAvatar" />
+
+						<img class="coversation-img mr-3" src="@avatarUrl" />
 						<div class="d-flex justify-start flex-column" style="flex: 1">
-							<div class="d-flex">
+							<div class="d-flex mb-1">
 								<p class="coversation-name">@chat.conversationName</p>
 								<MudSpacer/>
-								<p style="color: gray;">@chat.lastMessage.sendAt</p>
+								<p style="color: #AAA; font-weight: 400">@(isToday ? chat.lastMessage.sentAt.ToShortTimeString() : chat.lastMessage.sentAt.ToShortDateString())</p>
 							</div>
 							<p class="coversation-last-message">@chat.lastMessage.content</p>
 						</div>
@@ -87,6 +92,7 @@
 
 			<ChatDetail 
 				Id = "@_id"
+				Type="@_conversationType"
 				SelectedConversation="@_selectedUser"
 			BackToConversationList="BackToConversationList"
 			NewIncomingMessage="@_newIncomingMessage"
@@ -98,6 +104,7 @@
 </div>
 
 @implements IAsyncDisposable
+@inject CurrentUser CurrentUser
 
 @code {
 
@@ -131,63 +138,31 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
-		await GetSelectedConversation();
+		// Console.WriteLine("parameter-chat "+ _id );
+		// Console.WriteLine("parameter-chat - " + _selectedUser);
+
+		if (_selectedUser is null && _id is not null) {
+			//Console.WriteLine("30d");
+			await GetAllConversations();
+			await GetSelectedConversation();
+		}
+
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
-        foreach(var chat in Chats)
-        {
-            chat.IsSelected = false;
-        }
-        
-		@*if (!AuthenticationState.IsAuthenticated)
-        {
-            NavigationManager.NavigateTo("/");
-        }
-        else
-        {
-            if (!await IsTokenExpiredAsync())
-            {
-                _hubConnection = ConfigureHubConnection();
-
-                _loadingUsers = true;
-                var userListTask = GetClient().GetFromJsonAsync<ICollection<UserDto>>("api/users", JsonConverter.JsonSerializerOptions);
-                var chatListTask = GetClient().GetFromJsonAsync<IList<UserDto>>("api/users/chats", JsonConverter.JsonSerializerOptions);
-
-                await _hubConnection.StartAsync();
-
-                var usersList = await userListTask;
-                if (usersList is not null)
-                {
-                    Users = usersList;
-                }
-
-                var chatsList = await chatListTask;
-                if (chatsList is not null)
-                {
-                    Chats = chatsList;
-                }
-                _loadingUsers = false;
-                await _hubConnection.SendAsync(nameof(IBlazingChatHubServer.SetUserOnline), AuthenticationState.User);
-                StateHasChanged();
-            }
-        } *@
-		await GetAllConversations();
+		if (_id is null) await GetAllConversations();
+		foreach (var chat in Chats)
+		{
+			chat.IsSelected = false;
+			if (chat.conversationId == _id) chat.IsSelected = true;
+		}
+	
 	}
-
-	private async Task<IEnumerable<string>> Search2(string value)
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		// In real life use an asynchronous function for fetching data from an api.
-		await Task.Delay(5);
-
-		// if text is null or empty, don't return values (drop-down will not open)
-		if (string.IsNullOrEmpty(value))
-			return new string[0];
-		// return chat room
-		return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+		if (!Chats.Any()) await base.OnInitializedAsync();
 	}
-
 	private void OpenAddGroupDialog()
 	{
 		var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
@@ -198,6 +173,8 @@
 	{
 		/* Code của BC*/
 		_selectedUser = user;
+		_id = user.conversationId;
+
 
 		var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
 		if (selectedChatUser is not null)
@@ -231,6 +208,7 @@
 				HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
 				httpRequestMessage.Method = new HttpMethod("GET");
 				// FIX TẠM
+				httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
 				httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/" + _conversationType + "/" + _id);
 				var response = await _http.SendAsync(httpRequestMessage);
 
@@ -273,6 +251,8 @@
 			HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
 			httpRequestMessage.Method = new HttpMethod("GET");
 			httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation");
+			httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
 			var response = await _http.SendAsync(httpRequestMessage);
 
 			if (response.IsSuccessStatusCode)
@@ -302,50 +282,6 @@
 		}
 		return await Task.FromResult(true);
 	}
-
-	private async Task<bool> GetGroup()
-	{
-		bool success;
-		string erroMessage;
-		List<Group> groups = new List<Group>();
-		try
-		{
-			HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-			httpRequestMessage.Method = new HttpMethod("GET");
-			httpRequestMessage.RequestUri = new Uri(Constant.uriHost+ "Group");
-			var response = await _http.SendAsync(httpRequestMessage);
-
-			if (response.IsSuccessStatusCode)
-			{
-				var responseContent = await response.Content.ReadAsStringAsync();
-				var respond = JsonConvert.DeserializeObject<GroupGetResponse>(responseContent);
-				success = true;
-				try
-				{
-					if (respond.Data != null)
-					{
-						foreach (var group in respond.Data)
-						{
-							Chats.Add(group);
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					erroMessage = e.Message;
-				}
-
-				//await JSRuntime.InvokeAsync<string>("console.log", "group get", respond.ListGroup);
-			}
-		}
-		catch (Exception ex)
-		{
-			success = false;
-			erroMessage = ex.Message;
-		}
-		return await Task.FromResult(true);
-	}
-	
 	public async ValueTask DisposeAsync()
 	{
 

@@ -66,8 +66,10 @@
 }
 
 .water-mark-img {
-    position: fixed;
-    height: 60%;
+    position: absolute;
+    max-width: 70%;
+    max-height: 70%;
+    object-fit: contain;
 }
 
 .messages-list {
@@ -77,7 +79,6 @@
     overflow-y: scroll;
     padding: 20px;
 }
-
 
 #utils-message {
     display: flex;
@@ -136,6 +137,7 @@
     display: flex;
     justify-content: start;
 }
+
 .single-msg {
     padding: 10px 12px;
     border-radius: 10px;
@@ -143,6 +145,25 @@
     font-family: SVN-Poppins;
     margin-bottom: 6px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    word-wrap: break-word;
+}
+
+.text-msg {
+    max-width: calc(100% - 170px);
+}
+
+.image-msg, video-msg {
+    max-width: calc(100% - 225px);
+}
+
+.d-flex > .forward {
+    display: none;
+    margin-bottom: 6px;
+}
+
+/* Show the button when hovering over the <li> element */
+.d-flex:hover > .forward {
+    display: block;
 }
 
 .me {
@@ -157,7 +178,6 @@
 
 .msg-dt {
     font-family: SVN-Poppins;
-
     font-size: 11px;
 }
 
