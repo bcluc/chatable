@@ -1,5 +1,7 @@
 ﻿@import url('Theme.css');
-
+*{
+    font-family: SVN-Poppins
+}
 /* Layout cho màn hình Contact */
 .contact-container {
     display: flex;

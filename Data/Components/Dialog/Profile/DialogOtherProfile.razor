@@ -1,0 +1,102 @@
+﻿@using Chatable.DI
+@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles;
+@using System.Globalization;
+@using System.Net.Http;
+@using Chatable.Data.Entitles.Respond
+@using Newtonsoft.Json;
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject IDialogService DialogService
+@inject HttpClient _http
+@inject IJSRuntime jsRuntime
+@inject IDialogService Dialog
+
+
+
+<link rel="stylesheet" href="/css/DialogProfile.css">
+
+<MudDialog class="custom-dialog-content" Style="height: 580px" >
+    <DialogContent>
+        @if (currentUser == null)
+        {
+            <p>Loading</p>
+        }
+        else
+        {
+            <div class="content" style="height: 450px; max-height: 450px; overflow-y: unset">
+                <div Class="photos">
+                    <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
+                    <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
+                        <MudImage Src="@currentUser.avatarUrl"></MudImage>
+                    </MudAvatar>
+                    
+                    <MudText style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</MudText>
+
+
+                </div>
+
+                <div class="infor" style="margin-top: 70px;">
+                    <MudText style=" font-size: 18px; font-weight: 500;"> Thông tin cá nhân </MudText>
+
+                    <div class="horizental">
+                        <MudText Style="width: 170px; margin-top: 20px; ">Email</MudText>
+                        <MudText Style="margin-top: 20px">@(currentUser.email != null ? currentUser.email : "Chưa cập nhập")</MudText>
+                    </div>
+                    <div class="horizental">
+                        <MudText Style="width: 170px; margin-top: 20px; ">Giới tính</MudText>
+                        <MudText Style="margin-top: 20px" >@currentUser.gender</MudText>
+                    </div>
+                    <div class="horizental">
+                        <MudText Style="width: 170px; margin-top: 20px; ">Ngày sinh</MudText>
+                        <MudText Style="margin-top: 20px">@(currentUser.dob.HasValue ? currentUser.dob.Value.ToString("dd / MM / yyyy") : "N/A")</MudText>
+                    </div>
+                </div>
+            </div>
+        }
+    </DialogContent>
+    <DialogActions >
+        <div class="toEdit">
+            <MudButton StartIcon="@Icons.Material.Filled.Edit" OnClick="OpenEditDialog" Class="btn-save" FullWidth ="true" >
+                Chỉnh sửa thông tin
+            </MudButton>
+        </div>
+    </DialogActions>
+</MudDialog>
+
+@inject CurrentUser CurrentUser
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    // Truyen vao nguoi dung
+    [Parameter]
+    public User otherUser { get; set; }
+
+    User currentUser;
+    String avatar;
+
+    protected override void OnInitialized()
+    {
+        currentUser = CurrentUser.currentUser!;
+    }
+
+    private void OpenEditDialog()
+
+    //jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+        DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân");
+    }
+
+    
+    private void NotifyStateChanged() => StateHasChanged();
+   
+    private async Task OpenErroDialog()
+    {
+        var dialog = DialogService.Show<ErroUpImage>("Thông báo");
+        var result = await dialog.Result;
+    }
+}
+
+   

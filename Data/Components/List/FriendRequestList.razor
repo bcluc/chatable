@@ -14,9 +14,12 @@
     }
     else
     {
+        <h3 style="margin: 20px; font-weight:500">Lời mời đã nhận (@_countReceived)</h3>
         @foreach (var request in RequestList)
         {
-
+            @if(request.status.Equals("pending"))
+            {
+                @(_countReceived++)
             <li class="list-group-item " @onclick="() => HandleUserClick(request)">
                 <div class="friend-request-card">
                     <div class="profile-picture">
@@ -27,17 +30,34 @@
                         <h4 style="font-weight:lighter; font-size: 10px">13 Mutual Friends</h4>
                     </div>
                     <div class="friend-request-actions">
-                        <button class="button button-primary">Accept</button>
-                        <button class="button button-secondary">Decline</button>
+                        <button class="button button-primary">Chấp nhận</button>
+                        <button class="button button-secondary">Từ chối</button>
                     </div>
                 </div>
-                @* <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
-        <MudAvatar>
-        <MudImage Src=@Constant.defaultImgGroup></MudImage>
-        </MudAvatar>
-        <h4 class="user-name">@group.GroupName</h4>
-        </div> *@
             </li>
+            }
+        }
+        <h3 style="margin: 20px; font-weight:500">Lời mời đã gửi (@_countSent)</h3>
+        @foreach (var request in WaitList)
+        {
+            @if (request.status.Equals("pending"))
+            {
+                @(_countSent++)
+                <li class="list-group-item " @onclick="() => HandleUserClick(request)">
+                    <div class="friend-request-card">
+                        <div class="profile-picture">
+                            <img src=@(Constant.defaultImgFemale)>
+                        </div>
+                        <div class="user-details">
+                            <h4>@request.senderId</h4>
+                            <h4 style="font-weight:lighter; font-size: 10px">13 Mutual Friends</h4>
+                        </div>
+                        <div class="friend-request-actions">
+                            <button class="button button-primary">Hủy lời mời</button>
+                        </div>
+                    </div>
+                </li>
+            }
         }
     }
 </div>
@@ -47,10 +67,18 @@
     public IEnumerable<FriendRequestDTO> RequestList { get; set; } = Enumerable.Empty<FriendRequestDTO>();
 
     [Parameter]
+    public IEnumerable<FriendRequestDTO> WaitList { get; set; } = Enumerable.Empty<FriendRequestDTO>();
+
+
+    [Parameter]
     public bool Loading { get; set; }
 
     [Parameter]
     public EventCallback<FriendRequestDTO> OnFriendRequestSelected { get; set; }
+
+    private int _countReceived = 0;
+    private int _countSent = 0;
+
 
     private async Task HandleUserClick(FriendRequestDTO friendReq)
     {

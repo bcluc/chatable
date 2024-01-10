@@ -92,6 +92,7 @@
 
 			<ChatDetail 
 				Id = "@_id"
+				Type="@_conversationType"
 				SelectedConversation="@_selectedUser"
 			BackToConversationList="BackToConversationList"
 			NewIncomingMessage="@_newIncomingMessage"
@@ -137,12 +138,20 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
-		if (_selectedUser is null) await GetSelectedConversation();
+		// Console.WriteLine("parameter-chat "+ _id );
+		// Console.WriteLine("parameter-chat - " + _selectedUser);
+
+		if (_selectedUser is null && _id is not null) {
+			//Console.WriteLine("30d");
+			await GetAllConversations();
+			await GetSelectedConversation();
+		}
+
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
-		await GetAllConversations();
+		if (_id is null) await GetAllConversations();
 		foreach (var chat in Chats)
 		{
 			chat.IsSelected = false;
@@ -199,6 +208,7 @@
 				HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
 				httpRequestMessage.Method = new HttpMethod("GET");
 				// FIX TẠM
+				httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
 				httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/" + _conversationType + "/" + _id);
 				var response = await _http.SendAsync(httpRequestMessage);
 

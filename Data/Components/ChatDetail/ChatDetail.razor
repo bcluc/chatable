@@ -24,21 +24,24 @@ Chi tiết chat gồm 3 phần
 - Danh sách tin nhắn
 - Component dungf ddeer gửi tin nhắn
 *@
-
-
 <div class="container">
-
     <div class="header">
         <MudIconButton id="back-btn" Class="mr-3" OnClick="BackToConversationList">
             <i class="fa-solid fa-chevron-left fa-lg"></i>
         </MudIconButton>
-        <img class="coversation-img mr-3" src="@((SelectedConversation.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + SelectedConversation.conversationAvatar)" />
-        <div class="d-flex flex-column" style="width: 160px">
-            <p class="receiver-name">@SelectedConversation.conversationName</p>
-            @if (SelectedConversation.conversationType == "Peer") {
-                <p class="receiver-status">@onlineStatus</p>
-            }
+        @if (SelectedConversation != null)
+            {
+            <img class="coversation-img mr-3" src="@((SelectedConversation.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + SelectedConversation.conversationAvatar)" />
+            <div class="d-flex flex-column" style="width: 160px">
+
+                <p class="receiver-name">@SelectedConversation.conversationName</p>
+                @if (SelectedConversation.conversationType == "Peer")
+                {
+                    <p class="receiver-status">@onlineStatus</p>
+                }
+            
         </div>
+        }
         <MudSpacer />
         <MudIconButton Class="mr-2" OnClick=@(() => Call("voice")) Style="border-radius: 8px">
             <i class="fa-solid fa-phone fa-xl" style="color: #0091ff;"></i>
@@ -66,37 +69,40 @@ Chi tiết chat gồm 3 phần
                     <span class="text-white">@_infoMessage</span>
                 </div>
             }
-            <ul id="messages-ul" style="padding: 5px">
-                @if (_loadingMessages)
-                {
-                    <li class="list-group-item">
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        Loading messages...
-                    </li>
-                }
-                else
-                {
-                    @for (int i = 0; i<_messages.Count; ++i)
+            @if (SelectedConversation != null)
+            {
+                <ul id="messages-ul" style="padding: 5px">
+                    @if (_loadingMessages)
                     {
-                        bool isFirst;
-                        bool isSameDateWithPreMsg;
-
-                        if (i == 0)
-                        {
-                            isFirst = true;
-                            isSameDateWithPreMsg = false;
-                        }
-                        else
-                        {
-                            isFirst = _messages[i].SenderId != _messages[i - 1].SenderId;
-                            isSameDateWithPreMsg = _messages[i].SentAt.Date == _messages[i - 1].SentAt.Date;
-                        }
-
-                        <MessageItem Msg="_messages[i]" IsFirstMsg="isFirst" IsSameDateWithPreMsg="isSameDateWithPreMsg" ConversationType="@SelectedConversation.conversationType"/>
+                        <li class="list-group-item">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Loading messages...
+                        </li>
                     }
+                    else
+                    {
+                        @for (int i = 0; i < _messages.Count; ++i)
+                        {
+                            bool isFirst;
+                            bool isSameDateWithPreMsg;
+
+                            if (i == 0)
+                            {
+                                isFirst = true;
+                                isSameDateWithPreMsg = false;
+                            }
+                            else
+                            {
+                                isFirst = _messages[i].SenderId != _messages[i - 1].SenderId;
+                                isSameDateWithPreMsg = _messages[i].SentAt.Date == _messages[i - 1].SentAt.Date;
+                            }
+
+                            <MessageItem Msg="_messages[i]" IsFirstMsg="isFirst" IsSameDateWithPreMsg="isSameDateWithPreMsg" ConversationType="@SelectedConversation.conversationType"/>
+                        }
 
                 }
             </ul>
+            }
         </div>
     </div>
 
@@ -155,10 +161,12 @@ Chi tiết chat gồm 3 phần
     /* Code của Cường */
     private User currentUser;
     [Parameter]
-    public Conversation? SelectedConversation { get; set; }
+    public Conversation? SelectedConversation { get; set; } 
 
     [Parameter]
     public string? Id {get; set;}
+    [Parameter]
+    public string? Type { get; set; }
 
     [Parameter]
     public EventCallback OnIncomingMessageRecieved { get; set; }
@@ -179,6 +187,8 @@ Chi tiết chat gồm 3 phần
 
     protected override void OnInitialized()
     {
+        Console.WriteLine("init-detail");
+
         currentUser = CurrentUser.currentUser!;
 
         MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceived", message =>
@@ -197,7 +207,7 @@ Chi tiết chat gồm 3 phần
             InvokeAsync(StateHasChanged);
         });
     }
-
+      
     string permitScroll = "";
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -209,9 +219,11 @@ Chi tiết chat gồm 3 phần
         } 
 
     }
-
+      
     protected override async Task OnParametersSetAsync()
     {
+        Console.WriteLine("parameter-detail");
+
         if (NewIncomingMessage is not null)
         {
             //_messages.Add(NewIncomingMessage);
@@ -262,7 +274,6 @@ Chi tiết chat gồm 3 phần
                 erroMessage = ex.Message;
             }
         }
-
     }
     //Get SelectedConversation
     private async Task<bool> GetSelectedConversation()
@@ -277,7 +288,9 @@ Chi tiết chat gồm 3 phần
                 _loadingConversation = true;
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
                 httpRequestMessage.Method = new HttpMethod("GET");
-                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/" + Id);
+                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/"+Type+"/"+Id);
+                httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
                 var response = await _http.SendAsync(httpRequestMessage);
 
                 if (response.IsSuccessStatusCode)
