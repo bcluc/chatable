@@ -1,4 +1,7 @@
 ﻿@import url('Theme.css');
+*{
+    font-family: SVN-Poppins;
+}
 h4 {
     font-family: SVN-Poppins;
 }

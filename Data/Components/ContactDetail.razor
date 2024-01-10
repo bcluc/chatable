@@ -62,7 +62,7 @@ else
             }
             else if(Id == "friendRequestList")
             {
-                <FriendRequestList Loading="@_loadingList" RequestList="@_requestList" OnFriendRequestSelected="OnRequestSelected" />
+                <FriendRequestList Loading="@_loadingList" RequestList="@_requestList" WaitList="@_waitList" OnFriendRequestSelected="OnRequestSelected" />
             }
         }        </div>
     </div>
@@ -92,6 +92,7 @@ else
     private List<UserDTO> _friendList = new List<UserDTO>();
     private List<Group> _groupList = new List<Group>();
     public IList<FriendRequestDTO> _requestList = new List<FriendRequestDTO>();
+    public IList<FriendRequestDTO> _waitList = new List<FriendRequestDTO>();
 
 
     protected override async Task OnParametersSetAsync()
@@ -115,6 +116,7 @@ else
             _titleText = "Danh sách lời mời kết bạn";
             _titleIcon = @Icons.Material.Filled.Email;
             await GetFriendReqList();
+            await GetWaitReqList();
         }
     }
     private async Task OnUserSelected(UserDTO user)
@@ -123,7 +125,7 @@ else
         {
             throw new ArgumentNullException(nameof(user));
         }
-        _navigationManager.NavigateTo("/chat/" + user.UserName);
+        _navigationManager.NavigateTo("/chat/Peer/" + user.UserName);
     }
     private async Task OnGroupSelected(Group group)
     {
@@ -131,7 +133,7 @@ else
         {
             throw new ArgumentNullException(nameof(group));
         }
-        _navigationManager.NavigateTo("/chat/" + group.GroupId);
+        _navigationManager.NavigateTo("/chat/Group/" + group.GroupId);
     }
     private async Task OnRequestSelected(FriendRequestDTO request)
     {
@@ -275,6 +277,49 @@ else
         }
         return await Task.FromResult(true);
     }
+    // get waitReq list
+    private async Task<bool> GetWaitReqList()
+    {
+        bool success;
+        string erroMessage;
+        try
+        {
+            _loadingList = true;
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Sent");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            var response = await _http.SendAsync(httpRequestMessage);
 
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<FriendRequestDTO>>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        _waitList = respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        finally
+        {
+            _loadingList = false;
+        }
+        return await Task.FromResult(true);
+    }
 
 }
