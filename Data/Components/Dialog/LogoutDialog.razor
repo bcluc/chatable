@@ -1,10 +1,15 @@
 ﻿@using System.Net.Http;
+@using Blazored.LocalStorage
+@using Chatable.DI
 @using Chatable.Data.Entitles
 @using Newtonsoft.Json;
+@using System.Net.Http.Headers
 
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 @inject HttpClient _http
+@inject CurrentUser currentUser;
+@inject ILocalStorageService _iLocalStorageService;
 
 <MudDialog>
     <DialogContent>
@@ -29,10 +34,16 @@
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("POST");
             httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/Logout");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", currentUser.token!.accessToken);
+
             var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)
+
             {
+                await _iLocalStorageService.RemoveItemAsync("access_token");
+
+                await _iLocalStorageService.RemoveItemAsync("refresh_token");
                 NavigationManager.NavigateTo("/login");
             }
             else
