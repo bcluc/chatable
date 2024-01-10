@@ -85,13 +85,27 @@
 }
 
 .coversation-last-message {
+    max-width: 220px;
+}
+
+.last-msg {
     font-family: SVN-Poppins;
     font-size: 14px;
-    color: gray;
-    width: 215px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+.unread-count {
+    font-family: Arial;
+    font-weight: 600;
+    color: white;
+    background-color: rgb(229, 9, 21);
+    min-width: 20px;
+    min-height: 20px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 0.9;
 }
 
 .user-select {
