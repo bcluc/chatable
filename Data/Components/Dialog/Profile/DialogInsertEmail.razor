@@ -1,0 +1,83 @@
+﻿@using System.ComponentModel.DataAnnotations
+
+@inject NavigationManager _navigationManager
+@inject IDialogService DialogService
+
+<link rel="stylesheet" href="/css/DialogInsertEmail.css">
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Email" Class="mr-3 mb-n1" />
+            Xác nhận
+        </MudText>
+    </TitleContent>
+    <DialogContent >
+        <div style="padding:0 8px; width: 100%">
+            <MudTextField @bind-Value="model.email"
+                          For="@(() => model.email)"
+                          Variant="Variant.Outlined"
+                          Class="mb-4"
+                          TextChanged="checkMail" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+       <div class="full-width">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Dark"
+                       FullWidth="true"      
+                       Disabled="@(!canExcute)"
+                       OnClick="sendToEmail">Đặt lại mật khẩu</MudButton>
+            <MudButton OnClick="Cancel">Hủy</MudButton>
+       </div>
+
+    </DialogActions>
+</MudDialog>
+<style>
+    .mud-dialog .mud-dialog-content {
+        padding: 8px 0;
+    }
+</style>
+@code {
+    public class InsertPassForm
+    {
+        [Required(ErrorMessage = "Email là bắt buộc.")]
+        public string email { get; set; }
+    }
+}
+
+@code {
+    InsertPassForm model = new InsertPassForm();
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    Boolean canExcute = false;
+
+    private void checkMail ()
+    {
+        if(model.email=="" || String.IsNullOrEmpty(model.email))
+        {
+            canExcute = false;
+            return;
+        }
+        else
+        {
+            canExcute = true;
+            return;
+        }
+    }
+
+    private async Task sendToEmail ()
+    {
+        //_navigationManager.NavigateTo("/recoverPass");
+        var parameters = new DialogParameters<DialogNotifyResetPass> { { x => x.userEmail, model.email } };
+
+        var dialog = await DialogService.ShowAsync<DialogNotifyResetPass>("Thông báo", parameters);
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            _navigationManager.NavigateTo("/login");
+        }
+    }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+}
