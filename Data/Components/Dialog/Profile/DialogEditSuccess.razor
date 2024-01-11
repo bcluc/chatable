@@ -1,0 +1,31 @@
+﻿@using System.Net
+@using System.Text
+
+<MudDialog DisableSidePadding="true">
+    <DialogContent>
+        <MudContainer Style="max-height: 300px; overflow-y: scroll">
+            <MudText Style="white-space: pre-wrap;">@success</MudText>
+            </MudContainer>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color="Color.Primary" OnClick="Ok">Đóng</MudButton>
+        </DialogActions>
+    </MudDialog>
+    @code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public String userEmail { get; set; } = "";
+
+
+    private string success;
+
+    protected override void OnInitialized()
+    {
+        success = "Bạn đã thay đổi thông tin thành công";
+
+    }
+
+    private void Ok()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

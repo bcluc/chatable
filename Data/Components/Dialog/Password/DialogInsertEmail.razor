@@ -21,11 +21,14 @@
     </TitleContent>
     <DialogContent >
         <div style="padding:0 8px; width: 100%">
+            <MudText>Hãy nhập email của bạn:</MudText>
+
             <MudTextField @bind-Value="model.email"
                           For="@(() => model.email)"
                           Variant="Variant.Outlined"
                           Class="mb-4"
-                          TextChanged="checkMail" />
+                          TextChanged="checkMail"
+                          Style="margin-top: 8px"/>
         </div>
     </DialogContent>
     <DialogActions>

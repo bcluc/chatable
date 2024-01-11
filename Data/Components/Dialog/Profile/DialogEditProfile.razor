@@ -169,7 +169,6 @@
     bool CanUpdate = false;
     string erroMessage;
 
-
     UpdateUserForm model = new UpdateUserForm();
 
 
@@ -258,7 +257,8 @@
                 if (response.IsSuccessStatusCode)
                 {
                     // Show success message
-                    await DialogService.ShowMessageBox("Thông báo","   Bạn đã cập nhập thông tin thành công!   ");
+                    var dialog = await DialogService.ShowAsync<DialogEditSuccess>("Thông báo");
+                    var result = await dialog.Result;
 
                     currentUser = await GetCurUser();
 
@@ -394,7 +394,7 @@
                     ApiResponse<String> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
                     avatar = apiResponse.Data;
                     currentUser.avatarUrl = avatar;
-                    CurrentUser.currentUser = currentUser;
+                    CurrentUser.currentUser.avatarUrl = currentUser.avatarUrl;
                     CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
                     StateHasChanged();
                     //await LoadProfile();

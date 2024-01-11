@@ -20,6 +20,8 @@
 @inject Blazored.LocalStorage.ILocalStorageService _iLocalStorageService
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
+@inject NavigationManager _navigationManager2
+
 @inject IJSRuntime jsRuntime
 @inject IDialogService DialogService
 
@@ -172,7 +174,7 @@
     }
     protected override void OnInitialized()
     {
-        var id = _navigationManager.QueryString("id");
+        var id = Helpers.ExtensionMethods.QueryString(_navigationManager, "id");
         Console.WriteLine(id);
     }
 }
