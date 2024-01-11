@@ -54,7 +54,7 @@ else
         {
             @if(Id == "friendList")
             {
-                <UserList Loading="@_loadingList" Chats="@_friendList" OnUserSelected="OnUserSelected" />
+                <FriendList Loading="@_loadingList" Chats="@_friendList" OnUserSelected="OnUserSelected" />
             }
             else if (Id == "groupList")
             {
@@ -88,7 +88,6 @@ else
 
 
     private bool _loadingUsers = false;
-    public IList<User> userList = Constant.usersList;
     private List<UserDTO> _friendList = new List<UserDTO>();
     private List<Group> _groupList = new List<Group>();
     public IList<FriendRequestDTO> _requestList = new List<FriendRequestDTO>();
