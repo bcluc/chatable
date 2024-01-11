@@ -90,9 +90,8 @@ else
     private bool _loadingUsers = false;
     private List<UserDTO> _friendList = new List<UserDTO>();
     private List<Group> _groupList = new List<Group>();
-    public IList<FriendRequestDTO> _requestList = new List<FriendRequestDTO>();
-    public IList<FriendRequestDTO> _waitList = new List<FriendRequestDTO>();
-
+    public List<FriendRequestDTO> _requestList = new List<FriendRequestDTO>();
+    public List<FriendRequestDTO> _waitList = new List<FriendRequestDTO>();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -256,6 +255,8 @@ else
                     if (respond.Data != null)
                     {
                         _requestList = respond.Data;
+                        await JSRuntime.InvokeAsync<string>("console.log", "getfriendreq list", _requestList);
+                        await JSRuntime.InvokeAsync<string>("console.log", "getfriendreq data", respond.Data);
                     }
                 }
                 catch (Exception e)

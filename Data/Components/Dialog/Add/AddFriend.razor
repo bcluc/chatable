@@ -41,16 +41,19 @@
                     @if (_loadingUsers){
                         <MudDivider></MudDivider>
                         <p class="mb-4" style="margin-top:10px; margin-bottom:10px">Kết quả tìm kiếm</p>
-                        <div class="friend-container">
+                        <div class="friend-container" @onclick="() => OpenOtherProfileDialog(userResult.userName)">
                             <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                                 <MudAvatar>
                                     <MudImage Src=@(Constant.uriBaseUserAvt + userResult.avatarUrl)></MudImage>
                                 </MudAvatar>
                                 <h4 class="user-name">@userResult.fullName</h4>
                             </div>
-                            <MudIconButton Variant="Variant.Text" DisableElevation="true" Class="mx-2">                                         
-                                <i class="fa-solid fa-user-plus fa-lg"></i>
-                            </MudIconButton>
+                            @if (!userResult.isFriend)
+                            {
+                                <MudIconButton Variant="Variant.Text" DisableElevation="true" Class="mx-2">                                         
+                                    <i class="fa-solid fa-user-plus fa-lg"></i>
+                                </MudIconButton>
+                            }
                         </div>
                     }
                 </div>
@@ -80,7 +83,6 @@
     private bool _loadingUsers = false;
     private bool _processing = false;
 
-    private List<User> _selectedUsers = new List<User> ();
 
 
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
@@ -168,5 +170,12 @@
         return await Task.FromResult(true);
 
     }
+    private void OpenOtherProfileDialog(string userName)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var parameter = new DialogParameters { { "user", userResult } };
+        DialogService.Show<Dialog.Profile.DialogOtherProfile>("Thông tin tài khoản", parameter,options);
+    }
+    
 
 }
