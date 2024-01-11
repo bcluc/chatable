@@ -2,6 +2,7 @@
 {
     public class MessageDTO
     {
+        public string MessageId { get; set; }
         public string SenderId { get; set; }
         public string GroupId { get; set; }
         public DateTime SentAt { get; set; }
@@ -12,6 +13,7 @@
         public bool IsSeen { get; set; } = false;
 
         public MessageDTO(
+            string messageId,
             string senderId, 
             string groupId, 
             string messageType, 
@@ -22,6 +24,7 @@
             bool isSeen
         )
         {
+            MessageId = messageId;
             SenderId = senderId;
             GroupId = groupId;
             MessageType = messageType;

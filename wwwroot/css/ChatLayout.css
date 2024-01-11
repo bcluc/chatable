@@ -70,6 +70,7 @@
     justify-content: flex-start;
     align-items: center;
     padding: 14px;
+    cursor: pointer;
 }
 
 .coversation-img {

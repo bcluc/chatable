@@ -451,7 +451,7 @@ Chi tiết chat gồm 3 phần
             permitScroll = "instant";
 
 
-            _messages.Add(new MessageDTO(currentUser.userName, "", "text", _newMessage, DateTime.UtcNow, "", "", false));
+            _messages.Add(new MessageDTO("", currentUser.userName, "", "text", _newMessage, DateTime.UtcNow, "", "", false));
             
             await UpdateUIChat.InvokeAsync(new Dictionary<string, Object>
             {
@@ -470,9 +470,6 @@ Chi tiết chat gồm 3 phần
             });
 
             _newMessage = "";
-
-
-
 
         }
     }
@@ -504,6 +501,7 @@ Chi tiết chat gồm 3 phần
                 string imageUrl = apiResponse.Data;
                 _messages.Add(
                     new MessageDTO(
+                        "",
                         currentUser.userName,
                         "",
                         fileType,

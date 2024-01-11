@@ -8,11 +8,11 @@
 <li class="d-flex align-center @cls @(IsFirstMsg ? "mt-3" : "")">
     @if (isMyMessage)
     {
-        <MudIconButton Class="forward mr-2" OnClick="() => ForwardMsg(Msg.MessageType)" Style="border-radius: 8px">
+        <MudIconButton OnClick="() => ForwardMsg(Msg.MessageType)" Class="forward mr-2" Style="border-radius: 8px">
             <i class="fa-solid fa-share fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
 
-        <MudIconButton Class="forward mr-2"  Style="border-radius: 8px">
+        <MudIconButton OnClick="() => OpenReactionDialog(Msg.MessageId)" Class="forward mr-2" Style="border-radius: 8px">
             <i class=" fa-solid fa-heart fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
 
@@ -29,45 +29,58 @@
         <img class="coversation-img mr-3 align-self-start" src="@(Constant.uriBaseUserAvt + Msg.SenderAvatar)" />
     }
 
-    <p class="single-msg @(isMyMessage ? "me" : "other") image-msg"
-       style="@(!isMyMessage && !IsFirstMsg ? "margin-left: 62px" : "")">
-        @if (!isMyMessage && IsFirstMsg && ConversationType == "Group")
-        {
-            <span class="mb-2" style="font-size: 13px; color: gray">@Msg.SenderName</span>
+    @{
+        Console.WriteLine(Msg.MessageType + "-msg");
+    }
+
+    <div class="single-msg @(isMyMessage ? "me" : "other") @(Msg.MessageType)-msg"
+         style="@(!isMyMessage && !IsFirstMsg ? "margin-left: 62px" : ""); position: relative">
+        <p>
+            @if (!isMyMessage && IsFirstMsg && ConversationType == "Group")
+            {
+                <span class="mb-2" style="font-size: 13px; color: gray">@Msg.SenderName</span>
+                <br />
+            }
+            @if (Msg.MessageType == "text")
+            {
+                @Msg.Content
+            }
+            @if (Msg.MessageType == "image")
+            {
+                <MudImage Src="@Msg.Content" Fluid="true" Class="rounded-lg" />
+            }
+            @if (Msg.MessageType == "video")
+            {
+                <video src="@Msg.Content" controls
+                       class="rounded-lg" style="max-width: 100%" />
+            }
             <br />
-        }
-        @if (Msg.MessageType == "text")
-        {
-            @Msg.Content
-        }
-        @if (Msg.MessageType == "image")
-        {
-            <MudImage Src="@Msg.Content" Fluid="true" Class="rounded-lg" />
-        }
-        @if (Msg.MessageType == "video")
-        {
-            <video src="@Msg.Content" controls
-                   class="rounded-lg" style="max-width: 100%" />
-        }
-        <br />
-        <small class="msg-dt" style="color: @(isMyMessage ? "while" : "gray")">
-            @if (isToday || (IsSameDateWithPreMsg))
-            {
-                <span>@Msg.SentAt.ToShortTimeString()</span>
-            }
-            else
-            {
-                <span>@Msg.SentAt.ToShortDateString() | @Msg.SentAt.ToShortTimeString()</span>
-            }
-        </small>
-    </p>
+            <small class="msg-dt" style="color: @(isMyMessage ? "while" : "gray")">
+                @if (isToday || (IsSameDateWithPreMsg))
+                {
+                    <span>@Msg.SentAt.ToShortTimeString()</span>
+                }
+                else
+                {
+                    <span>@Msg.SentAt.ToShortDateString() | @Msg.SentAt.ToShortTimeString()</span>
+                }
+            </small>
+
+            <div class="reactions">
+
+            </div>
+        </p>
+
+    </div>
+
+    
 
     @if (!isMyMessage)
     {
         <MudIconButton OnClick="() => ForwardMsg(Msg.MessageType)" Class="forward ml-2" Style="border-radius: 8px">
             <i class="fa-solid fa-share fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
-        <MudIconButton Class="forward mr-2"  Style="border-radius: 8px">
+        <MudIconButton OnClick="() => OpenReactionDialog(Msg.MessageId)" Class="forward mr-2" Style="border-radius: 8px">
             <i class=" fa-solid fa-heart fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
 
@@ -86,9 +99,14 @@
 
 @inject HttpClient _http
 
+@using Microsoft.AspNetCore.SignalR.Client
 @using Newtonsoft.Json;
 
 @inject IJSRuntime JSRuntime
+
+@inject IDialogService DialogService
+
+@inject MessageHubManager MessageHubManager;
 
 @code {
     [Parameter]
@@ -139,5 +157,28 @@
     {
         string fileName = fileUrl.Split('/').Last().Split('?').First();
         await JSRuntime.InvokeVoidAsync("downloadFile", fileName, fileUrl);
+    }
+
+    private async void OpenReactionDialog(string messageId)
+    {
+        DialogOptions options = new DialogOptions
+        {
+            FullWidth = false,
+            CloseOnEscapeKey = false,
+            DisableBackdropClick = false,
+            NoHeader = true,
+        };
+
+        DialogParameters keyValues = new DialogParameters();
+        dialogReference = DialogService.Show<ReactionDialog>("", options);
+
+        var result = await dialogReference.Result;
+
+        if (!result.Canceled)
+        {
+            Console.WriteLine("Reacted: " + result.Data);
+            // await  MessageHubManager.HubConnection!.SendAsync("");
+
+        }
     }
 }
