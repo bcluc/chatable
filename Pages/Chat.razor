@@ -55,38 +55,39 @@
 				}
 				else
 				{
-					@foreach (var chat in Chats)
-					{
-						bool isToday = chat.lastMessage.sentAt.Date == DateTime.Today.Date;
-						string avatarUrl = (chat.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + chat.conversationAvatar;
-						<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
-						@onclick="() => OnUserSelected(chat)">
+					<div class="list-conversations">
 
-							<img class="coversation-img mr-3" src="@avatarUrl" />
-							<div class="d-flex justify-start flex-column" style="flex: 1">
-								<div class="d-flex mb-1">
-									<p class="coversation-name">@chat.conversationName</p>
-									<MudSpacer/>
-									<p style="color: #AAA; font-weight: 400">@(isToday ? chat.lastMessage.sentAt.ToShortTimeString() : chat.lastMessage.sentAt.ToShortDateString())</p>
+						@foreach (var chat in Chats)
+						{
+							bool isToday = chat.lastMessage.sentAt.Date == DateTime.Today.Date;
+							string avatarUrl = (chat.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + chat.conversationAvatar;
+							<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
+							@onclick="() => OnUserSelected(chat)">
+
+								<img class="coversation-img mr-3" src="@avatarUrl" />
+								<div class="d-flex justify-start flex-column" style="flex: 1">
+									<div class="d-flex mb-1">
+										<p class="coversation-name">@chat.conversationName</p>
+										<MudSpacer />
+										<p style="color: #AAA; font-weight: 400">@(isToday ? chat.lastMessage.sentAt.ToShortTimeString() : chat.lastMessage.sentAt.ToShortDateString())</p>
+									</div>
+									<div class="d-flex coversation-last-message">
+										<p class="last-msg" style="font-weight: @(chat.lastMessage.isSeen ? "normal" : "600"); color: @(chat.lastMessage.isSeen ? "gray" : "black")">
+											@((chat.lastMessage.senderId == CurrentUser.currentUser!.userName ? "Bạn: " : "") + chat.lastMessage.content)
+										</p>
+										@if (chat.lastMessage.unreadMsgCount > 0)
+										{
+											<MudSpacer />
+											<p class="ml-2 pa-1 unread-count">
+												@chat.lastMessage.unreadMsgCount
+											</p>
+										}
+									</div>
 								</div>
-								<p class="coversation-last-message">@chat.lastMessage.content</p>
 							</div>
 
-							<div class="d-flex coversation-last-message">
-								<p class="last-msg" style="font-weight: @(chat.lastMessage.isSeen ? "normal" : "600"); color: @(chat.lastMessage.isSeen ? "gray" : "black")">
-									@((chat.lastMessage.senderId == CurrentUser.currentUser!.userName ? "Bạn: " : "") + chat.lastMessage.content)
-								</p>
-								@if (chat.lastMessage.unreadMsgCount > 0)
-								{
-									<MudSpacer/>
-									<p class="ml-2 pa-1 unread-count">
-										@chat.lastMessage.unreadMsgCount
-									</p>
-								}
-							</div>
-						</div>
-
-					}
+						}
+					</div>
 				}
 
 			</div>

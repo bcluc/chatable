@@ -38,20 +38,17 @@
                 </div>
                 <div class="app-component-container2" style="margin-top:10px">
                     @* Hiện kết quả *@
-                    @if (_loadingUsers)
-                    {
+                    @if (_loadingUsers){
                         <MudDivider></MudDivider>
                         <p class="mb-4" style="margin-top:10px; margin-bottom:10px">Kết quả tìm kiếm</p>
                         <div class="friend-container">
-                        <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
-                            <MudAvatar>
-                                <MudImage Src=@(Constant.uriBaseUserAvt + userResult.avatarUrl)></MudImage>
-                            </MudAvatar>
-                            <h4 class="user-name">@userResult.fullName</h4>
-                        </div>
-                            <MudIconButton Variant="Variant.Text" DisableElevation="true"
-                                           Class="mx-2" Style="">
-                                           @if()
+                            <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+                                <MudAvatar>
+                                    <MudImage Src=@(Constant.uriBaseUserAvt + userResult.avatarUrl)></MudImage>
+                                </MudAvatar>
+                                <h4 class="user-name">@userResult.fullName</h4>
+                            </div>
+                            <MudIconButton Variant="Variant.Text" DisableElevation="true" Class="mx-2">                                         
                                 <i class="fa-solid fa-user-plus fa-lg"></i>
                             </MudIconButton>
                         </div>
