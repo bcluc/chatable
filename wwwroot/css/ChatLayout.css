@@ -55,7 +55,6 @@
         top: 0px;
         left: 80px;
         width: calc(100% - 80px);
-        
     }
 
     .wait-chat {
@@ -65,9 +64,7 @@
 
 .list-conversations {
     display: flex;
-    flex: 1;
     flex-direction: column;
-    overflow: scroll
 }
 
 .coversation-container {
@@ -76,7 +73,6 @@
     justify-content: flex-start;
     align-items: center;
     padding: 14px;
-    cursor: pointer;
 }
 
 .coversation-img {
@@ -125,9 +121,9 @@
     color: black;
 }
 
-.user-unselect:hover {
-    background-color: #F4F5F7;
-}
+    .user-unselect:hover {
+        background-color: #F4F5F7;
+    }
 
 /* Layout cho màn hình đợi */
 .wait-chat {

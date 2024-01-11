@@ -42,54 +42,65 @@
 
 		@if (!_isSearch)
 		{
-			<div class="list-conversations">
+			@if (_loadingUsers)
+			{
+				@* <div class="coversation-container">
+		<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+		Loading...
+		</div> *@
+				<div class="d-flex justify-center align-center" style="height: 100%">
+					<MudProgressCircular Color="Color.Info" Indeterminate="true" />
+				</div>
+			}
+			else
+			{
+				<div class="list-conversations">
 
-				@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" /> *@
-				@if (_loadingUsers)
+					@foreach (var chat in Chats)
+					{
+						bool isToday = chat.lastMessage.sentAt.Date == DateTime.Today.Date;
+						string avatarUrl = (chat.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + chat.conversationAvatar;
+						<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
+							 @onclick="() => OnUserSelected(chat)">
 
-				{
-								<div class="d-flex justify-center align-center" style="height: 100%">
-				<MudProgressCircular Color="Color.Info" Indeterminate="true" />
-			</div>
-				}
-				else
-				{
-					<div class="list-conversations">
-
-						@foreach (var chat in Chats)
-						{
-							bool isToday = chat.lastMessage.sentAt.Date == DateTime.Today.Date;
-							string avatarUrl = (chat.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + chat.conversationAvatar;
-							<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
-							@onclick="() => OnUserSelected(chat)">
-
-								<img class="coversation-img mr-3" src="@avatarUrl" />
-								<div class="d-flex justify-start flex-column" style="flex: 1">
-									<div class="d-flex mb-1">
-										<p class="coversation-name">@chat.conversationName</p>
-										<MudSpacer />
+							<img class="coversation-img mr-3" src="@avatarUrl" />
+							<div class="d-flex justify-start flex-column" style="flex: 1">
+								<div class="d-flex mb-1">
+									<p class="coversation-name">@chat.conversationName</p>
+									<MudSpacer />
+									@if (chat.lastMessage.content != null)
+									{
 										<p style="color: #AAA; font-weight: 400">@(isToday ? chat.lastMessage.sentAt.ToShortTimeString() : chat.lastMessage.sentAt.ToShortDateString())</p>
-									</div>
-									<div class="d-flex coversation-last-message">
+									}
+								</div>
+								<div class="d-flex coversation-last-message">
+									@if (chat.lastMessage.content != null)
+									{
 										<p class="last-msg" style="font-weight: @(chat.lastMessage.isSeen ? "normal" : "600"); color: @(chat.lastMessage.isSeen ? "gray" : "black")">
 											@((chat.lastMessage.senderId == CurrentUser.currentUser!.userName ? "Bạn: " : "") + chat.lastMessage.content)
 										</p>
-										@if (chat.lastMessage.unreadMsgCount > 0)
-										{
-											<MudSpacer />
-											<p class="ml-2 pa-1 unread-count">
-												@chat.lastMessage.unreadMsgCount
-											</p>
-										}
-									</div>
+									}
+									else
+									{
+										<p class="last-msg" style="color: gray">
+											Chưa có tin nhắn
+										</p>
+									}
+
+									@if (chat.lastMessage.unreadMsgCount > 0)
+									{
+										<MudSpacer />
+										<p class="ml-2 pa-1 unread-count">
+											@chat.lastMessage.unreadMsgCount
+										</p>
+									}
 								</div>
 							</div>
+						</div>
 
-						}
-					</div>
-				}
-
-			</div>
+					}
+				</div>
+			}
 		}
 
 	</div>
@@ -164,7 +175,7 @@
 	//private AuthenticationState
 	private string value2;
 
-	private bool _loadingUsers = false;
+	private bool _loadingUsers = true;
 	private bool _isSearch = false;
 
 	private Conversation? _selectedUser = null;
