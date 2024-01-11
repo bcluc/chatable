@@ -42,25 +42,25 @@
                             </MudIconButton>
                         </ButtonTemplate>
                     </MudFileUpload>
-                    <MudText style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</MudText>
+                    <MudText style=" position: absolute;  font-family: SVN-Poppins;left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</MudText>
 
 
                 </div>
 
                 <div class="infor" style="margin-top: 70px;">
-                    <MudText style=" font-size: 18px; font-weight: 500;"> Thông tin cá nhân </MudText>
+                    <MudText style="font-family: SVN-Poppins; font-size: 18px; font-weight: 500;"> Thông tin cá nhân </MudText>
 
                     <div class="horizental">
-                        <MudText Style="width: 170px; margin-top: 20px; ">Email</MudText>
-                        <MudText Style="margin-top: 20px">@(currentUser.email != null ? currentUser.email : "Chưa cập nhập")</MudText>
+                        <MudText Style="font-family: SVN-Poppins;width: 170px; margin-top: 20px; ">Email</MudText>
+                        <MudText Style="font-family: SVN-Poppins;margin-top: 20px">@(currentUser.email != null ? currentUser.email : "Chưa cập nhập")</MudText>
                     </div>
                     <div class="horizental">
-                        <MudText Style="width: 170px; margin-top: 20px; ">Giới tính</MudText>
-                        <MudText Style="margin-top: 20px" >@currentUser.gender</MudText>
+                            <MudText Style="font-family: SVN-Poppins;width: 170px; margin-top: 20px; ">Giới tính</MudText>
+                            <MudText Style="font-family: SVN-Poppins;margin-top: 20px">@currentUser.gender</MudText>
                     </div>
                     <div class="horizental">
-                        <MudText Style="width: 170px; margin-top: 20px; ">Ngày sinh</MudText>
-                        <MudText Style="margin-top: 20px">@(currentUser.dob.HasValue ? currentUser.dob.Value.ToString("dd / MM / yyyy") : "N/A")</MudText>
+                            <MudText Style="font-family: SVN-Poppins;width: 170px; margin-top: 20px; ">Ngày sinh</MudText>
+                            <MudText Style="font-family: SVN-Poppins;margin-top: 20px">@(currentUser.dob.HasValue ? currentUser.dob.Value.ToString("dd / MM / yyyy") : "N/A")</MudText>
                     </div>
                 </div>
             </div>

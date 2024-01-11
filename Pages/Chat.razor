@@ -231,6 +231,13 @@
 			}
 			InvokeAsync(StateHasChanged);
 		});
+
+		MessageHubManager.HubConnection!.On<RequestDTO>("FriendRequestReceived", request =>
+		{
+			Console.WriteLine("id send: " + request.UserId);
+			
+			InvokeAsync(StateHasChanged);
+		});
 	}
 
 	protected override async Task OnParametersSetAsync()

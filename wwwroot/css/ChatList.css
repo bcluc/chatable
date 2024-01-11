@@ -88,11 +88,13 @@ h4 {
 .friend-request-actions {
     margin-left: auto;
     width: 180px;
+    text-align: end;
+    margin-right: 20px;
 }
 
 .button:first-child
 {
-    margin-bottom: 14px;
+
 }
 
     .button .button-primary {
