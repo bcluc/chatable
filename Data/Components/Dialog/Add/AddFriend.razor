@@ -1,0 +1,175 @@
+﻿@using Chatable.DI
+@using Chatable.Data.Components;
+@using System.ComponentModel.DataAnnotations;
+@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles.Request;
+@using Chatable.Data.Entitles.Respond;
+@using Chatable.Data.Entitles;
+@using Microsoft.AspNetCore.Components.Forms;
+@using System.Diagnostics;
+@using System.Net.Http
+@using Newtonsoft.Json
+@using System.Net.Http.Headers;
+
+@inject IJSRuntime jsRuntime
+@inject IDialogService DialogService
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+
+<link rel="stylesheet" href="/css/AddGroupDialog.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+<MudDialog class="custom-dialog-content" >
+
+    <DialogContent>
+        <div>
+            <div class="app-component-container">
+                <div class="app-component-container1">
+                    <div class="app-component-container3">
+                        <img src="@Constant.logoIcon" class="group-img" />
+                        <input type="text"
+                               style="background-image:none; padding-left: 8px; margin:auto; margin-left: 8px"
+                        @bind="@_userName"
+                        @oninput="@((e) => { _userName=(string)e.Value;})"
+                               placeholder="Nhập id người dùng"
+                               class="app-component-textinput input" />
+                    </div>
+                </div>
+                <div class="app-component-container2" style="margin-top:10px">
+                    @* Hiện kết quả *@
+                    @if (_loadingUsers)
+                    {
+                        <MudDivider></MudDivider>
+                        <p class="mb-4" style="margin-top:10px; margin-bottom:10px">Kết quả tìm kiếm</p>
+                        <div class="friend-container">
+                        <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+                            <MudAvatar>
+                                <MudImage Src=@(Constant.uriBaseUserAvt + userResult.avatarUrl)></MudImage>
+                            </MudAvatar>
+                            <h4 class="user-name">@userResult.fullName</h4>
+                        </div>
+                            <MudIconButton Variant="Variant.Text" DisableElevation="true"
+                                           Class="mx-2" Style="">
+                                           @if()
+                                <i class="fa-solid fa-user-plus fa-lg"></i>
+                            </MudIconButton>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <div class="app-component-container5" style="height:auto; margin-bottom:10px">
+            <button type="button" class="app-component-button1 button" @onclick="() => Close()" >Hủy</button>
+            <button type="button" class="button app-component-button2-activate" @onclick="() => FindUserById(_userName)">
+                Tìm kiếm
+            </button>
+        </div>
+    </DialogActions>
+</MudDialog>
+
+@inject CurrentUser CurrentUser
+
+@code {
+    // test
+    private User currentUser;
+    private User userResult = new User();
+    //private User userResult = Constant.oppositeUser;
+    // variable
+    bool success;
+    private string _userName = "";
+    private bool _loadingUsers = false;
+    private bool _processing = false;
+
+    private List<User> _selectedUsers = new List<User> ();
+
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    private async Task<bool> FindUserById(string id)
+    {
+        _loadingUsers = false;
+        try
+        {
+            string requestInitialize = JsonConvert.SerializeObject(id);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + $"User/{id}");
+            httpRequestMessage.Content = new StringContent(requestInitialize);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        _loadingUsers = true;
+                        userResult = respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                }
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            success = false;
+        }
+        return await Task.FromResult(true);
+    }
+
+    private async Task<bool> SendFriendRequest(string receiverId)
+    {
+        try
+        {
+            string requestInitialize = JsonConvert.SerializeObject(receiverId);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request");
+            httpRequestMessage.Content = new StringContent(requestInitialize);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                success = true;
+            }
+            else
+            {
+                success = false;
+                string resBody = await response.Content.ReadAsStringAsync();
+            }
+            _processing = false;
+
+            if (success)
+            {
+                _navigationManager.NavigateTo("/chat");
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+        }
+        return await Task.FromResult(true);
+
+    }
+
+}
