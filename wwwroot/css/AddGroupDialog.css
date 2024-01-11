@@ -214,18 +214,17 @@ input[type=text] {
     display: flex;
     flex-direction: column;
 }
-.coversation-container {
+.coversation-container-search {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
     padding: 14px;
-    background-color: white;
     color: black;
 }
-.conversation-container:hover {
-    background-color: #F4F5F7;
-}
+    .coversation-container-search:hover {
+        background-color: #F4F5F7;
+    }
 .coversation-img {
     height: 50px;
     width: 50px;
@@ -237,3 +236,16 @@ input[type=text] {
     font-size: 16px;
     font-weight: 400;
 }
+
+.friend-container {
+    background-color: white;
+    padding: 12px;
+    display: flex;
+    flex-direction: row;
+    border-radius: 8px;
+    justify-content: space-between;
+    align-items: center;
+}
+    .friend-container:hover {
+        background-color: #F4F5F7;
+    }

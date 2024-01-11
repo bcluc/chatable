@@ -17,6 +17,8 @@
 @inject NavigationManager _navigationManager
 
 <link rel="stylesheet" href="/css/AddGroupDialog.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 
 <MudDialog class="custom-dialog-content" >
 
@@ -40,11 +42,18 @@
                     {
                         <MudDivider></MudDivider>
                         <p class="mb-4" style="margin-top:10px; margin-bottom:10px">Kết quả tìm kiếm</p>
+                        <div class="friend-container">
                         <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                             <MudAvatar>
                                 <MudImage Src=@(Constant.uriBaseUserAvt + userResult.avatarUrl)></MudImage>
                             </MudAvatar>
                             <h4 class="user-name">@userResult.fullName</h4>
+                        </div>
+                            <MudIconButton Variant="Variant.Text" DisableElevation="true"
+                                           Class="mx-2" Style="">
+                                           @if()
+                                <i class="fa-solid fa-user-plus fa-lg"></i>
+                            </MudIconButton>
                         </div>
                     }
                 </div>
@@ -66,12 +75,12 @@
 @code {
     // test
     private User currentUser;
-    //private User userResult = new User();
-    private User userResult = Constant.oppositeUser;
+    private User userResult = new User();
+    //private User userResult = Constant.oppositeUser;
     // variable
     bool success;
     private string _userName = "";
-    private bool _loadingUsers = true;
+    private bool _loadingUsers = false;
     private bool _processing = false;
 
     private List<User> _selectedUsers = new List<User> ();
@@ -83,6 +92,7 @@
 
     private async Task<bool> FindUserById(string id)
     {
+        _loadingUsers = false;
         try
         {
             string requestInitialize = JsonConvert.SerializeObject(id);
@@ -105,6 +115,7 @@
                 {
                     if (respond.Data != null)
                     {
+                        _loadingUsers = true;
                         userResult = respond.Data;
                     }
                 }

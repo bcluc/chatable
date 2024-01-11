@@ -48,7 +48,7 @@
         </ItemTemplate>
     </MudAutocomplete> *@
 
-        <input type="text" placeholder="Tìm kiếm" @bind-value="searchText" @bind-value:event="onchange" @onclick="() => OnClickSearchField()">
+        <input type="text" placeholder="Tìm kiếm" @bind-value="searchText" @bind-value:event="oninput" @onclick="() => OnClickSearchField()">
         
 
     @if(IsSearch)
@@ -77,7 +77,7 @@
             if (item.conversationName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase))
             {
                     string avatarUrl = (item.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + item.conversationAvatar;
-                    <div class="coversation-container"
+                    <div class="coversation-container-search"
                     @onclick="() => OnUserSelected(item)">
 
                         <img class="coversation-img mr-3" src="@avatarUrl" />
@@ -113,20 +113,17 @@
     }
     private async Task<IEnumerable<Conversation>> Search(string value)
     {
-        // In real life use an asynchronous function for fetching data from an api.
         await Task.Delay(5);
 
-        // if text is null or empty, don't return values (drop-down will not open)
         if (string.IsNullOrWhiteSpace(value))
             return Enumerable.Empty<Conversation>();
-        // return chat room
         return items.Where(x => x.conversationName.Contains(value, StringComparison.InvariantCultureIgnoreCase));//.Select(x => x.Name);
     }
     private async Task OnClickSearchField()
     {
         IsSearch = true;
         await UpdateIsSearch();
-        await GetAllFakeConversation();
+        await GetAllConversations();
     }
     private async Task CloseSearchField()
     {

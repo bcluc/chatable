@@ -15,7 +15,7 @@
     {
         @foreach (var chat in Chats)
         {
-            <li class="list-group-item " @onclick="() => HandleUserClick(chat)">
+            <li class="list-group-item @(chat.IsSelected ? "user-select" : "") " @onclick="() => HandleUserClick(chat)">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
                         <MudImage Src=@(Constant.uriBaseUserAvt + chat.avatarUrl)></MudImage>

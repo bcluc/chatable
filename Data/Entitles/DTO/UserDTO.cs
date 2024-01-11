@@ -6,7 +6,7 @@
         public string FullName { get; set; }
         public bool IsFriend { get; set; }
         public string AvatarUrl { get; set; }
-
+        public bool IsSelected { get; set; }
 
         public UserDTO(string userName, string fullName, string avatarUrl, bool isFriend)
         {
