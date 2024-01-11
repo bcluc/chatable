@@ -25,7 +25,7 @@
 
 @code {
     Token token = new Token();
-    User curUser;
+    User curUser = new User();
 
     protected override async Task OnInitializedAsync()
     {
@@ -61,20 +61,19 @@
                     CurrentUser.token = token;
 
                 }
-                curUser = new User();
-
+              
                 curUser = await GetCurUser();
 
                 if (curUser != null)
                 {
-                    CurrentUser.currentUser = curUser;
 
-                    if (curUser.avatarUrl== null)
+                    if (curUser.avatarUrl == null)
                     {
                        setNullAvt(curUser.gender);
                     }
 
                     CurrentUser.currentUser = curUser;
+
                     _navigationManager.NavigateTo("/chat");
 
                 }

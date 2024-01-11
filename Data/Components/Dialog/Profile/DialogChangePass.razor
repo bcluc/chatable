@@ -1,0 +1,156 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using Chatable.Data.Entitles
+@using Newtonsoft.Json
+@using System.Text
+@using System.Net.Http.Json
+
+@inject NavigationManager _navigationManager
+@inject IDialogService DialogService
+@inject HttpClient _http
+@inject IJSRuntime jsRuntime
+@inject Blazored.LocalStorage.ILocalStorageService _localStorageService
+
+<link rel="stylesheet" href="/css/DialogInsertEmail.css">
+<MudDialog Style="width: 400px"> 
+    <DialogContent>
+        <div style="padding:0 20px">
+            <MudText Style="margin-top: 10px">Mật khẩu hiện tại</MudText>
+            <MudTextField Placeholder="Abc@12345"
+                          TextChanged="CheckCanExcute" 
+                          Required="true"
+                          RequiredError="Hãy nhập mật khẩu hiện tại"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" Class="mb-4"
+                          @bind-Value="model.oldPassword" For="@(() => model.oldPassword)" InputType="@PasswordInput" />
+
+            <MudText Style="margin-top: 10px">Mật khẩu mới</MudText>
+            <MudTextField Placeholder="Abc@12345" Required="true" RequiredError="Hãy nhập mật khẩu"
+                          Variant="Variant.Outlined"
+                          TextChanged="CheckCanExcute"
+                          Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" Class="mb-4"
+                          @bind-Value="model.password" For="@(() => model.password)" InputType="@PasswordInput" />
+
+            <MudText Style="margin-top: 10px">Nhập lại mật khẩu</MudText>
+
+            <MudTextField Placeholder="Abc@12345"
+                          Required="true"
+                          TextChanged="CheckCanExcute"
+                          RequiredError="Hãy xác nhận lại mật khẩu"
+                          Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" Class="mb-4"
+                          @bind-Value="model.confirmPassword" For="@(() => model.confirmPassword)" InputType="@PasswordInput" />
+            <p class="erro">@erroMessage</p>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <div class="full-width">
+            <MudButton Variant="Variant.Filled"
+                       FullWidth="true"
+                       Disabled="@(!canExcute)"
+                       Class="save-btn">
+                @if (_processing)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Style="color: white"
+                                         StrokeWidth="4" />
+                }
+                else
+                {
+                    <MudText>Đặt lại mật khẩu</MudText>
+                }
+
+            </MudButton>
+            <MudButton OnClick="Cancel" Style="margin-top: 10px">Hủy</MudButton>
+        </div>
+
+    </DialogActions>
+</MudDialog>
+<style>
+    .mud-dialog .mud-dialog-content {
+        padding: 8px 0;
+    }
+
+    .save-btn {
+        border-radius: 11px;
+        color: white;
+        background-color: var(--bg-color);
+        font-size: 16px;
+        font-weight: 500;
+        font-family: SVN-Poppins;
+        text-transform: none;
+    }
+
+        .save-btn:hover {
+            background-color: var(--btn-hover);
+        }
+
+</style>
+@code {
+    public class ChangePassForm
+    {
+        [Required(ErrorMessage = "Nhập lại mật khẩu hiện tại của bạn.")]
+        public string oldPassword { get; set; }
+
+
+        [Required(ErrorMessage = "Mật khẩu là bắt buộc.")]
+        [StringLength(30, ErrorMessage = "Mật khẩu phải có ít nhất 8 kí tự \nGồm số,chữ hoa và ký tự đặc biệt", MinimumLength = 8)]
+        public string password { get; set; }
+
+        [Required(ErrorMessage = "Nhập lại mật khẩu là bắt buộc.")]
+        [Compare(nameof(password), ErrorMessage = "Mật khẩu và nhập lại mật khẩu không khớp.")]
+        public string confirmPassword { get; set; }
+
+
+    }
+
+    
+    public class ApiResponse
+    {
+        public bool success { get; set; }
+        public string message { get; set; }
+        public String data { get; set; }
+    }
+}
+
+
+@code {
+    ChangePassForm model = new ChangePassForm();
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    String erroMessage;
+    Boolean canExcute = false;
+    Boolean _processing = false;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    bool isShow;
+
+    void togglePasswordVisibility()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+
+    private void CheckCanExcute()
+    {
+        if (!String.IsNullOrWhiteSpace(model.oldPassword) && !String.IsNullOrWhiteSpace(model.confirmPassword) && !String.IsNullOrWhiteSpace(model.password))
+        {
+            canExcute = true;
+            return;
+        }
+        canExcute = false;
+        return;
+    }
+
+  
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+}

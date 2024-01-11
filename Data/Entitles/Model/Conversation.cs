@@ -2,22 +2,26 @@
 {
     public class Conversation
     {
+		public string? conversationId { get; set; }
+		public string conversationType { get; set; }
 
-        public string conversationName { get; set; }
+		public string conversationName { get; set; }
 
         public string conversationAvatar { get; set; }
 
-        public string? conversationId { get; set; }
         public LastMessageDTO? lastMessage { get; set; }
-        public string conversationType { get; set; }
+
+        public bool IsSelected { get; set; } = false;
+
+
         public bool isFriend { get; set; }
-        public bool IsSelected { get; set; }
+
         public Conversation() { }
 
         public Conversation(
-            string? id,  
-            string conversationType, 
-            LastMessageDTO? lastMessage, 
+            string? id,
+            string conversationType,
+            LastMessageDTO? lastMessage,
             string conversationName,
             string conversationAvatar,
             bool isFriend

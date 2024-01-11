@@ -112,7 +112,7 @@
     </DialogContent>
     <DialogActions >
         <div class="bottom-right-button">
-            <MudButton Color="Color.Primary" OnClick="Cancel" Style="margin-right: 20px; background-color: #F5F5F5; color: black">
+            <MudButton OnClick="Cancel" Style="margin-right: 20px; background-color: #F5F5F5; color: black">
                 Hủy
             </MudButton>
             <MudButton Color="Color.Primary" OnClick="SaveChange" Class="btn-save btn-save-hover btn-save-disable "
@@ -162,15 +162,12 @@
        
     }
 }
-
-
 @code {
-
+    [Parameter] public EventCallback OnProfileUpdated { get; set; }
     User currentUser;
     UserInfor currentUserInfor;
     bool CanUpdate = false;
     string erroMessage;
-
 
     UpdateUserForm model = new UpdateUserForm();
 
@@ -260,15 +257,18 @@
                 if (response.IsSuccessStatusCode)
                 {
                     // Show success message
-                    await DialogService.ShowMessageBox("Thông báo","Bạn đã cập nhập thông tin thành công!");
+                    var dialog = await DialogService.ShowAsync<DialogEditSuccess>("Thông báo");
+                    var result = await dialog.Result;
 
                     currentUser = await GetCurUser();
+
                     CurrentUser.currentUser = currentUser;
 
                     // Close the dialog
                     MudDialog.Close(DialogResult.Ok(true));
 
-                    DialogService.Show<DialogProfile>("Thông tin cá nhân");
+
+                    OpenProfileDialog();
 
                 }
                 else
@@ -394,7 +394,8 @@
                     ApiResponse<String> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
                     avatar = apiResponse.Data;
                     currentUser.avatarUrl = avatar;
-                    CurrentUser.currentUser = currentUser;
+                    CurrentUser.currentUser.avatarUrl = currentUser.avatarUrl;
+                    CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
                     StateHasChanged();
                     //await LoadProfile();
                 }
@@ -420,5 +421,12 @@
     {
         var dialog = DialogService.Show<ErroUpImage>("Thông báo");
         var result = await dialog.Result;
+    }
+    private void OpenProfileDialog()
+    {
+        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = true };
+        DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+
+
     }
 }

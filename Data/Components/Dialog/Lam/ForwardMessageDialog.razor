@@ -2,50 +2,58 @@
 @using Chatable.Data.Entitles
 @using Chatable.Data.Entitles.DTO
 @using Chatable.Data.Entitles.Model
-<MudDialog Style="width: 350px; max-height: 80%; border-radius: 20px">
+
+<style>
+	.mud-dialog-content {
+		padding: 0 !important
+	}
+</style>
+
+<MudDialog Style="width: 360px; max-height: 80%; border-radius: 20px">
 
     <DialogContent>
 
-        <div class="d-flex justify-center align-center mt-2">
+		<div class="d-flex flex-column" style="padding: 8px 8px">
+			<div class="d-flex justify-center align-center mt-2" style="padding: 0 16px 0 16px">
 
-            <MudText Style="font-size: 24px; font-weight: 400;">Chia sẻ</MudText>
-            <MudSpacer/>
-            <MudIconButton Icon="@Icons.Material.Filled.Close" Variant="Variant.Filled" DisableElevation="true"
-                           Size="Size.Large" OnClick="Cancel">
-                       </MudIconButton>
-        </div>
+				<MudText Style="font-size: 24px; font-weight: 400;">Chia sẻ</MudText>
+				<MudSpacer />
+				<MudIconButton Icon="@Icons.Material.Filled.Close" Variant="Variant.Filled" DisableElevation="true"
+							   Size="Size.Large" OnClick="Cancel">
+				</MudIconButton>
+			</div>
 
-        <MudDivider Class="my-2"/>
+			<MudDivider Class="my-2" />
 
-        <div>
-			@if (_loadingUsers)
-			{
-				<div class="coversation-container">
-					<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-					Loading...
-				</div>
-			}
-			else
-			{
-				<MudText Class="mb-2" Style="font-size: 16px; font-weight: 400;">
-					Cuộc trò chuyện gần đây
-				</MudText>
-				@for (int i=0; i < Chats.Count; ++i )
+			<div style="height: 400px; overflow: scroll; padding: 0 8px 0 16px">
+				@if (_loadingUsers)
 				{
-					var currentIndex = i;
-					<div class="d-flex justify-center align-center mb-4">
-						<img class="coversation-img mr-3" src="@((Chats[currentIndex].conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + Chats[currentIndex].conversationAvatar)" />
-						<p class="coversation-name">@Chats[currentIndex].conversationName</p>
-						<MudSpacer/>
-						<MudButton Variant="Variant.Filled" Style="background-color: #0091FE; color: white; border-radius: 8px"
-								   Disabled="@sentList[currentIndex]"
-								   OnClick="@(() => SendMessageTo(currentIndex))"
-								   DisableElevation="true">Gửi</MudButton>
+					<div class="coversation-container">
+						<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+						Loading...
 					</div>
 				}
-			}
-        </div>
-
+				else
+				{
+					<MudText Class="mb-2" Style="font-size: 16px; font-weight: 400;">
+						Cuộc trò chuyện gần đây
+					</MudText>
+					@for (int i = 0; i < Chats.Count; ++i)
+					{
+						var currentIndex = i;
+						<div class="d-flex justify-center align-center mb-4">
+							<img class="coversation-img mr-3" src="@((Chats[currentIndex].conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + Chats[currentIndex].conversationAvatar)" />
+							<p class="coversation-name">@Chats[currentIndex].conversationName</p>
+							<MudSpacer />
+							<MudButton Variant="Variant.Filled" Style="background-color: #0091FE; color: white; border-radius: 8px"
+									   Disabled="@sentList[currentIndex]"
+									   OnClick="@(() => SendMessageTo(currentIndex))"
+									   DisableElevation="true">Gửi</MudButton>
+						</div>
+					}
+				}
+			</div>
+		</div>
     </DialogContent>
 
 </MudDialog>
@@ -66,6 +74,9 @@
 
 	[Parameter]
 	public MessageDTO? Msg { get; set; }
+
+	[Parameter]
+	public EventCallback<Dictionary<String, Object>> UpdateUIChat { get; set; }
 
 	List<Conversation> Chats = new List<Conversation>();
 
@@ -117,22 +128,38 @@
 		return await Task.FromResult(true);
 	}
 
-	void SendMessageTo(int chatIndex)
+	async void SendMessageTo(int chatIndex)
 	{
-		string id = Chats[chatIndex].conversationId;
+		string conversationId = Chats[chatIndex].conversationId;
 		string type = Chats[chatIndex].conversationType;
-		Console.WriteLine("forward to " + id);
+		Console.WriteLine("forward to " + conversationId);
 
 		if (type == "Peer")
 		{
-			MessageHubManager.HubConnection!.SendAsync("SendPeerMessage", id, Msg.MessageType, Msg.Content);
+			await MessageHubManager.HubConnection!.SendAsync("SendPeerMessage", conversationId, Msg.MessageType, Msg.Content);
 			sentList[chatIndex] = true;
 		}
 		else
 		{
-			MessageHubManager.HubConnection!.SendAsync("SendGroupMessage", id, Msg.MessageType, Msg.Content);
+			await MessageHubManager.HubConnection!.SendAsync("SendGroupMessage", conversationId, Msg.MessageType, Msg.Content);
 			sentList[chatIndex] = true;
 		}
+
+		await UpdateUIChat.InvokeAsync(new Dictionary<string, Object>
+			{
+				{"conversation_id", conversationId!},
+				{
+					"last_msg", new LastMessageDTO(
+						CurrentUser.currentUser!.userName,
+						 Msg.MessageType,
+						Msg.Content,
+						DateTime.UtcNow,
+						null,
+						true,
+						0
+					)
+				},
+			});
 	}
 
     void Submit() => MudDialog!.Close(DialogResult.Ok("accept"));

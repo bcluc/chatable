@@ -24,11 +24,11 @@
 
 <div class="sidebar">
     <div class="user">
-        <img src=" @(Constant.uriBaseUserAvt +currentUser.avatarUrl)" class="user_img" @onclick="OpenDialog" />
+        <img src=" @(Constant.uriBaseUserAvt + currentUser.avatarUrl)" class="user_img" @onclick="OpenDialog" />
         <p>@currentUser.fullName</p>
     </div>
     <ul>
-        @for (int i = 0; i <= 2; ++i)
+        @for (int i = 0; i <= 1; ++i)
         {
             var currentIndex = i;
             <li class="@(currentPageIndex == i ? "current-page" : "")"
@@ -107,17 +107,26 @@
 @inject CallHubManager CallHubManager
 @inject MessageHubManager MessageHubManager
 
-@* @implements IAsyncDisposable *@
+@implements IAsyncDisposable
 
 @code {
     User currentUser;
     bool themeOn = false;
 
-    private void OpenDialog()
+    private async void OpenDialog()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = true };
+        Console.WriteLine(CurrentUser.currentUser.avatarUrl);
+
+        var dialog =  DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+        await dialog.Result;
+        Console.WriteLine(CurrentUser.currentUser.avatarUrl);
+        CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
+        StateHasChanged();
+
     }
+
+
     private void OpenConfirmLogoutDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
@@ -125,10 +134,6 @@
     }
 
     /* Lâm */
-    protected override void OnInitialized()
-    {
-
-    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -251,11 +256,11 @@
         CallHubManager.isIdle = true;
     }
 
-    // public async ValueTask DisposeAsync()
-    // {
-    //     await MessageHubManager.HubConnection!.DisposeAsync();
-    //     await CallHubManager.HubConnection!.DisposeAsync();
-    //     Console.WriteLine("Bye MainLayout");
-    // }
+    public async ValueTask DisposeAsync()
+    {
+        await MessageHubManager.HubConnection!.DisposeAsync();
+        await CallHubManager.HubConnection!.DisposeAsync();
+        Console.WriteLine("Bye MainLayout");
+    }
 
 }
