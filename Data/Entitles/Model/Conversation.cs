@@ -13,6 +13,7 @@
 
         public bool IsSelected { get; set; } = false;
 
+
         public bool isFriend { get; set; }
 
         public Conversation() { }

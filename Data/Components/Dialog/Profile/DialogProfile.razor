@@ -17,8 +17,10 @@
 
 
 <link rel="stylesheet" href="/css/DialogProfile.css">
+<link rel="stylesheet" href="/css/AuthTemplate.css">
 
-<MudDialog class="custom-dialog-content" Style="height: 580px" >
+
+<MudDialog class="custom-dialog-content" Style="height: 605px" >
     <DialogContent>
         @if (currentUser == null)
         {
@@ -26,7 +28,7 @@
         }
         else
         {
-            <div class="content" style="height: 450px; max-height: 450px; overflow-y: unset">
+            <div class="content" style="height: 420px; overflow-y: unset">
                 <div Class="photos">
                     <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
                     <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
@@ -42,43 +44,61 @@
                             </MudIconButton>
                         </ButtonTemplate>
                     </MudFileUpload>
-                    <MudText style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</MudText>
+                    <MudText style=" position: absolute;  font-family: SVN-Poppins;left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</MudText>
 
 
                 </div>
 
                 <div class="infor" style="margin-top: 70px;">
-                    <MudText style=" font-size: 18px; font-weight: 500;"> Thông tin cá nhân </MudText>
+                    <MudText style="font-family: SVN-Poppins; font-size: 18px; font-weight: 500;"> Thông tin cá nhân </MudText>
 
                     <div class="horizental">
-                        <MudText Style="width: 170px; margin-top: 20px; ">Email</MudText>
-                        <MudText Style="margin-top: 20px">@(currentUser.email != null ? currentUser.email : "Chưa cập nhập")</MudText>
+                        <MudText Style="font-family: SVN-Poppins;width: 170px; margin-top: 20px; ">Email</MudText>
+                        <MudText Style="font-family: SVN-Poppins;margin-top: 20px">@(currentUser.email != null ? currentUser.email : "Chưa cập nhập")</MudText>
                     </div>
                     <div class="horizental">
-                        <MudText Style="width: 170px; margin-top: 20px; ">Giới tính</MudText>
-                        <MudText Style="margin-top: 20px" >@currentUser.gender</MudText>
+                            <MudText Style="font-family: SVN-Poppins;width: 170px; margin-top: 20px; ">Giới tính</MudText>
+                            <MudText Style="font-family: SVN-Poppins;margin-top: 20px">@currentUser.gender</MudText>
                     </div>
                     <div class="horizental">
-                        <MudText Style="width: 170px; margin-top: 20px; ">Ngày sinh</MudText>
-                        <MudText Style="margin-top: 20px">@(currentUser.dob.HasValue ? currentUser.dob.Value.ToString("dd / MM / yyyy") : "N/A")</MudText>
+                            <MudText Style="font-family: SVN-Poppins;width: 170px; margin-top: 20px; ">Ngày sinh</MudText>
+                            <MudText Style="font-family: SVN-Poppins;margin-top: 20px">@(currentUser.dob.HasValue ? currentUser.dob.Value.ToString("dd / MM / yyyy") : "N/A")</MudText>
                     </div>
                 </div>
             </div>
         }
     </DialogContent>
     <DialogActions >
-        <div class="toEdit">
-            <MudButton StartIcon="@Icons.Material.Filled.Edit" OnClick="OpenEditDialog" Class="btn-save" FullWidth ="true" >
+        <div class="toEdit" style="flex-direction: column">
+            <MudButton StartIcon="@Icons.Material.Filled.Edit" OnClick="OpenEditDialog" Class="save-btn" FullWidth="true">
                 Chỉnh sửa thông tin
+            </MudButton>
+            <MudButton OnClick="OpenChangePassDialog" Class="save-btn" style="margin-top: 10px;" FullWidth="true">
+                Đổi mật khẩu
             </MudButton>
         </div>
     </DialogActions>
 </MudDialog>
+<style>
+    .save-btn {
+        border-radius: 11px;
+        color: white;
+        background-color: var(--bg-color);
+        font-size: 15px;
+        font-weight: 500;
+        font-family: SVN-Poppins;
+        text-transform: none;
+    }
+
+        .save-btn:hover {
+            background-color: var(--btn-hover);
+        }
+</style>
 
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-
+    [Parameter] public EventCallback OnDialogClosed { get; set; }
     User currentUser;
     List<IBrowserFile> selectedFiles = new List<IBrowserFile>();
     String avatar;
@@ -90,10 +110,16 @@
 
     private void OpenEditDialog()
 
-    //jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
     {
         MudDialog.Close(DialogResult.Ok(true));
-        DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân");
+        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân", options);
+        StateHasChanged();
+    }
+    private void OpenChangePassDialog()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+        DialogService.Show<DialogChangePass>("Thay đổi mật khẩu");
     }
 
     private async void UploadFile(IBrowserFile file)
@@ -144,9 +170,10 @@
                 {
                     ApiResponse<String> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
                     avatar = apiResponse.Data;
+
                     currentUser.avatarUrl = avatar;
                     CurrentUser.currentUser = currentUser;
-
+                    CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
                     StateHasChanged();
                 }
 

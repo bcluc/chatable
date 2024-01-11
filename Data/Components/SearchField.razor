@@ -1,4 +1,5 @@
-﻿@using Chatable.Data.Components;
+﻿@using Chatable.DI;
+@using Chatable.Data.Components;
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.DTO;
 @using Chatable.Data.Entitles.Model;
@@ -18,59 +19,128 @@
 @inject IHttpClientFactory ClientFactory
 
 <link rel="stylesheet" href="/css/AddGroupDialog.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+<div>
 
 <div class="top_bar">
-    <MudAutocomplete Placeholder="Tìm kiếm" T="ConversationDTO" @bind-Value="selectedConversation" SearchFunc="@Search"
-                     Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" 
-                     ToStringFunc="@(e=> e==null?null : $"{e.Name}")">
+    @* <MudTextField T="Conversation" @bind-Value="selectedConversation" Placeholder="Tìm kiếm" Variant="Variant.Outlined" Adornment="Adornment.End"
+                  AdornmentIcon="@Icons.Material.Filled.Search">
+</MudTextField> *@
+
+    @* <MudAutocomplete Placeholder="Tìm kiếm" T="Conversation" @bind-Value="selectedConversation" SearchFunc="@Search"
+                     Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" ShowProgressIndicator="true"
+                     ToStringFunc="@(e=> e==null?null : $"{e.conversationName}")" @onclick="() => OnClickSearchField()">
+        <ProgressIndicatorTemplate>
+            <MudProgressLinear Size="Size.Small" Indeterminate="true" Color="Color.Primary" />
+        </ProgressIndicatorTemplate>
+                    
         <ItemTemplate>
             <div class="list-group-item">
                 <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
                     <MudAvatar>
-                        <MudImage Src=@context.Avt></MudImage>
+                        <MudImage Src=@((context.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + context.conversationAvatar)></MudImage>
                     </MudAvatar>
-                    <h4 class="user-name">@context.Name</h4>
+                    <h4 class="user-name">@context.conversationName</h4>
                 </div>
             </div>
-            
         </ItemTemplate>
-    </MudAutocomplete>
+    </MudAutocomplete> *@
 
+        <input type="text" placeholder="Tìm kiếm" @bind-value="searchText" @bind-value:event="oninput" @onclick="() => OnClickSearchField()">
+        
+
+    @if(IsSearch)
+    {
+        <MudButton Variant="Variant.Filled" DisableElevation="true"
+                       Style="padding: 8px; border-radius: 8px;transition: .3s;" 
+                       Class="mx-2" OnClick="CloseSearchField">
+                       Đóng</MudButton>
+    }
+    else
+    {
     <MudIconButton Variant="Variant.Text" DisableElevation="true" 
-    Style="padding: 9px; border-radius: 8px;" Class="mx-2">
+    Style="padding: 9px; border-radius: 8px;" Class="mx-2" OnClick="OpenAddFriendDialog">
         <i class="fa-solid fa-user-plus fa-lg"></i>
     </MudIconButton>
     <MudIconButton Icon="@Icons.Material.Filled.GroupAdd" OnClick="OpenAddGroupDialog" Variant="Variant.Text" DisableElevation="true"
         Style="padding: 7px; border-radius: 8px;">
     </MudIconButton>
-
+    }
 </div>
+@if(IsSearch)
+    {
+        <div class="list-conversations-search">
+        @foreach (var item in items)
+        {
+            if (item.conversationName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase))
+            {
+                    string avatarUrl = (item.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + item.conversationAvatar;
+                    <div class="coversation-container-search"
+                    @onclick="() => OnUserSelected(item)">
+
+                        <img class="coversation-img mr-3" src="@avatarUrl" />
+                        <div class="d-flex justify-start flex-column" style="flex: 1">
+                            <div class="d-flex mb-1">
+                                <p class="coversation-name">@item.conversationName</p>
+                            </div>
+                        </div>
+                    </div>
+            }
+        }
+        </div>
+    }
+</div>
+
+
+@inject CurrentUser CurrentUser
+
 @code {
-    private string searchText;
-    private ConversationDTO selectedConversation;
-    private List<ConversationDTO> items = new List<ConversationDTO>();
+    [Parameter]
+    public bool IsSearch { get; set; }
+    [Parameter]
+    public EventCallback<bool> IsSearchChanged { get; set; }
+
+
+    private string searchText="";
+
+    private Conversation selectedConversation;
+    private List<Conversation> items = new List<Conversation>();
     protected override async Task OnInitializedAsync()
     {
-        await GetAllFakeConversation();
+        //await GetAllFakeConversation();
     }
-    private async Task<IEnumerable<ConversationDTO>> Search(string value)
+    private async Task<IEnumerable<Conversation>> Search(string value)
     {
-        // In real life use an asynchronous function for fetching data from an api.
         await Task.Delay(5);
 
-        // if text is null or empty, don't return values (drop-down will not open)
         if (string.IsNullOrWhiteSpace(value))
-            return Enumerable.Empty<ConversationDTO>();
-        // return chat room
-        return items.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));//.Select(x => x.Name);
+            return Enumerable.Empty<Conversation>();
+        return items.Where(x => x.conversationName.Contains(value, StringComparison.InvariantCultureIgnoreCase));//.Select(x => x.Name);
+    }
+    private async Task OnClickSearchField()
+    {
+        IsSearch = true;
+        await UpdateIsSearch();
+        await GetAllConversations();
+    }
+    private async Task CloseSearchField()
+    {
+        IsSearch = false;
+        await UpdateIsSearch();
+    }
+    private async Task UpdateIsSearch()
+    {
+        await IsSearchChanged.InvokeAsync(IsSearch);
     }
     private async Task<bool> GetAllFakeConversation()
     {
-        items = new List<ConversationDTO>
+        items = new List<Conversation>
         {
-            new ConversationDTO("test", Constant.defaultImgMale, "test"),
-            new ConversationDTO("2UHY3794", Constant.defaultImgMale, "2UHY3794"),
-            new ConversationDTO("2UHY3794", Constant.defaultImgMale, "2UHY3794")
+            new Conversation("test","Peer",null,"name test", Constant.defaultImgMale, true),
+            new Conversation("2UHY3794","Peer",null,"name test 2", Constant.defaultImgMale, true),
+            new Conversation("2UHY3794","Group",null,"naem 123", Constant.defaultImgMale, false)
         };
         return await Task.FromResult(true);
     }
@@ -83,12 +153,13 @@
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("GET");
             httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
             var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var respond = JsonConvert.DeserializeObject<ApiResponse<List<ConversationDTO>>>(responseContent);
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<Conversation>>>(responseContent);
                 success = true;
                 try
                 {
@@ -111,14 +182,21 @@
         return await Task.FromResult(true);
     }
 
-    private string GetItemText(ConversationDTO item)
-    {
-        return item?.Name ?? string.Empty; 
-    }
-
     private void OpenAddGroupDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
-        DialogService.Show<Dialog.AddGroup>("Tạo nhóm", options);
+        DialogService.Show<Dialog.Add.AddGroup>("Tạo nhóm", options);
+    }
+
+    private async Task OnUserSelected(Conversation user)
+    {
+        /* Code của BC*/
+        _navigationManager.NavigateTo($"/chat/{user.conversationType}/{user.conversationId}");
+    }
+
+    private void OpenAddFriendDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        DialogService.Show<Dialog.Add.AddFriend>("Thêm bạn", options);
     }
 }

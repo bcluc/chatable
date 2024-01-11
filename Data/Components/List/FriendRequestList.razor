@@ -2,6 +2,14 @@
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.DTO
 @using Chatable.Data.Entitles.Model;
+@using System.Net.Http.Headers;
+@using Chatable.Data.Entitles.Respond;
+@using Newtonsoft.Json;
+
+@inject HttpClient _http
+@inject IDialogService DialogService
+
+
 <link rel="stylesheet" href="/css/ChatList.css">
 <div class="list-group list-group-flush">
 
@@ -14,46 +22,42 @@
     }
     else
     {
-        <h3 style="margin: 20px; font-weight:500">Lời mời đã nhận (@_countReceived)</h3>
+        <h3 style="margin: 10px; font-weight:500">Lời mời đã nhận</h3>
         @foreach (var request in RequestList)
         {
-            @if(request.status.Equals("pending"))
+            @if(request.status.Equals("Pending"))
             {
-                @(_countReceived++)
             <li class="list-group-item " @onclick="() => HandleUserClick(request)">
                 <div class="friend-request-card">
                     <div class="profile-picture">
-                        <img src=@(Constant.defaultImgFemale)>
-                    </div>
+                            <img src=@(Constant.uriBaseUserAvt + request.avatar)>
+                        </div>
                     <div class="user-details">
-                        <h4>@request.senderId</h4>
-                        <h4 style="font-weight:lighter; font-size: 10px">13 Mutual Friends</h4>
+                            <h4>@request.name</h4>
                     </div>
                     <div class="friend-request-actions">
-                        <button class="button button-primary">Chấp nhận</button>
-                        <button class="button button-secondary">Từ chối</button>
+                            <button class="button button-primary" @onclick="() => HandleAccept(request)">Chấp nhận</button>
+                            <button class="button button-secondary" @onclick="() => HandleDecline(request)">Từ chối</button>
                     </div>
                 </div>
             </li>
             }
         }
-        <h3 style="margin: 20px; font-weight:500">Lời mời đã gửi (@_countSent)</h3>
+        <h3 style="margin: 10px; font-weight:500">Lời mời đã gửi</h3>
         @foreach (var request in WaitList)
         {
-            @if (request.status.Equals("pending"))
+            @if (request.status.Equals("Pending"))
             {
-                @(_countSent++)
                 <li class="list-group-item " @onclick="() => HandleUserClick(request)">
                     <div class="friend-request-card">
                         <div class="profile-picture">
-                            <img src=@(Constant.defaultImgFemale)>
+                            <img src=@(Constant.uriBaseUserAvt + request.avatar)>
                         </div>
                         <div class="user-details">
-                            <h4>@request.senderId</h4>
-                            <h4 style="font-weight:lighter; font-size: 10px">13 Mutual Friends</h4>
+                            <h4>@request.name</h4>
                         </div>
                         <div class="friend-request-actions">
-                            <button class="button button-primary">Hủy lời mời</button>
+                            <button class="button button-primary" @onclick="() => HandleCancel(request)">Hủy lời mời</button>
                         </div>
                     </div>
                 </li>
@@ -62,12 +66,14 @@
     }
 </div>
 
+@inject CurrentUser CurrentUser
+
 @code {
     [Parameter]
-    public IEnumerable<FriendRequestDTO> RequestList { get; set; } = Enumerable.Empty<FriendRequestDTO>();
+    public List<FriendRequestDTO> RequestList { get; set; } = new List<FriendRequestDTO>();
 
     [Parameter]
-    public IEnumerable<FriendRequestDTO> WaitList { get; set; } = Enumerable.Empty<FriendRequestDTO>();
+    public List<FriendRequestDTO> WaitList { get; set; } = new List<FriendRequestDTO>();
 
 
     [Parameter]
@@ -79,7 +85,118 @@
     private int _countReceived = 0;
     private int _countSent = 0;
 
+    private async Task AcceptRequest(string senderID)
+    {
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.Method = new HttpMethod("GET");
+        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Accept/" + senderID);
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
 
+        var response = await _http.SendAsync(
+            httpRequestMessage
+        );
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var respond = JsonConvert.DeserializeObject<ApiResponse<object>>(responseContent);
+            try
+            {
+                Console.WriteLine("Accepted friend request");
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something went wrong");
+            }
+            UpdateRequest(senderID);
+            await DialogService.ShowMessageBox("Thông báo", "  Các bạn đã là bạn bè!  ");
+        }
+    }
+    private async Task DeclineRequest(string senderID)
+    {
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.Method = new HttpMethod("GET");
+        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Decline/" + senderID);
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+        var response = await _http.SendAsync(
+            httpRequestMessage
+        );
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var respond = JsonConvert.DeserializeObject<ApiResponse<object>>(responseContent);
+            try
+            {
+                Console.WriteLine("Declined friend request");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something went wrong");
+            }
+            UpdateRequest(senderID);
+        }
+    }
+    private async Task CancelRequest(string receiverID)
+    {
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.Method = new HttpMethod("GET");
+        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Remove/" + receiverID);
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+        var response = await _http.SendAsync(
+            httpRequestMessage
+        );
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var respond = JsonConvert.DeserializeObject<ApiResponse<object>>(responseContent);
+            try
+            {
+                Console.WriteLine("Cancel friend request");
+                for (int i = 0; i < WaitList.Count; ++i)
+                {
+                    if (WaitList[i].userId == receiverID)
+                    {
+                        WaitList.RemoveAt(i);
+                        //
+                        break;
+                    }
+                }
+                
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something went wrong");
+            }
+            StateHasChanged();
+        }
+    }
+    private void UpdateRequest(string senderId)
+    {
+        for (int i = 0; i < RequestList.Count; ++i)
+        {
+            if (RequestList[i].userId == senderId)
+            {
+                RequestList.RemoveAt(i);
+                //
+                break;
+            }
+        }
+        StateHasChanged();
+    }
+    private async Task HandleCancel(FriendRequestDTO friendReq)
+    {
+        await CancelRequest(friendReq.userId);
+    }
+    private async Task HandleAccept(FriendRequestDTO friendReq)
+    {
+        await AcceptRequest(friendReq.userId);
+    }
+    private async Task HandleDecline(FriendRequestDTO friendReq)
+    {
+        await DeclineRequest(friendReq.userId);
+    }
     private async Task HandleUserClick(FriendRequestDTO friendReq)
     {
         await OnFriendRequestSelected.InvokeAsync(friendReq);
