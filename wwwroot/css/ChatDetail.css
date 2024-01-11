@@ -184,23 +184,25 @@
 
 .me .reactions {
     position: absolute;
+    bottom: -12px;
     left: 12px;
     border-radius: 20px;
     background-color: white;
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1), 0 2px rgba(0, 0, 0, 0.1);
-    padding: 2px;
-    height: 20px;
+    height: 24px;
+    padding: 0 2px;
     cursor: pointer;
 }
 
 .other .reactions {
     position: absolute;
+    bottom: -12px;
     right: 12px;
     border-radius: 20px;
     background-color: white;
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1), 0 2px rgba(0, 0, 0, 0.1);
-    padding: 2px;
-    height: 20px;
+    height: 24px;
+    padding: 0 2px;
     cursor: pointer;
 }
 

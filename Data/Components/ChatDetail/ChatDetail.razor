@@ -110,7 +110,12 @@ Chi tiết chat gồm 3 phần
                                 isSameDateWithPreMsg = _messages[i].SentAt.Date == _messages[i - 1].SentAt.Date;
                             }
 
-                            <MessageItem Msg="_messages[i]" IsFirstMsg="isFirst" IsSameDateWithPreMsg="isSameDateWithPreMsg" ConversationId="@SelectedConversation.conversationId" ConversationType="@SelectedConversation.conversationType" />
+                            <MessageItem Msg="_messages[i]" IsFirstMsg="isFirst" 
+                                        IsSameDateWithPreMsg="isSameDateWithPreMsg" 
+                                        ConversationId="@SelectedConversation.conversationId" 
+                                        ConversationType="@SelectedConversation.conversationType" 
+                                        UpdateUIChat="UpdateUIChat"
+                            />
                         }
 
                 }
@@ -208,6 +213,8 @@ Chi tiết chat gồm 3 phần
             // Console.WriteLine("MessageReceived: " + message.Content);
             if (message.SenderId == SelectedConversation.conversationId)
             {
+                // Bên phía BE trả về message với message.Reactions = null
+                message.Reactions = new List<ReactionMessage>();
                 _messages.Add(message);
                 permitScroll = "smooth";
                 InvokeAsync(StateHasChanged);
@@ -220,6 +227,8 @@ Chi tiết chat gồm 3 phần
             // Console.WriteLine("MessageReceivedFromGroup: " + message.Content);
             if (message.GroupId == SelectedConversation.conversationId)
             {
+                // Bên phía BE trả về message với message.Reactions = null
+                message.Reactions = new List<ReactionMessage>();
                 _messages.Add(message);
                 permitScroll = "smooth";
                 InvokeAsync(StateHasChanged);
@@ -254,7 +263,9 @@ Chi tiết chat gồm 3 phần
                             message.Reactions.Add(new ReactionMessage
                                 {
                                     Type = reaction.Type,
-                                    SenderId = reaction.SenderId
+                                    SenderId = reaction.SenderId,
+                                    SenderName = reaction.SenderName,
+                                    SenderAvatar = reaction.SenderAvatar,
                                 });
                         }
                         break;
@@ -273,7 +284,7 @@ Chi tiết chat gồm 3 phần
         if (permitScroll != "")
         {
             await Task.Delay(permitScroll == "instant" ? 0 : 300); // Độ trễ 1 giây
-            // Không được thêm await trước lệnh dưới này
+                                                                   // Không được thêm await trước lệnh dưới này
             JSRuntime.InvokeVoidAsync("scrollMessagesListToBottom", permitScroll);
             permitScroll = "";
         } 
@@ -445,45 +456,6 @@ Chi tiết chat gồm 3 phần
 
     }
 
-    // Get nguoi dung
-    // private async Task<bool> GetUser()
-    // {
-    //     bool success;
-    //     string erroMessage;
-    //     try
-    //     {
-    //         HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-    //         httpRequestMessage.Method = new HttpMethod("GET");
-    //         httpRequestMessage.RequestUri = new Uri( Constant.uriHost + "User/{SelectedUser.conversationId}");
-    //         var response = await _http.SendAsync(httpRequestMessage);
-
-    //         if (response.IsSuccessStatusCode)
-    //         {
-    //             var responseContent = await response.Content.ReadAsStringAsync();
-    //             var respond = JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
-    //             success = true;
-    //             try
-    //             {
-    //                 if (respond.Data != null)
-    //                 {
-    //                     // SelectedUser = respond.Data;
-    //                 }
-    //             }
-    //             catch (Exception e)
-    //             {
-    //                 erroMessage = e.Message;
-    //             }
-
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         success = false;
-    //         erroMessage = ex.Message;
-    //     }
-    //     return await Task.FromResult(true);
-    // }
-
     private async Task SendMessage()
     {
         if (!string.IsNullOrWhiteSpace(_newMessage))
@@ -501,8 +473,10 @@ Chi tiết chat gồm 3 phần
             permitScroll = "instant";
 
 
-            _messages.Add(new MessageDTO("", currentUser.userName, "", "text", _newMessage, DateTime.UtcNow, "", "", false));
-            
+            _messages.Add(
+                new MessageDTO("", currentUser.userName, "", "text", _newMessage, DateTime.UtcNow, "", "", false, new List<ReactionMessage>())
+            );
+
             await UpdateUIChat.InvokeAsync(new Dictionary<string, Object>
             {
                 {"conversation_id", SelectedConversation.conversationId!},
@@ -559,7 +533,8 @@ Chi tiết chat gồm 3 phần
                         DateTime.UtcNow,
                         "",
                         "",
-                        true
+                        true,
+                        new List<ReactionMessage>()
                     )
                 );
             }

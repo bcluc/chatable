@@ -15,6 +15,8 @@ namespace Chatable.Data.Entitles.DTO
         public bool IsSeen { get; set; }
         public List<ReactionMessage> Reactions { get; set; }
 
+        public MessageDTO() { }
+
         public MessageDTO(
             string messageId,
             string senderId,
@@ -24,7 +26,8 @@ namespace Chatable.Data.Entitles.DTO
             DateTime sentAt,
             string senderName,
             string senderAvatar,
-            bool isSeen
+            bool isSeen,
+            List<ReactionMessage> reactionMessages
         )
         {
             MessageId = messageId;
@@ -36,7 +39,7 @@ namespace Chatable.Data.Entitles.DTO
             SenderName = senderName;
             SenderAvatar = senderAvatar;
             IsSeen = isSeen;
-            Reactions = new List<ReactionMessage>();
+            Reactions = reactionMessages;
         }
 
     }

@@ -75,6 +75,9 @@
 	[Parameter]
 	public MessageDTO? Msg { get; set; }
 
+	[Parameter]
+	public EventCallback<Dictionary<String, Object>> UpdateUIChat { get; set; }
+
 	List<Conversation> Chats = new List<Conversation>();
 
 	List<bool> sentList = new List<bool>();
@@ -125,22 +128,38 @@
 		return await Task.FromResult(true);
 	}
 
-	void SendMessageTo(int chatIndex)
+	async void SendMessageTo(int chatIndex)
 	{
-		string id = Chats[chatIndex].conversationId;
+		string conversationId = Chats[chatIndex].conversationId;
 		string type = Chats[chatIndex].conversationType;
-		Console.WriteLine("forward to " + id);
+		Console.WriteLine("forward to " + conversationId);
 
 		if (type == "Peer")
 		{
-			MessageHubManager.HubConnection!.SendAsync("SendPeerMessage", id, Msg.MessageType, Msg.Content);
+			await MessageHubManager.HubConnection!.SendAsync("SendPeerMessage", conversationId, Msg.MessageType, Msg.Content);
 			sentList[chatIndex] = true;
 		}
 		else
 		{
-			MessageHubManager.HubConnection!.SendAsync("SendGroupMessage", id, Msg.MessageType, Msg.Content);
+			await MessageHubManager.HubConnection!.SendAsync("SendGroupMessage", conversationId, Msg.MessageType, Msg.Content);
 			sentList[chatIndex] = true;
 		}
+
+		await UpdateUIChat.InvokeAsync(new Dictionary<string, Object>
+			{
+				{"conversation_id", conversationId!},
+				{
+					"last_msg", new LastMessageDTO(
+						CurrentUser.currentUser!.userName,
+						 Msg.MessageType,
+						Msg.Content,
+						DateTime.UtcNow,
+						null,
+						true,
+						0
+					)
+				},
+			});
 	}
 
     void Submit() => MudDialog!.Close(DialogResult.Ok("accept"));
