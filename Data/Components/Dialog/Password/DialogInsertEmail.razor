@@ -1,7 +1,14 @@
 ﻿@using System.ComponentModel.DataAnnotations
+@using Chatable.Data.Entitles
+@using Newtonsoft.Json
+@using System.Text
+@using System.Net.Http.Json
 
 @inject NavigationManager _navigationManager
 @inject IDialogService DialogService
+@inject HttpClient _http
+@inject IJSRuntime jsRuntime
+@inject Blazored.LocalStorage.ILocalStorageService _localStorageService
 
 <link rel="stylesheet" href="/css/DialogInsertEmail.css">
 
@@ -27,7 +34,18 @@
                        Color="Color.Dark"
                        FullWidth="true"      
                        Disabled="@(!canExcute)"
-                       OnClick="sendToEmail">Đặt lại mật khẩu</MudButton>
+                       OnClick="sendToEmail">
+                @if (_processing)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Style="color: white"
+                                         StrokeWidth="4" />
+                }
+                else
+                {
+                    <MudText>Đặt lại mật khẩu</MudText>
+                }
+                
+            </MudButton>
             <MudButton OnClick="Cancel" Style="margin-top: 10px">Hủy</MudButton>
        </div>
 
@@ -44,12 +62,24 @@
         [Required(ErrorMessage = "Email là bắt buộc.")]
         public string email { get; set; }
     }
+    public class EmailModel
+    {
+        public string email { get; set; }
+    }
+    public class ApiResponse
+    {
+        public bool success { get; set; }
+        public string message { get; set; }
+        public String data { get; set; }
+    }
 }
 
 @code {
     InsertPassForm model = new InsertPassForm();
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     Boolean canExcute = false;
+    Boolean _processing = false;
+
 
     private void checkMail ()
     {
@@ -67,15 +97,47 @@
 
     private async Task sendToEmail ()
     {
-        //_navigationManager.NavigateTo("/recoverPass");
-        var parameters = new DialogParameters<DialogNotifyResetPass> { { x => x.userEmail, model.email } };
-
-        var dialog = await DialogService.ShowAsync<DialogNotifyResetPass>("Thông báo", parameters);
-        var result = await dialog.Result;
-        if (!result.Cancelled)
+        canExcute = false;
+        _processing = true;
+        try
         {
-            _navigationManager.NavigateTo("/login");
-        }
+
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/ForgotPassword?email="+ model.email);
+
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                canExcute = false;
+                _processing = false;
+                var responseContent = await response.Content.ReadAsStringAsync();;
+                var responseData = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+                if (responseData != null)
+                {
+                    string token = responseData.data;
+                    await _localStorageService.SetItemAsync("token", token);
+                }
+                
+            }
+            else
+            {
+                string resBody = await response.Content.ReadAsStringAsync();
+            }
+
+            var parameters = new DialogParameters<DialogNotifyResetPass> { { x => x.userEmail, model.email } };
+
+            var dialog = await DialogService.ShowAsync<DialogNotifyResetPass>("Thông báo", parameters);
+            var result = await dialog.Result;
+            if (!result.Cancelled)
+            {
+                _navigationManager.NavigateTo("/login");
+            }
+        } catch (Exception ex)
+        {
+            
+        }       
     }
 
     void Submit() => MudDialog.Close(DialogResult.Ok(true));
