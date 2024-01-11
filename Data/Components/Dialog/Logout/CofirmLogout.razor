@@ -43,7 +43,6 @@
             httpRequestMessage.Method = new HttpMethod("POST");
             httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/Logout");
             httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
-            
             var response = await _http.SendAsync(httpRequestMessage);
 
             if (response.IsSuccessStatusCode)

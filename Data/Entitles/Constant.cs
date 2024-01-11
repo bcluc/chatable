@@ -47,6 +47,8 @@ namespace Chatable.Data.Entitles
 
         //public static readonly Group currentGroup = new Group("123", "Group Local Test", "BC", "2023-12-04 17:03:22.2+00");
 
+
         public static readonly User oppositeUser = new User("nhubaole", "Trần Lê Hoàng Lâm", "", Constant.defaultImgMale, DateTime.Now, "Nam", false);
+
     }
 }

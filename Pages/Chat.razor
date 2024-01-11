@@ -39,12 +39,14 @@
 		</SearchField> 
 
 		<MudDivider></MudDivider>
+
 		@if (!_isSearch)
 		{
 			<div class="list-conversations">
 
 				@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" /> *@
 				@if (_loadingUsers)
+
 				{
 					<div class="coversation-container">
 						<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -69,6 +71,19 @@
 								</div>
 								<p class="coversation-last-message">@chat.lastMessage.content</p>
 							</div>
+
+							<div class="d-flex coversation-last-message">
+								<p class="last-msg" style="font-weight: @(chat.lastMessage.isSeen ? "normal" : "600"); color: @(chat.lastMessage.isSeen ? "gray" : "black")">
+									@((chat.lastMessage.senderId == CurrentUser.currentUser!.userName ? "Bạn: " : "") + chat.lastMessage.content)
+								</p>
+								@if (chat.lastMessage.unreadMsgCount > 0)
+								{
+									<MudSpacer/>
+									<p class="ml-2 pa-1 unread-count">
+										@chat.lastMessage.unreadMsgCount
+									</p>
+								}
+							</div>
 						</div>
 
 					}
@@ -76,6 +91,7 @@
 
 			</div>
 		}
+
 	</div>
 
 	<MudDivider id="v-divider" Vertical="true"/>
@@ -91,14 +107,12 @@
 	else
 	{
 		<div id="right-banner">
-
 			<ChatDetail 
 				Id = "@_id"
 				Type="@_conversationType"
 				SelectedConversation="@_selectedUser"
 			BackToConversationList="BackToConversationList"
-			NewIncomingMessage="@_newIncomingMessage"
-			OnIncomingMessageRecieved="()=> _newIncomingMessage = null" />
+			UpdateUIChat="@UpdateUI"/>
 		</div>
 	}
 
@@ -107,6 +121,7 @@
 
 @implements IAsyncDisposable
 @inject CurrentUser CurrentUser
+@inject MessageHubManager MessageHubManager
 
 @code {
 
@@ -116,6 +131,24 @@
 		// isShowChat = false;
 		Chats.ForEach(e => e.IsSelected = false);
 		_navigationManager.NavigateTo($"/chat");
+	}
+
+	void UpdateUI(Dictionary<String, Object> lastMsgData)
+	{
+		Console.WriteLine("UpdateUI: " + lastMsgData["conversation_id"]);
+		for (int i = 0; i < Chats.Count; ++i)
+		{
+			if (Chats[i].conversationId == lastMsgData["conversation_id"] as String)
+			{
+				var conversation = Chats[i];
+				Chats.RemoveAt(i);
+				//
+				conversation.lastMessage = lastMsgData["last_msg"] as LastMessageDTO;
+				Chats.Insert(0, conversation);
+				break;
+			}
+		}
+		StateHasChanged();
 	}
 
 	/* TODO: Thay đổi cách code chỗ _selectedUser */
@@ -130,23 +163,78 @@
 
 	//private AuthenticationState
 	private string value2;
+
 	private bool _loadingUsers = false;
 	private bool _isSearch = false;
+
 	private Conversation? _selectedUser = null;
-	private MessageDTO? _newIncomingMessage = null;
 
 	// Khi nào run thì đổi
 	// = IList.Empty<Conversation>();
 	public List<Conversation> Chats = new List<Conversation>();
 	private IList<String> states = Constant.states;
 
+	protected override void OnInitialized()
+	{
+		MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceived", message =>
+		{
+			Console.WriteLine("Page CHAT MessageReceived: " + message.Content);
+			Console.WriteLine("message.ConversationId: " + message.SenderId);
+			for (int i = 0; i < Chats.Count; ++i)
+			{
+				if (Chats[i].conversationId == message.SenderId)
+				{
+					var conversation = Chats[i];
+					Chats.RemoveAt(i);
+					//
+					conversation.lastMessage = new LastMessageDTO(
+						message.SenderId, 
+						message.MessageType, 
+						message.Content, 
+						message.SentAt, 
+						null, 
+						false,
+						conversation.lastMessage!.unreadMsgCount + 1
+					);
+					Chats.Insert(0, conversation);
+					break;
+				}
+			}
+			InvokeAsync(StateHasChanged);
+		});
+
+
+		MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceivedFromGroup", message =>
+		{
+			Console.WriteLine("Page CHAT MessageReceivedFromGroup: " + message.Content);
+			Console.WriteLine("message.ConversationId: " + message.GroupId);
+			for (int i = 0; i < Chats.Count; ++i)
+			{
+				if (Chats[i].conversationId == message.GroupId)
+				{
+					var conversation = Chats[i];
+					Chats.RemoveAt(i);
+					//
+					conversation.lastMessage = new LastMessageDTO(
+						message.SenderId, 
+						message.MessageType, 
+						message.Content, 
+						message.SentAt, 
+						message.GroupId, 
+						false, 
+						conversation.lastMessage!.unreadMsgCount + 1
+					);
+					Chats.Insert(0, conversation);
+					break;
+				}
+			}
+			InvokeAsync(StateHasChanged);
+		});
+	}
+
 	protected override async Task OnParametersSetAsync()
 	{
-		 Console.WriteLine("parameter-chat "+ _isSearch );
-		// Console.WriteLine("parameter-chat - " + _selectedUser);
-
 		if (_selectedUser is null && _id is not null) {
-			//Console.WriteLine("30d");
 			await GetAllConversations();
 			await GetSelectedConversation();
 		}
@@ -161,11 +249,18 @@
 			chat.IsSelected = false;
 			if (chat.conversationId == _id) chat.IsSelected = true;
 		}
+
 	}
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (!Chats.Any()) await base.OnInitializedAsync();
 	}
+	
+	// protected override async Task OnAfterRenderAsync(bool firstRender)
+	// {
+	// 	if (!Chats.Any()) await base.OnInitializedAsync();
+	// }
+
 	private void OpenAddGroupDialog()
 	{
 		var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
@@ -178,13 +273,14 @@
 		_selectedUser = user;
 		_id = user.conversationId;
 
-
+		/* Loại bỏ màu nền cho tất cả Conversation*/
 		var selectedChatUser = Chats.FirstOrDefault(c => c.IsSelected);
 		if (selectedChatUser is not null)
 		{
 			selectedChatUser.IsSelected = false;
 		}
 
+		/* Tô màu cho Conversation được chọn */
 		var chatUser = Chats.FirstOrDefault(c => c.conversationId == user.conversationId);
 		//Truong hop Chats null, user dau tien
 		if (chatUser is null)
@@ -196,6 +292,10 @@
 		{
 			chatUser.IsSelected = true;
 		}
+
+		user.lastMessage!.isSeen = true;
+		user.lastMessage.unreadMsgCount = 0;
+
 		_navigationManager.NavigateTo($"/chat/{user.conversationType}/{user.conversationId}");
 	}
 
@@ -268,6 +368,7 @@
 					if (respond.Data != null)
 					{
 						Chats = respond.Data;
+						// Console.WriteLine("Conversations.Count = " + Chats[0].lastMessage.isSeen);
 					}
 				}
 				catch (Exception e)
@@ -283,8 +384,10 @@
 			success = false;
 			erroMessage = ex.Message;
 		}
+		_loadingUsers = false;
 		return await Task.FromResult(true);
 	}
+	
 	public async ValueTask DisposeAsync()
 	{
 

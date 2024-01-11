@@ -6,11 +6,13 @@
 @using Chatable.Data.Entitles.Respond
 @using Newtonsoft.Json;
 @using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Headers
 
 @inject IDialogService DialogService
 @inject HttpClient _http
 @inject IJSRuntime jsRuntime
 @inject IDialogService Dialog
+@inject CurrentUser CurrentUser
 
 
 
@@ -28,7 +30,7 @@
                 <div Class="photos">
                     <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
                     <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
-                        <MudImage Src="@currentUser.avatarUrl"></MudImage>
+                        <MudImage Src="@(Constant.uriBaseUserAvt +currentUser.avatarUrl)"></MudImage>
                     </MudAvatar>
                     <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
                         <ButtonTemplate>
@@ -73,7 +75,6 @@
     </DialogActions>
 </MudDialog>
 
-@inject CurrentUser CurrentUser
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
@@ -99,7 +100,6 @@
     {
         try
         {
-
             using var fileStream = file.OpenReadStream();
 
             if (fileStream != null)
@@ -122,14 +122,19 @@
     }
     private async Task UpAvatar(IBrowserFile file)
     {
-
         try
         {
-
             using var content = new MultipartFormDataContent();
             content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
 
-            var response = await _http.PostAsync(Constant.uriHost + "User/UploadAvatar", content);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/UploadAvatar");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+            httpRequestMessage.Content = content;
+
+            var response = await _http.SendAsync(httpRequestMessage);
 
             // Kiểm tra xem yêu cầu có thành công không
             if (response.IsSuccessStatusCode)
@@ -139,8 +144,10 @@
                 {
                     ApiResponse<String> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
                     avatar = apiResponse.Data;
-                    CurrentUser.currentUser.avatarUrl = avatar;
-                    NotifyStateChanged();
+                    currentUser.avatarUrl = avatar;
+                    CurrentUser.currentUser = currentUser;
+
+                    StateHasChanged();
                 }
 
             }
@@ -159,7 +166,7 @@
 
     }
     private void NotifyStateChanged() => StateHasChanged();
-   
+
     private async Task OpenErroDialog()
     {
         var dialog = DialogService.Show<ErroUpImage>("Thông báo");
