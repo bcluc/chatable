@@ -12,7 +12,7 @@
         public LastMessageDTO? lastMessage { get; set; }
 
         public string conversationType { get; set; }
-
+      
         public bool IsSelected { get; set; }
 
         public bool isFriend { get; set; }

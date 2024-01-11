@@ -269,6 +269,7 @@ Chi tiết chat gồm 3 phần
     string permitScroll = "";
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (SelectedConversation is null) await GetSelectedConversation();
         if (permitScroll != "")
         {
             await Task.Delay(permitScroll == "instant" ? 0 : 300); // Độ trễ 1 giây
@@ -288,9 +289,10 @@ Chi tiết chat gồm 3 phần
             await GetConversationMessages();
         }
 
-        // Get Online status
-        if (SelectedConversation is not null)
+        if (SelectedConversation is null) await base.OnAfterRenderAsync(false);
+        else
         {
+            // Get Online status
             if (SelectedConversation.conversationType == "Peer")
             {
                 string erroMessage;
