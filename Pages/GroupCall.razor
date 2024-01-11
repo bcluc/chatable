@@ -5,7 +5,6 @@ Non-optional parameters or literal routes cannot appear after optional parameter
 @page "/groupCall/{roomId}/{peerName}/{peerAvatar}/{typeCall}/{conversationType?}/{receiverName?}/{receiverAvt?}"
 
 
-
 <link rel="stylesheet" type="text/css" href="css/lam/group_call.css" />
 
 @using Chatable.Data.Entitles;
@@ -24,7 +23,7 @@ Non-optional parameters or literal routes cannot appear after optional parameter
         {
             @if (receiverAvt != null)
             {
-                <img src="@(Constant.uriBaseUserAvt + receiverAvt)" class="avatar-200 mb-3" />
+                <img src="@((conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + receiverAvt)" class="avatar-200 mb-3" />
             }
 
             @if (receiverName != null)
@@ -285,6 +284,10 @@ else
                         break;
 
                     case "inAnotherCall":
+                        rejectionCount++;
+                        break;
+
+                    case "offline":
                         rejectionCount++;
                         break;
                 }

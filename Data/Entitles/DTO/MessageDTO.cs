@@ -1,4 +1,6 @@
-﻿namespace Chatable.Data.Entitles.DTO
+﻿using Chatable.Data.Entitles.Model;
+
+namespace Chatable.Data.Entitles.DTO
 {
     public class MessageDTO
     {
@@ -10,17 +12,18 @@
         public string Content { get; set; }
         public string SenderName { get; set; }
         public string SenderAvatar { get; set; }
-        public bool IsSeen { get; set; } = false;
+        public bool IsSeen { get; set; }
+        public List<ReactionMessage> Reactions { get; set; }
 
         public MessageDTO(
             string messageId,
-            string senderId, 
-            string groupId, 
-            string messageType, 
-            string content, 
-            DateTime sentAt, 
-            string senderName, 
-            string senderAvatar, 
+            string senderId,
+            string groupId,
+            string messageType,
+            string content,
+            DateTime sentAt,
+            string senderName,
+            string senderAvatar,
             bool isSeen
         )
         {
@@ -33,6 +36,7 @@
             SenderName = senderName;
             SenderAvatar = senderAvatar;
             IsSeen = isSeen;
+            Reactions = new List<ReactionMessage>();
         }
 
     }

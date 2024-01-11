@@ -1,0 +1,45 @@
+﻿@using Chatable.Data.Entitles.Model
+@using Chatable.Helpers
+<MudDialog Class="my-2" Style="width: 350px; border-radius: 20px;">
+    <DialogContent>
+        <div class="d-flex justify-center align-center">
+
+            <MudText Style="font-size: 24px; font-weight: 400;">Biểu cảm</MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Close" Variant="Variant.Filled" DisableElevation="true"
+                           Size="Size.Large" OnClick="Cancel">
+            </MudIconButton>
+        </div>
+
+        <MudDivider Class="my-2" />
+
+        @foreach (var reaction in ReactionMessages)
+        {
+            <div class="d-flex justify-center align-center mb-3">
+                <img class="mr-3" style="height: 50px; width: 50px; border-radius: 50%;" src="https://goexjtmckylmpnrbxtcn.supabase.co/storage/v1/object/public/users-avatar/user-test?t=2023-20-12-13-40-33.png" />
+                <p style="font-family: SVN-Poppins; font-size: 16px; font-weight: 500;">
+                    Trần Lê Hoàng Lâm
+                </p>
+                <MudSpacer/>
+                @{
+                    var reactIcon = Utils.MapToIcon(reaction.Type);
+                    <i class="@reactIcon.icon fa-lg mx-1 reaction"
+                       style="color: @reactIcon.color">
+                    </i>
+                }
+
+            </div>
+        }
+
+
+    </DialogContent>
+</MudDialog>
+@code {
+    [CascadingParameter]
+    MudDialogInstance? MudDialog { get; set; }
+
+    [Parameter]
+    public List<ReactionMessage> ReactionMessages { get; set; }
+
+    void Cancel() => MudDialog!.Close(DialogResult.Cancel);
+}

@@ -24,7 +24,10 @@
 
 <div class="sidebar">
     <div class="user">
-        <img src=" @(Constant.uriBaseUserAvt +currentUser.avatarUrl)" class="user_img" @onclick="OpenDialog" />
+        <div class="user_img">
+            <img src="@(Constant.uriBaseUserAvt +currentUser.avatarUrl)" style="width: 52px; height: 52px; border-radius: 100%" @onclick="OpenDialog" />
+
+        </div>
         <p>@currentUser.fullName</p>
     </div>
     <ul>
@@ -107,7 +110,7 @@
 @inject CallHubManager CallHubManager
 @inject MessageHubManager MessageHubManager
 
-@* @implements IAsyncDisposable *@
+@implements IAsyncDisposable
 
 @code {
     User currentUser;
@@ -251,11 +254,11 @@
         CallHubManager.isIdle = true;
     }
 
-    // public async ValueTask DisposeAsync()
-    // {
-    //     await MessageHubManager.HubConnection!.DisposeAsync();
-    //     await CallHubManager.HubConnection!.DisposeAsync();
-    //     Console.WriteLine("Bye MainLayout");
-    // }
+    public async ValueTask DisposeAsync()
+    {
+        await MessageHubManager.HubConnection!.DisposeAsync();
+        await CallHubManager.HubConnection!.DisposeAsync();
+        Console.WriteLine("Bye MainLayout");
+    }
 
 }

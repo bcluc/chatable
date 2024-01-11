@@ -26,19 +26,18 @@
     class Reaction
     {
         public int type { get; set; }
-        public string? name { get; set; }
         public string? icon { get; set; }
         public string? color { get; set; }
     }
 
     List<Reaction> reactions = new List<Reaction>
     {
-        new Reaction { type = 0, name = "Like", icon = "fa-solid fa-thumbs-up fa-2xl", color = "#0091FE" },
-        new Reaction { type = 1, name = "Heart", icon = "fa-solid fa-heart fa-2xl", color = "#E50915" },
-        new Reaction { type = 2, name = "Laugh", icon = "fa-solid fa-face-laugh-beam fa-2xl", color = "#FFCB3D" },
-        new Reaction { type = 3, name = "Surprise", icon = "fa-solid fa-face-surprise fa-2xl", color = "#FFCB3D" },
-        new Reaction { type = 4, name = "Sad", icon = "fa-solid fa-face-frown fa-2xl fa-2xl", color = "#FFCB3D" },
-        new Reaction { type = 5, name = "Angry", icon = "fa-solid fa-face-angry fa-2xl", color = "#FFCB3D" },
+        new Reaction { type = 0, icon = "fa-solid fa-thumbs-up fa-2xl", color = "#0091FE" },
+        new Reaction { type = 1, icon = "fa-solid fa-heart fa-2xl", color = "#E50915" },
+        new Reaction { type = 2, icon = "fa-solid fa-face-laugh-beam fa-2xl", color = "#FFCB3D" },
+        new Reaction { type = 3, icon = "fa-solid fa-face-surprise fa-2xl", color = "#FFCB3D" },
+        new Reaction { type = 4, icon = "fa-solid fa-face-frown fa-2xl", color = "#FFCB3D" },
+        new Reaction { type = 5, icon = "fa-solid fa-face-angry fa-2xl", color = "#E50915" },
     };
 
     [CascadingParameter]

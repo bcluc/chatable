@@ -12,7 +12,7 @@
             <i class="fa-solid fa-share fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
 
-        <MudIconButton OnClick="() => OpenReactionDialog(Msg.MessageId)" Class="forward mr-2" Style="border-radius: 8px">
+        <MudIconButton OnClick="() => OpenReactionDialog()" Class="forward mr-2" Style="border-radius: 8px">
             <i class=" fa-solid fa-heart fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
 
@@ -29,11 +29,7 @@
         <img class="coversation-img mr-3 align-self-start" src="@(Constant.uriBaseUserAvt + Msg.SenderAvatar)" />
     }
 
-    @{
-        Console.WriteLine(Msg.MessageType + "-msg");
-    }
-
-    <div class="single-msg @(isMyMessage ? "me" : "other") @(Msg.MessageType)-msg"
+    <div class="single-msg @(isMyMessage ? "me" : "other") @(Msg.MessageType)-msg @(Msg.Reactions.Count > 0 ? "has-reaction" : "")"
          style="@(!isMyMessage && !IsFirstMsg ? "margin-left: 62px" : ""); position: relative">
         <p>
             @if (!isMyMessage && IsFirstMsg && ConversationType == "Group")
@@ -66,9 +62,31 @@
                 }
             </small>
 
-            <div class="reactions">
+            @if (Msg.Reactions.Count > 0)
+            {
+                // Console.WriteLine("Msg.Reactions.Count: " + Msg.Reactions.Count);
+                <div class="d-flex justify-center align-center reactions"
+                     @onclick="OpenDetailReactionDialog">
+                    @{
+                        HashSet<int> typeReactionSet = new HashSet<int>(Msg.Reactions.Select(r => r.Type));
+                        foreach (int typeReaction in typeReactionSet)
+                        {
+                            var reaction = Utils.MapToIcon(typeReaction);
+                            <i class="@reaction.icon mx-1 reaction"
+                               style="color: @reaction.color">
+                            </i>
+                        }
+                    }
+                    @if (@Msg.Reactions.Count > 1) 
+                    {
+                        <p class="mx-1" style="color: black; font-family: Arial; font-size: 14px; font-weight: bold">
+                            @Msg.Reactions.Count
+                        </p>
+                    }
 
-            </div>
+                </div>
+            }
+
         </p>
 
     </div>
@@ -80,7 +98,7 @@
         <MudIconButton OnClick="() => ForwardMsg(Msg.MessageType)" Class="forward ml-2" Style="border-radius: 8px">
             <i class="fa-solid fa-share fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
-        <MudIconButton OnClick="() => OpenReactionDialog(Msg.MessageId)" Class="forward mr-2" Style="border-radius: 8px">
+        <MudIconButton OnClick="() => OpenReactionDialog()" Class="forward mr-2" Style="border-radius: 8px">
             <i class=" fa-solid fa-heart fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
 
@@ -99,6 +117,7 @@
 
 @inject HttpClient _http
 
+@using Chatable.Helpers
 @using Microsoft.AspNetCore.SignalR.Client
 @using Newtonsoft.Json;
 
@@ -119,6 +138,9 @@
     public bool IsSameDateWithPreMsg { get; set; }
 
     [Parameter]
+    public string ConversationId { get; set; }
+
+    [Parameter]
     public string ConversationType { get; set; }
 
     public bool isMyMessage;
@@ -129,6 +151,7 @@
 
     protected override void OnParametersSet()
     {
+        // Console.WriteLine("Msg.Id = " + Msg.MessageId);
 
         isMyMessage = Msg.SenderId == CurrentUser.currentUser!.userName;
         isToday = Msg.SentAt.Date == DateTime.Today.Date;
@@ -142,7 +165,7 @@
             {
                 FullWidth = false,
                 CloseOnEscapeKey = false,
-                DisableBackdropClick = true,
+                DisableBackdropClick = false,
                 NoHeader = true,
             };
 
@@ -159,7 +182,7 @@
         await JSRuntime.InvokeVoidAsync("downloadFile", fileName, fileUrl);
     }
 
-    private async void OpenReactionDialog(string messageId)
+    private async void OpenReactionDialog()
     {
         DialogOptions options = new DialogOptions
         {
@@ -169,16 +192,57 @@
             NoHeader = true,
         };
 
-        DialogParameters keyValues = new DialogParameters();
         dialogReference = DialogService.Show<ReactionDialog>("", options);
 
         var result = await dialogReference.Result;
 
         if (!result.Canceled)
         {
-            Console.WriteLine("Reacted: " + result.Data);
-            // await  MessageHubManager.HubConnection!.SendAsync("");
+            // Console.WriteLine("Reacted: " + result.Data);
 
+            await MessageHubManager.HubConnection!.SendAsync("ReactMessage", ConversationId, ConversationType, Msg.MessageId, result.Data);
+
+            int existingReactedIndex = -1;
+
+            for (int i = 0; i < Msg.Reactions.Count; ++i)
+            {
+                if (Msg.Reactions[i].SenderId == CurrentUser.currentUser!.userName)
+                {
+                    existingReactedIndex = i;
+                    Msg.Reactions[i].Type = (int)result.Data;
+                    break;
+                }
+            }
+
+            // Console.WriteLine("Reacted: " + result.Data);
+            // Console.WriteLine("existingReactedIndex: " + existingReactedIndex);
+
+            if (existingReactedIndex == -1)
+            {
+                Msg.Reactions.Add(new ReactionMessage
+                    {
+                        Type = (int)result.Data,
+                        SenderId = CurrentUser.currentUser!.userName
+                    });
+            }
+            StateHasChanged();
         }
     }
+
+    private void OpenDetailReactionDialog()
+    {
+        DialogOptions options = new DialogOptions
+            {
+                FullWidth = false,
+                CloseOnEscapeKey = false,
+                DisableBackdropClick = false,
+                NoHeader = true,
+            };
+
+        DialogParameters keyValues = new DialogParameters();
+        keyValues.Add("ReactionMessages", Msg.Reactions);
+
+        dialogReference = DialogService.Show<DetailReactionDialog>("", keyValues, options);
+    }
 }
+

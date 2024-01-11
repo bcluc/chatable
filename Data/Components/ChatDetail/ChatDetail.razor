@@ -3,6 +3,7 @@
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.Respond;
+@using Chatable.Data.Entitles.Response
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Text.Json;
 @using System.Text.Json.Serialization;
@@ -32,12 +33,21 @@ Chi tiết chat gồm 3 phần
         @if (SelectedConversation != null)
             {
             <img class="coversation-img mr-3" src="@((SelectedConversation.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + SelectedConversation.conversationAvatar)" />
-            <div class="d-flex flex-column" style="width: 160px">
+            <div class="d-flex flex-column justify-start align-start" style="width: 160px">
 
                 <p class="receiver-name">@SelectedConversation.conversationName</p>
                 @if (SelectedConversation.conversationType == "Peer")
                 {
-                    <p class="receiver-status">@onlineStatus</p>
+                    if (SelectedConversation.isFriend)
+                    {
+                        <p class="receiver-status">@onlineStatus</p>
+                    }
+                    else
+                    {
+                        <p style="color: white; background-color: #AAA; border-radius: 6px; font-size: 12px; padding: 2px 4px; font-weight: 300">
+                            NGƯỜI LẠ
+                        </p>
+                    }
                 }
             
             </div>
@@ -100,7 +110,7 @@ Chi tiết chat gồm 3 phần
                                 isSameDateWithPreMsg = _messages[i].SentAt.Date == _messages[i - 1].SentAt.Date;
                             }
 
-                            <MessageItem Msg="_messages[i]" IsFirstMsg="isFirst" IsSameDateWithPreMsg="isSameDateWithPreMsg" ConversationType="@SelectedConversation.conversationType"/>
+                            <MessageItem Msg="_messages[i]" IsFirstMsg="isFirst" IsSameDateWithPreMsg="isSameDateWithPreMsg" ConversationId="@SelectedConversation.conversationId" ConversationType="@SelectedConversation.conversationType" />
                         }
 
                 }
@@ -189,7 +199,7 @@ Chi tiết chat gồm 3 phần
 
     protected override void OnInitialized()
     {
-        Console.WriteLine("init-detail");
+        // Console.WriteLine("init-detail");
 
         currentUser = CurrentUser.currentUser!;
 
@@ -215,6 +225,44 @@ Chi tiết chat gồm 3 phần
                 InvokeAsync(StateHasChanged);
             }
 
+        });
+
+        MessageHubManager.HubConnection!.On<ReactionRespone>("ReactionReceived", reaction =>
+        {
+            Console.WriteLine("ReactionReceived from: " + reaction.SenderId);
+
+            if (reaction.ConversationId == SelectedConversation.conversationId)
+            {
+                foreach (var message in _messages)
+                {
+                    if (message.MessageId == reaction.MessageId)
+                    {
+                        int existingReactedIndex = -1;
+
+                        for (int i = 0; i < message.Reactions.Count; ++i)
+                        {
+                            if (message.Reactions[i].SenderId == reaction.SenderId)
+                            {
+                                existingReactedIndex = i;
+                                message.Reactions[i].Type = reaction.Type;
+                                break;
+                            }
+                        }
+
+                        if (existingReactedIndex == -1)
+                        {
+                            message.Reactions.Add(new ReactionMessage
+                                {
+                                    Type = reaction.Type,
+                                    SenderId = reaction.SenderId
+                                });
+                        }
+                        break;
+
+                    }
+                }
+                InvokeAsync(StateHasChanged);
+            }
         });
     }
 
@@ -546,6 +594,8 @@ Chi tiết chat gồm 3 phần
 
         string callerAvatar = CurrentUser.currentUser!.avatarUrl.Split('?')[0];
         string receiverAvatar = SelectedConversation!.conversationAvatar.Split('?')[0];
+        
+        Console.WriteLine("receiverAvatar: " + receiverAvatar);
 
         await JSRuntime.InvokeVoidAsync(
             "moCuaSoGoiDien",

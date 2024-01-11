@@ -65,7 +65,9 @@
 
 .list-conversations {
     display: flex;
+    flex: 1;
     flex-direction: column;
+    overflow: scroll
 }
 
 .coversation-container {
