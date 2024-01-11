@@ -37,8 +37,8 @@
 
 .receiver-name {
     font-family: SVN-Poppins;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 18px;
+    font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -83,6 +83,7 @@
 #utils-message {
     display: flex;
     padding: 4px;
+    background-color: white;
 }
 
 #utils-message > button {
@@ -93,7 +94,7 @@
 /*-------------------------------------------------------------------------------------*/
 #message-input {
     font-family: SVN-Poppins;
-
+    background-color: white;
     display: flex;
     align-items: center;
 }
@@ -146,13 +147,18 @@
     margin-bottom: 6px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     word-wrap: break-word;
+    min-width: 110px;
+}
+
+.has-reaction {
+    margin-bottom: 16px;
 }
 
 .text-msg {
     max-width: calc(100% - 170px);
 }
 
-.image-msg, video-msg {
+.image-msg, .video-msg {
     max-width: calc(100% - 225px);
 }
 
@@ -174,6 +180,28 @@
 .other {
     color: black;
     background-color: white;
+}
+
+.me .reactions {
+    position: absolute;
+    left: 12px;
+    border-radius: 20px;
+    background-color: white;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1), 0 2px rgba(0, 0, 0, 0.1);
+    padding: 2px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.other .reactions {
+    position: absolute;
+    right: 12px;
+    border-radius: 20px;
+    background-color: white;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1), 0 2px rgba(0, 0, 0, 0.1);
+    padding: 2px;
+    height: 20px;
+    cursor: pointer;
 }
 
 .msg-dt {

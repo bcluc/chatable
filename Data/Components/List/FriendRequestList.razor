@@ -2,6 +2,12 @@
 @using Chatable.Data.Entitles;
 @using Chatable.Data.Entitles.DTO
 @using Chatable.Data.Entitles.Model;
+@using System.Net.Http.Headers;
+@using Chatable.Data.Entitles.Respond;
+@using Newtonsoft.Json;
+
+@inject HttpClient _http
+
 <link rel="stylesheet" href="/css/ChatList.css">
 <div class="list-group list-group-flush">
 
@@ -30,8 +36,8 @@
                         <h4 style="font-weight:lighter; font-size: 10px">13 Mutual Friends</h4>
                     </div>
                     <div class="friend-request-actions">
-                        <button class="button button-primary">Chấp nhận</button>
-                        <button class="button button-secondary">Từ chối</button>
+                            <button class="button button-primary" @onclick="() => HandleAccept(request)">Chấp nhận</button>
+                            <button class="button button-secondary" @onclick="() => HandleDecline(request)">Từ chối</button>
                     </div>
                 </div>
             </li>
@@ -53,7 +59,7 @@
                             <h4 style="font-weight:lighter; font-size: 10px">13 Mutual Friends</h4>
                         </div>
                         <div class="friend-request-actions">
-                            <button class="button button-primary">Hủy lời mời</button>
+                            <button class="button button-primary" @onclick="() => HandleCancel(request)">Hủy lời mời</button>
                         </div>
                     </div>
                 </li>
@@ -61,6 +67,8 @@
         }
     }
 </div>
+
+@inject CurrentUser CurrentUser
 
 @code {
     [Parameter]
@@ -79,7 +87,92 @@
     private int _countReceived = 0;
     private int _countSent = 0;
 
+    private async Task AcceptRequest(string senderID)
+    {
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.Method = new HttpMethod("GET");
+        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Accept/" + senderID);
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
 
+        var response = await _http.SendAsync(
+            httpRequestMessage
+        );
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var respond = JsonConvert.DeserializeObject<ApiResponse<object>>(responseContent);
+            try
+            {
+                Console.WriteLine("Accepted friend request");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something went wrong");
+            }
+
+        }
+    }
+    private async Task DeclineRequest(string senderID)
+    {
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.Method = new HttpMethod("GET");
+        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Decline/" + senderID);
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+        var response = await _http.SendAsync(
+            httpRequestMessage
+        );
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var respond = JsonConvert.DeserializeObject<ApiResponse<object>>(responseContent);
+            try
+            {
+                Console.WriteLine("Declined friend request");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something went wrong");
+            }
+        }
+    }
+    private async Task CancelRequest(string receiverID)
+    {
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.Method = new HttpMethod("GET");
+        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Remove/" + receiverID);
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+        var response = await _http.SendAsync(
+            httpRequestMessage
+        );
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var respond = JsonConvert.DeserializeObject<ApiResponse<object>>(responseContent);
+            try
+            {
+                Console.WriteLine("Cancel friend request");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something went wrong");
+            }
+
+        }
+    }
+    private async Task HandleCancel(FriendRequestDTO friendReq)
+    {
+        await CancelRequest(friendReq.receiverId);
+    }
+    private async Task HandleAccept(FriendRequestDTO friendReq)
+    {
+        await AcceptRequest(friendReq.senderId);
+    }
+    private async Task HandleDecline(FriendRequestDTO friendReq)
+    {
+        await DeclineRequest(friendReq.senderId);
+    }
     private async Task HandleUserClick(FriendRequestDTO friendReq)
     {
         await OnFriendRequestSelected.InvokeAsync(friendReq);

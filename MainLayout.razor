@@ -107,7 +107,7 @@
 @inject CallHubManager CallHubManager
 @inject MessageHubManager MessageHubManager
 
-@* @implements IAsyncDisposable *@
+@implements IAsyncDisposable
 
 @code {
     User currentUser;
@@ -256,11 +256,11 @@
         CallHubManager.isIdle = true;
     }
 
-    // public async ValueTask DisposeAsync()
-    // {
-    //     await MessageHubManager.HubConnection!.DisposeAsync();
-    //     await CallHubManager.HubConnection!.DisposeAsync();
-    //     Console.WriteLine("Bye MainLayout");
-    // }
+    public async ValueTask DisposeAsync()
+    {
+        await MessageHubManager.HubConnection!.DisposeAsync();
+        await CallHubManager.HubConnection!.DisposeAsync();
+        Console.WriteLine("Bye MainLayout");
+    }
 
 }

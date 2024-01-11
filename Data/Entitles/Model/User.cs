@@ -13,8 +13,9 @@ namespace Chatable.Data.Entitles.Model
         [DefaultValue("Nam")]
         private DateTime LastTimeOnline { get; set; }
         public DateTime? dob { get; set; }
+        public bool isFriend { get; set; }
         public User() { }
-        public User(string userName, string fullName, string email, string? avatar, DateTime? dateOfBirth, string? gender)
+        public User(string userName, string fullName, string email, string? avatar, DateTime? dateOfBirth, string? gender, bool isFriend)
         {
             this.userName = userName;
             this.fullName = fullName;
@@ -23,6 +24,7 @@ namespace Chatable.Data.Entitles.Model
             else { this.avatarUrl = avatar; }
             this.gender = gender;
             dob = dateOfBirth;
+            this.isFriend = isFriend;
         }
         public bool IsSelected { get; set; }
 

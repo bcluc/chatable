@@ -9,7 +9,7 @@ namespace Chatable.Data.Entitles
         public const string defaultImgFemale = "img/default_female.jpg";
         public const string defaultImgGroup = "img/default_group.jpg";
         public const string defaultBg = "img/pattern_bg.jpg";
-        public const string imgWaitChat = "img/wait_chat.png";
+        public const string imgWaitChat = "img/waitChat.png";
         public const string waterMark = "img/waterMark.png";
         public const string logoIcon = "img/logo-1.svg";
         public const string logoText = "img/logo-2.svg";
@@ -39,16 +39,16 @@ namespace Chatable.Data.Entitles
 
         public static readonly IList<User> usersList = new List<User>
         {
-        new User("nhubaole", "Trần Lê Hoàng Lâm","", "",DateTime.Now,"Nam"),
-        new User("nhihuynh", "Công chúa Elsa","", "", DateTime.Now,"Nữ"),
+        new User("nhubaole", "Trần Lê Hoàng Lâm","", "",DateTime.Now,"Nam",false),
+        new User("nhihuynh", "Công chúa Elsa","", "", DateTime.Now,"Nữ", true),
         };
 
         public static readonly Message visibleMessage = new("0", "BC", "1", DateTime.Now, "Text", "Say hi");
 
         //public static readonly Group currentGroup = new Group("123", "Group Local Test", "BC", "2023-12-04 17:03:22.2+00");
 
-        public static readonly Peer oppositeUser = new Peer("nhubaole", "Trần Lê Hoàng Lâm", "Nam", "2023-11-19 07:58:48.084+00","BC_nhubaole");
 
-        
+        public static readonly User oppositeUser = new User("nhubaole", "Trần Lê Hoàng Lâm", "", Constant.defaultImgMale, DateTime.Now, "Nam", false);
+
     }
 }
