@@ -113,11 +113,20 @@
     User currentUser;
     bool themeOn = false;
 
-    private void OpenDialog()
+    private async void OpenDialog()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = true };
+        Console.WriteLine(CurrentUser.currentUser.avatarUrl);
+
+        var dialog =  DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+        await dialog.Result;
+        Console.WriteLine(CurrentUser.currentUser.avatarUrl);
+        CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
+        StateHasChanged();
+
     }
+
+
     private void OpenConfirmLogoutDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };

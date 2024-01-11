@@ -112,7 +112,7 @@
     </DialogContent>
     <DialogActions >
         <div class="bottom-right-button">
-            <MudButton Color="Color.Primary" OnClick="Cancel" Style="margin-right: 20px; background-color: #F5F5F5; color: black">
+            <MudButton OnClick="Cancel" Style="margin-right: 20px; background-color: #F5F5F5; color: black">
                 Hủy
             </MudButton>
             <MudButton Color="Color.Primary" OnClick="SaveChange" Class="btn-save btn-save-hover btn-save-disable "
@@ -162,10 +162,8 @@
        
     }
 }
-
-
 @code {
-
+    [Parameter] public EventCallback OnProfileUpdated { get; set; }
     User currentUser;
     UserInfor currentUserInfor;
     bool CanUpdate = false;
@@ -260,15 +258,17 @@
                 if (response.IsSuccessStatusCode)
                 {
                     // Show success message
-                    await DialogService.ShowMessageBox("Thông báo","Bạn đã cập nhập thông tin thành công!");
+                    await DialogService.ShowMessageBox("Thông báo","   Bạn đã cập nhập thông tin thành công!   ");
 
                     currentUser = await GetCurUser();
+
                     CurrentUser.currentUser = currentUser;
 
                     // Close the dialog
                     MudDialog.Close(DialogResult.Ok(true));
 
-                    DialogService.Show<DialogProfile>("Thông tin cá nhân");
+
+                    OpenProfileDialog();
 
                 }
                 else
@@ -420,5 +420,12 @@
     {
         var dialog = DialogService.Show<ErroUpImage>("Thông báo");
         var result = await dialog.Result;
+    }
+    private void OpenProfileDialog()
+    {
+        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = true };
+        DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+
+
     }
 }
