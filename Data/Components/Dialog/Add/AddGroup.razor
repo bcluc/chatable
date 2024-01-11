@@ -1,6 +1,7 @@
 ﻿@using Chatable.DI
 @using Chatable.Data.Components;
 @using System.ComponentModel.DataAnnotations;
+@using Chatable.Data.Components.List
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
 @using Chatable.Data.Entitles.Respond;
@@ -9,6 +10,7 @@
 @using System.Diagnostics;
 @using System.Net.Http
 @using Newtonsoft.Json
+@using System.Net.Http.Headers;
 
 @inject IJSRuntime jsRuntime
 @inject IDialogService DialogService
@@ -26,22 +28,23 @@
                     <div class="app-component-container3">
                         <img src="@Constant.defaultImgGroup" class="group-img" />
                         <input type="text"
-                            
-                            @bind="@groupName"
-                               @oninput="@((e) => { groupName=(string)e.Value;})"
+                               style="background-image:none; padding-left: 8px; margin:auto; margin-left: 8px"
+                            @bind="@_groupName"
+                               @oninput="@((e) => { _groupName=(string)e.Value;})"
                                placeholder="Nhập tên nhóm"
                                class="app-component-textinput input"/>
                     </div>
                 </div>
+                <MudDivider Style="margin-top:10px; margin-bottom:10px"></MudDivider>
                 <div class="app-component-container2" style="margin-top:10px">
                 <MudItem>
                     <MudAutocomplete T="string" Placeholder="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
                                          AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" Variant="Variant.Outlined" />
                 </MudItem>
                 
-                    <UserList Loading="_loadingUsers" Chats="userList" OnUserSelected="OnUserSelected" />
-                </div>
-                <div class="app-component-container4">
+                     <UserList Loading="_loadingUsers" Chats="userList" OnUserSelected="OnUserSelected" />
+                 </div>
+                <div class="app-component-container4" >
                     <span class="app-component-text3">Đã chọn</span>
                     <span class="app-component-text4">@count /100</span>
                 </div>
@@ -50,7 +53,7 @@
         </div>
     </DialogContent>
     <DialogActions>
-        <div class="app-component-container5">
+        <div class="app-component-container5" style="height:auto; margin-bottom:10px">
             <button type="button" class="app-component-button1 button" @onclick="() => Close()" >Hủy</button>
             <button type="button" disabled="@isDisable" class="button @(count > 1 ? "app-component-button2-activate" :"app-component-button2" )" @onclick="() => CreateGroup(_selectedUsers)">
                 Tạo nhóm
@@ -70,7 +73,7 @@
     // variable
     bool success;
     private string value2;
-    private string groupName = "";
+    private string _groupName = "";
     private int count = 0;
     private bool isDisable = true;
     private bool _loadingUsers = false;
@@ -147,12 +150,12 @@
     {
         var memberList = users.Select(l => l.userName).ToList();
         string res = "";
-        if (groupName == "")
+        if (_groupName == "")
         {
-            groupName = currentUser.fullName + "," + _selectedUsers[0].fullName + ", " + _selectedUsers[1].fullName;
+            _groupName = currentUser.fullName + "," + _selectedUsers[0].fullName + ", " + _selectedUsers[1].fullName;
         }
         //await jsRuntime.InvokeAsync<string>("console.log","This is group member", memberList.ToString());
-        GroupRequest group = new GroupRequest(groupName, memberList);
+        GroupRequest group = new GroupRequest(_groupName, memberList);
 
         // with the server
         try
@@ -160,8 +163,9 @@
             string groupInitialize = JsonConvert.SerializeObject(group);
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
             httpRequestMessage.Method = new HttpMethod("POST");
-            httpRequestMessage.RequestUri = new Uri("https://localhost:7124/api/v1/Group");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Group");
             httpRequestMessage.Content = new StringContent(groupInitialize);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
 
             httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
             var response = await _http.SendAsync(httpRequestMessage);

@@ -207,10 +207,11 @@ Chi tiết chat gồm 3 phần
             InvokeAsync(StateHasChanged);
         });
     }
-      
+
     string permitScroll = "";
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (SelectedConversation is null) await GetSelectedConversation();
         if (permitScroll != "")
         {
             await Task.Delay(permitScroll == "instant" ? 0 : 300); // Độ trễ 1 giây
@@ -219,7 +220,7 @@ Chi tiết chat gồm 3 phần
         } 
 
     }
-      
+
     protected override async Task OnParametersSetAsync()
     {
         Console.WriteLine("parameter-detail");
@@ -235,43 +236,48 @@ Chi tiết chat gồm 3 phần
             previousSelectedUserId = SelectedConversation.conversationId;
             await GetConversationMessages();
         }
-
-        // Get Online status
-        if (SelectedConversation.conversationType == "Peer")
+        if (SelectedConversation is null) await base.OnAfterRenderAsync(false);
+        else
         {
-            string erroMessage;
-            try
+
+
+            // Get Online status
+            if (SelectedConversation.conversationType == "Peer")
             {
-                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-                httpRequestMessage.Method = new HttpMethod("GET");
-                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/OnlineStatus/" + Id);
-                httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
-
-                var response = await _http.SendAsync(httpRequestMessage);
-
-                if (response.IsSuccessStatusCode)
+                string erroMessage;
+                try
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var respond = JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
-                    try
-                    {
-                        if (respond.Data != null)
-                        {
-                            // Console.WriteLine("Get Online Status Success");
-                            onlineStatus = respond.Data;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("Get Online Status FAIL");
-                        erroMessage = e.Message;
-                    }
+                    HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+                    httpRequestMessage.Method = new HttpMethod("GET");
+                    httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/OnlineStatus/" + Id);
+                    httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
 
+                    var response = await _http.SendAsync(httpRequestMessage);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var respond = JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
+                        try
+                        {
+                            if (respond.Data != null)
+                            {
+                                // Console.WriteLine("Get Online Status Success");
+                                onlineStatus = respond.Data;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Get Online Status FAIL");
+                            erroMessage = e.Message;
+                        }
+
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                erroMessage = ex.Message;
+                catch (Exception ex)
+                {
+                    erroMessage = ex.Message;
+                }
             }
         }
     }

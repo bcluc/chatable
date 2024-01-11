@@ -10,6 +10,7 @@
         public string? conversationId { get; set; }
         public LastMessageDTO? lastMessage { get; set; }
         public string conversationType { get; set; }
+        public bool isFriend { get; set; }
         public bool IsSelected { get; set; }
         public Conversation() { }
 
@@ -18,7 +19,8 @@
             string conversationType, 
             LastMessageDTO? lastMessage, 
             string conversationName,
-            string conversationAvatar
+            string conversationAvatar,
+            bool isFriend
         )
         {
             conversationId = id;
@@ -26,6 +28,7 @@
             this.conversationType = conversationType;
             this.conversationName = conversationName;
             this.conversationAvatar = conversationAvatar;
+            this.isFriend = isFriend;
         }
         
     }

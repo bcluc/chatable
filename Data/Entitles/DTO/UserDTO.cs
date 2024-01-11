@@ -4,15 +4,15 @@
     {
         public string UserName { get; set; }
         public string FullName { get; set; }
-        public string CreateAt { get; set; }
+        public bool IsFriend { get; set; }
         public string AvatarUrl { get; set; }
 
 
-        public UserDTO(string userName, string fullName, string createAt, string avatarUrl)
+        public UserDTO(string userName, string fullName, string avatarUrl, bool isFriend)
         {
             UserName = userName;
             FullName = fullName;
-            CreateAt = createAt;
+            IsFriend = isFriend;
             AvatarUrl = avatarUrl;
         }
     }

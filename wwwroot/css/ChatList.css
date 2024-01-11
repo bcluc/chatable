@@ -86,25 +86,11 @@ h4 {
     overflow: hidden;
 }
 
-img {
-    width: 40px;
-    height: 100%;
-}
 .friend-request-actions {
     margin-left: auto;
     width: 180px;
 }
-.button {
-    font-family: SVN-Poppins;
-    border-radius: 100px;
-    width: 100%;
-    padding: 1px 10px;
-    border: none;
-    font-size: 12px;
-    font-weight: normal; 
-    transition: background .3s;
-    cursor: pointer;
-}
+
 .button:first-child
 {
     margin-bottom: 14px;

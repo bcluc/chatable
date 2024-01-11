@@ -188,3 +188,52 @@
     width: 600px !important;
     background-color: aliceblue !important;
 }
+input[type=text] {
+    width: 100%;
+    border: 2px solid #F5F5F5;
+    border-radius: 10px;
+    outline: none;
+    padding: 8px;
+    box-sizing: border-box;
+    transition: .3s;
+    padding-left: 40px;
+    font-size: 14px;
+    background-image: url('../img/icon _Search_.svg');
+    background-color: #F5F5F5;
+    background-repeat: no-repeat;
+    background-position: left 8px center;
+    background-size: 25px;
+}
+
+    input[type=text]:focus {
+        border-color: var(--bg-color);
+    }
+
+    /* Get from Chat Layout */
+.list-conversations-search {
+    display: flex;
+    flex-direction: column;
+}
+.coversation-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 14px;
+    background-color: white;
+    color: black;
+}
+.conversation-container:hover {
+    background-color: #F4F5F7;
+}
+.coversation-img {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+}
+
+.coversation-name {
+    font-family: SVN-Poppins;
+    font-size: 16px;
+    font-weight: 400;
+}

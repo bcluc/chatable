@@ -35,45 +35,47 @@
 
 <div class="chat-layout">
 	<div id="left-banner">
-		<SearchField>
+		<SearchField IsSearch = "@_isSearch" IsSearchChanged="SearchFieldChangedHandler">
 		</SearchField> 
 
 		<MudDivider></MudDivider>
+		@if (!_isSearch)
+		{
+			<div class="list-conversations">
 
-		<div class="list-conversations">
-
-			@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" /> *@
-			@if (_loadingUsers)
-			{
-				<div class="coversation-container">
-					<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-					Loading...
-				</div>
-			}
-			else
-			{
-				@foreach (var chat in Chats)
+				@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" /> *@
+				@if (_loadingUsers)
 				{
-					bool isToday = chat.lastMessage.sentAt.Date == DateTime.Today.Date;
-					string avatarUrl = (chat.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + chat.conversationAvatar;
-					<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
-					@onclick="() => OnUserSelected(chat)">
-
-						<img class="coversation-img mr-3" src="@avatarUrl" />
-						<div class="d-flex justify-start flex-column" style="flex: 1">
-							<div class="d-flex mb-1">
-								<p class="coversation-name">@chat.conversationName</p>
-								<MudSpacer/>
-								<p style="color: #AAA; font-weight: 400">@(isToday ? chat.lastMessage.sentAt.ToShortTimeString() : chat.lastMessage.sentAt.ToShortDateString())</p>
-							</div>
-							<p class="coversation-last-message">@chat.lastMessage.content</p>
-						</div>
+					<div class="coversation-container">
+						<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+						Loading...
 					</div>
-
 				}
-			}
+				else
+				{
+					@foreach (var chat in Chats)
+					{
+						bool isToday = chat.lastMessage.sentAt.Date == DateTime.Today.Date;
+						string avatarUrl = (chat.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + chat.conversationAvatar;
+						<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
+						@onclick="() => OnUserSelected(chat)">
 
-		</div>
+							<img class="coversation-img mr-3" src="@avatarUrl" />
+							<div class="d-flex justify-start flex-column" style="flex: 1">
+								<div class="d-flex mb-1">
+									<p class="coversation-name">@chat.conversationName</p>
+									<MudSpacer/>
+									<p style="color: #AAA; font-weight: 400">@(isToday ? chat.lastMessage.sentAt.ToShortTimeString() : chat.lastMessage.sentAt.ToShortDateString())</p>
+								</div>
+								<p class="coversation-last-message">@chat.lastMessage.content</p>
+							</div>
+						</div>
+
+					}
+				}
+
+			</div>
+		}
 	</div>
 
 	<MudDivider id="v-divider" Vertical="true"/>
@@ -125,9 +127,11 @@
 	[Parameter]
 	public string? _conversationType { get; set; }
 
+
 	//private AuthenticationState
 	private string value2;
 	private bool _loadingUsers = false;
+	private bool _isSearch = false;
 	private Conversation? _selectedUser = null;
 	private MessageDTO? _newIncomingMessage = null;
 
@@ -138,7 +142,7 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
-		// Console.WriteLine("parameter-chat "+ _id );
+		 Console.WriteLine("parameter-chat "+ _isSearch );
 		// Console.WriteLine("parameter-chat - " + _selectedUser);
 
 		if (_selectedUser is null && _id is not null) {
@@ -157,7 +161,6 @@
 			chat.IsSelected = false;
 			if (chat.conversationId == _id) chat.IsSelected = true;
 		}
-	
 	}
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -166,7 +169,7 @@
 	private void OpenAddGroupDialog()
 	{
 		var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
-		DialogService.Show<Data.Components.Dialog.AddGroup>("Tạo nhóm", options);
+		DialogService.Show<Data.Components.Dialog.Add.AddGroup>("Tạo nhóm", options);
 	}
 
 	private async Task OnUserSelected(Conversation user)
@@ -285,5 +288,11 @@
 	public async ValueTask DisposeAsync()
 	{
 
+	}
+
+	// Update Search
+	private void SearchFieldChangedHandler(bool newValue)
+	{
+		_isSearch = newValue;
 	}
 }
