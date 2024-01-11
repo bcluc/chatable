@@ -395,6 +395,7 @@
                     avatar = apiResponse.Data;
                     currentUser.avatarUrl = avatar;
                     CurrentUser.currentUser = currentUser;
+                    CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
                     StateHasChanged();
                     //await LoadProfile();
                 }

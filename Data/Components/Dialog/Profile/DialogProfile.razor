@@ -110,10 +110,11 @@
 
     private void OpenEditDialog()
 
-    //jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
     {
         MudDialog.Close(DialogResult.Ok(true));
-        DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân");
+        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân", options);
+        StateHasChanged();
     }
     private void OpenChangePassDialog()
     {
@@ -172,7 +173,7 @@
 
                     currentUser.avatarUrl = avatar;
                     CurrentUser.currentUser = currentUser;
-
+                    CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
                     StateHasChanged();
                 }
 
