@@ -40,7 +40,10 @@ Chi tiết chat gồm 3 phần
                     <p class="receiver-status">@onlineStatus</p>
                 }
             
-        </div>
+            </div>
+        } else
+        {
+            <div style="height: 50px"></div>
         }
         <MudSpacer />
         <MudIconButton Class="mr-2" OnClick=@(() => Call("voice")) Style="border-radius: 8px">
@@ -158,8 +161,12 @@ Chi tiết chat gồm 3 phần
     [Parameter]
     public EventCallback BackToConversationList { get; set; }
 
+    [Parameter]
+    public EventCallback<Dictionary<String, Object>> UpdateUIChat { get; set; }
+
     /* Code của Cường */
     private User currentUser;
+
     [Parameter]
     public Conversation? SelectedConversation { get; set; } 
 
@@ -168,11 +175,6 @@ Chi tiết chat gồm 3 phần
     [Parameter]
     public string? Type { get; set; }
 
-    [Parameter]
-    public EventCallback OnIncomingMessageRecieved { get; set; }
-
-    [Parameter]
-    public MessageDTO? NewIncomingMessage { get; set; }
 
     private List<MessageDTO> _messages = new List<MessageDTO>();
 
@@ -193,42 +195,44 @@ Chi tiết chat gồm 3 phần
 
         MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceived", message =>
         {
-            Console.WriteLine("MessageReceived: " + message.Content);
-            _messages.Add(message);
-            permitScroll = "smooth";
-            InvokeAsync(StateHasChanged);
+            // Console.WriteLine("MessageReceived: " + message.Content);
+            if (message.SenderId == SelectedConversation.conversationId)
+            {
+                _messages.Add(message);
+                permitScroll = "smooth";
+                InvokeAsync(StateHasChanged);
+            }
+
         });
 
         MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceivedFromGroup", message =>
         {
-            Console.WriteLine("MessageReceivedFromGroup: " + message.Content);
-            _messages.Add(message);
-            permitScroll = "smooth";
-            InvokeAsync(StateHasChanged);
+            // Console.WriteLine("MessageReceivedFromGroup: " + message.Content);
+            if (message.GroupId == SelectedConversation.conversationId)
+            {
+                _messages.Add(message);
+                permitScroll = "smooth";
+                InvokeAsync(StateHasChanged);
+            }
+
         });
     }
-      
+
     string permitScroll = "";
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (permitScroll != "")
         {
             await Task.Delay(permitScroll == "instant" ? 0 : 300); // Độ trễ 1 giây
-            await JSRuntime.InvokeVoidAsync("scrollMessagesListToBottom", permitScroll);
+            // Không được thêm await trước lệnh dưới này
+            JSRuntime.InvokeVoidAsync("scrollMessagesListToBottom", permitScroll);
             permitScroll = "";
         } 
-
     }
-      
+
     protected override async Task OnParametersSetAsync()
     {
-        Console.WriteLine("parameter-detail");
-
-        if (NewIncomingMessage is not null)
-        {
-            //_messages.Add(NewIncomingMessage);
-            await OnIncomingMessageRecieved.InvokeAsync();
-        }
+        // Console.WriteLine("parameter-detail");
 
         if (SelectedConversation is not null && SelectedConversation.conversationId != previousSelectedUserId)
         {
@@ -237,43 +241,47 @@ Chi tiết chat gồm 3 phần
         }
 
         // Get Online status
-        if (SelectedConversation.conversationType == "Peer")
+        if (SelectedConversation is not null)
         {
-            string erroMessage;
-            try
+            if (SelectedConversation.conversationType == "Peer")
             {
-                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-                httpRequestMessage.Method = new HttpMethod("GET");
-                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/OnlineStatus/" + Id);
-                httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
-
-                var response = await _http.SendAsync(httpRequestMessage);
-
-                if (response.IsSuccessStatusCode)
+                string erroMessage;
+                try
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var respond = JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
-                    try
-                    {
-                        if (respond.Data != null)
-                        {
-                            // Console.WriteLine("Get Online Status Success");
-                            onlineStatus = respond.Data;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("Get Online Status FAIL");
-                        erroMessage = e.Message;
-                    }
+                    HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+                    httpRequestMessage.Method = new HttpMethod("GET");
+                    httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/OnlineStatus/" + Id);
+                    httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
 
+                    var response = await _http.SendAsync(httpRequestMessage);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var respond = JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
+                        try
+                        {
+                            if (respond.Data != null)
+                            {
+                                // Console.WriteLine("Get Online Status Success");
+                                onlineStatus = respond.Data;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Get Online Status FAIL");
+                            erroMessage = e.Message;
+                        }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    erroMessage = ex.Message;
                 }
             }
-            catch (Exception ex)
-            {
-                erroMessage = ex.Message;
-            }
         }
+
     }
     //Get SelectedConversation
     private async Task<bool> GetSelectedConversation()
@@ -442,8 +450,29 @@ Chi tiết chat gồm 3 phần
 
             permitScroll = "instant";
 
-            _messages.Add(new MessageDTO(currentUser.userName, "text", _newMessage, DateTime.UtcNow, "", "", ""));
+
+            _messages.Add(new MessageDTO(currentUser.userName, "", "text", _newMessage, DateTime.UtcNow, "", "", false));
+            
+            await UpdateUIChat.InvokeAsync(new Dictionary<string, Object>
+            {
+                {"conversation_id", SelectedConversation.conversationId!},
+                {
+                    "last_msg", new LastMessageDTO(
+                        currentUser.userName,
+                        "text",
+                        _newMessage,
+                        DateTime.UtcNow,
+                        null,
+                        true,
+                        0
+                    )
+                },
+            });
+
             _newMessage = "";
+
+
+
 
         }
     }
@@ -476,12 +505,13 @@ Chi tiết chat gồm 3 phần
                 _messages.Add(
                     new MessageDTO(
                         currentUser.userName,
+                        "",
                         fileType,
                         imageUrl,
                         DateTime.UtcNow,
                         "",
                         "",
-                        ""
+                        true
                     )
                 );
             }
