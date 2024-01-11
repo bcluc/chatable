@@ -1,9 +1,11 @@
 ﻿@layout EmptyLayout
-@page "/"
+
 @page "/login"
 
 @using System.ComponentModel.DataAnnotations;
 @using Chatable.DI
+@using Chatable.Data.Components.Dialog.Password
+@using Chatable.Data.Components.Dialog.Profile
 @using Chatable.Data.Entitles.Model;
 @using Chatable.Data.Entitles.Request;
 @using Chatable.Data.Entitles.Respond
@@ -20,8 +22,7 @@
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
 @inject IJSRuntime jsRuntime
-
-
+@inject IDialogService DialogService
 
 
 <link rel="stylesheet" href="/css/AuthTemplate.css">
@@ -79,7 +80,7 @@
                     </MudButton>
 
                     <div align="center" class="mb-2">
-                        <a href="forgotpass">Quên mật khẩu</a>
+                        <MudButton Variant="Variant.Text" OnClick="ShowDialogInsertEmail">Quên mật khẩu</MudButton>
                     </div>
 
                     <div align="center">
@@ -175,6 +176,8 @@ LeBaoNhu71!
                     if (user.Data != null)
                     {
                         await _localStorageService.SetItemAsync("access_token", user.Data.accessToken);
+                        await _localStorageService.SetItemAsync("refresh_token", user.Data.refreshToken);
+
                         CurrentUser.token = user.Data;
                     }
                 }
@@ -242,7 +245,7 @@ LeBaoNhu71!
             return null;
         }
     }
-    
+
     private void setNullAvt(string gender)
     {
         if (gender == "Nữ")
@@ -252,5 +255,11 @@ LeBaoNhu71!
         }
         else usr.avatarUrl = Constant.defaultImgMale;
     }
-    
+
+    private void ShowDialogInsertEmail()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<DialogInsertEmail>("Xác nhận", options);
+    }
+
 }

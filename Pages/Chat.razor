@@ -39,19 +39,20 @@
 		</SearchField> 
 
 		<MudDivider></MudDivider>
+		@if (_loadingUsers)
+		{
+			@* <div class="coversation-container">
+				<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+				Loading...
+			</div> *@
+			<div class="d-flex justify-center align-center" style="height: 100%">
+				<MudProgressCircular Color="Color.Info" Indeterminate="true" />
+			</div>
+		}
+		else
+		{
+			<div class="list-conversations">
 
-		<div class="list-conversations">
-
-			@* <ChatList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" /> *@
-			@if (_loadingUsers)
-			{
-				<div class="coversation-container">
-					<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-					Loading...
-				</div>
-			}
-			else
-			{
 				@foreach (var chat in Chats)
 				{
 					bool isToday = chat.lastMessage.sentAt.Date == DateTime.Today.Date;
@@ -82,9 +83,9 @@
 					</div>
 
 				}
-			}
+			</div>
+		}
 
-		</div>
 	</div>
 
 	<MudDivider id="v-divider" Vertical="true"/>
@@ -155,7 +156,7 @@
 
 	//private AuthenticationState
 	private string value2;
-	private bool _loadingUsers = false;
+	private bool _loadingUsers = true;
 	private Conversation? _selectedUser = null;
 
 	// Khi nào run thì đổi
@@ -239,6 +240,7 @@
 		}
 
 	}
+	
 	// protected override async Task OnAfterRenderAsync(bool firstRender)
 	// {
 	// 	if (!Chats.Any()) await base.OnInitializedAsync();
@@ -367,8 +369,10 @@
 			success = false;
 			erroMessage = ex.Message;
 		}
+		_loadingUsers = false;
 		return await Task.FromResult(true);
 	}
+	
 	public async ValueTask DisposeAsync()
 	{
 

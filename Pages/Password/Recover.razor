@@ -1,0 +1,110 @@
+﻿@layout EmptyLayout
+@page "/recoverPass"
+
+@using System.ComponentModel.DataAnnotations;
+@using Chatable.DI
+@using Chatable.Data.Components.Dialog.Profile
+@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles.Request;
+@using Chatable.Data.Entitles.Respond
+@using Chatable.Data.Entitles.Response;
+@using Chatable.Data.Entitles;
+@using Microsoft.AspNetCore.Components.Forms;
+@using System.Net.Http;
+@using Microsoft.AspNetCore.Http
+@using Newtonsoft.Json;
+@using System.Web;
+@using System.ComponentModel.DataAnnotations
+
+@inject Blazored.LocalStorage.ILocalStorageService _localStorageService
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+@inject IJSRuntime jsRuntime
+@inject IDialogService DialogService
+
+<link rel="stylesheet" href="/css/AuthTemplate.css">
+<div class="login-section" style="display: flex; align-items: center; justify-content: center; height: 100vh;" >
+    <EditForm Model="@model" OnValidSubmit="ResetPass">
+            <DataAnnotationsValidator />
+            <MudCard Class="over-lay" Outlined="true">
+                <MudCardContent>
+                    <MudText Class="mb-5" Style="font-weight: 500; font-size: 32px">Đặt lại mật khẩu</MudText>                
+                    <MudText Style="margin-top: 10px">Mật khẩu</MudText>
+                    <MudTextField Placeholder="Abc@12345" Required="true" RequiredError="Hãy nhập mật khẩu"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" Class="mb-4"
+                                  @bind-Value="model.password" For="@(() => model.password)" InputType="@PasswordInput" />
+
+                    <MudText Style="margin-top: 10px">Nhập lại mật khẩu</MudText>
+                    <MudTextField Placeholder="Abc@12345" Required="true" RequiredError="Hãy xác nhận lại mật khẩu"
+                                  Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="togglePasswordVisibility" Class="mb-4"
+                                  @bind-Value="model.confirmPassword" For="@(() => model.confirmPassword)" InputType="@PasswordInput" />               
+                    <p class="erro">@erroMessage</p>
+
+                    <MudDivider></MudDivider>
+                    <MudButton ButtonType="ButtonType.Submit" Disabled="@_processing" Variant="Variant.Filled" 
+                               Class="login-button mb-8" FullWidth="true" DisableElevation="true" Style="margin-top: 20px">
+                        @if (_processing)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Đang xử lý</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Đặt lại mật khẩu</MudText>
+                        }
+                    </MudButton>
+
+                    <div align="center" >
+                        <a href="login">Quay lại đăng nhập</a>
+                    </div>
+                </MudCardContent>
+                
+            </MudCard>
+        </EditForm>
+</div>
+
+@code {
+    public class RecoverPassForm
+    {
+        [Required(ErrorMessage = "Mật khẩu là bắt buộc.")]
+        [StringLength(30, ErrorMessage = "Mật khẩu phải có ít nhất 8 kí tự \nGồm số,chữ hoa và ký tự đặc biệt", MinimumLength = 8)]
+        public string password { get; set; }
+
+        [Required(ErrorMessage = "Nhập lại mật khẩu là bắt buộc.")]
+        [Compare(nameof(password), ErrorMessage = "Mật khẩu và nhập lại mật khẩu không khớp.")]
+        public string confirmPassword { get; set; }
+    }
+}
+@code {
+    RecoverPassForm model = new RecoverPassForm();
+    private bool _processing = false;
+    bool success;
+    string erroMessage;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    bool isShow;
+
+    void togglePasswordVisibility()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    private async Task<bool> ResetPass ()
+    {
+
+        //làm cái gì ở đây
+        return await Task.FromResult(true);
+    }
+}
