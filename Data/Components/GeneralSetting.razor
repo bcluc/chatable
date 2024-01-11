@@ -1,10 +1,17 @@
-﻿
+﻿@using Blazored.LocalStorage
+@using Chatable.Data.Components.Dialog.Password
+@inject NavigationManager _navigationManager
+@inject ILocalStorageService _iLocalStorageService;
+@inject IDialogService DialogService
+
+
 <div class="container">
     <MudText Style="font-size:22px; font-weight: 600; "> Mật khẩu đăng nhập</MudText>
 	<MudButton Target="_blank"
 			   Variant="Variant.Text"
 			   Disabled=false
-               Style="width: 130px; height: 47px; border-radius: 8px; margin-top: 20px; background-color:#E6E6E6; color: #666666; ">
+               Style="width: 130px; height: 47px; border-radius: 8px; margin-top: 20px; background-color:#E6E6E6; color: #666666; "
+               OnClick="ShowDialogInsertEmail">
 		<div class="d-flex justify-center align-center">
 			Đổi mật khẩu
 		</div>
@@ -21,5 +28,24 @@
 </style>
 
 @code {
+    // private async void ToResetPassword()
+    // {
+    //     await ResetPassword();
+    // }
+    // private async Task ResetPassword ()
+    // {
+    //     //lấy access token bỏ lên local storage thành token 
+    //     string storedAccessToken = await _iLocalStorageService.GetItemAsync<string>("access_token");
+    //     await _iLocalStorageService.SetItemAsync("token", storedAccessToken);
+    //     _navigationManager.NavigateTo("/password/recover");
 
+
+    // }
+
+    private void ShowDialogInsertEmail()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<DialogInsertEmail>("Xác nhận", options);
+
+    }
 }
