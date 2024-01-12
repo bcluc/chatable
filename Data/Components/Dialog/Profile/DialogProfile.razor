@@ -118,12 +118,10 @@
     }
 
     private void OpenEditDialog()
-
     {
         MudDialog.Close(DialogResult.Ok(true));
         var options = new DialogOptions { DisableBackdropClick = true };
         var dialog = DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân", options);
-        StateHasChanged();
     }
     private void OpenChangePassDialog()
     {

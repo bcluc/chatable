@@ -1,7 +1,13 @@
 ﻿@inject NavigationManager NavigationManager
 <MudDialog>
-    <DialogContent>
-        Bạn đã đăng ký thành công! 
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.NotificationsActive" Color="Color.Info" Class="mr-3 mb-n1" />
+            Thông báo
+        </MudText>
+    </TitleContent>
+    <DialogContent >
+        <MudText style="padding: 5px 20px;"> Bạn đã đăng ký thành công!  </MudText>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Primary" OnClick="toLogin">Đăng nhập</MudButton>

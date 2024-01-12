@@ -196,16 +196,10 @@
 
     private  async void Cancel()
     {
-        MudDialog.Close(DialogResult.Ok(true));
-
+        MudDialog.Cancel();
         var options = new DialogOptions { CloseButton = true, DisableBackdropClick = false };
         var dialog = DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
-        await dialog.Result;
-        if (CurrentUser.currentUser.avatarUrl != null)
-        {
-            CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
-            StateHasChanged();
-        }
+       
     }
 
     private void OnGenderChanged(string selectedgender)
