@@ -64,9 +64,13 @@
     <DialogActions >
         @if (user.isFriend)
         {
-            <div class="toEdit">
+            <div class="otherDialog">
                 <MudButton OnClick="OpenChat" Class="btn-save" FullWidth="true">
                     Nhắn tin
+                </MudButton>
+                <MudButton OnClick="SendFriendRequest" Class="btn-unfriend" FullWidth="true"
+                           Style="margin-left:20px">
+                    Hủy kết bạn
                 </MudButton>
             </div>
         }
@@ -77,7 +81,7 @@
                 Nhắn tin
             </MudButton>
             @*Thêm điều kiện đã chấp nhận lời mời hay chưa*@                    
-            <MudButton OnClick="SendFriendRequest" Class="btn-addfr" FullWidth="true" 
+            <MudButton OnClick="UnFriend" Class="btn-addfr" FullWidth="true" 
                     Style="margin-left:20px">
                 Gửi lời mời kết bạn
             </MudButton>
@@ -127,8 +131,16 @@
         request.ReceiverId = user.userName;
         await SendRequest(request);
         Console.WriteLine("send rq "+request);
-        await MessageHubManager.HubConnection!.SendAsync("SendRequest", user.userName);
     }
+
+    private async void UnFriend()
+    {
+        // FriendRequest request = new FriendRequest();
+        // request.ReceiverId = user.userName;
+        // await SendRequest(request);
+        // Console.WriteLine("send rq " + request);
+    }
+
 
     private void NotifyStateChanged() => StateHasChanged();
 
@@ -152,7 +164,7 @@
                 await DialogService.ShowMessageBox("Thông báo", "  Bạn đã gửi lời mời thành công!  ");
 
                 // var user = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
-
+                await MessageHubManager.HubConnection!.SendAsync("SendRequest", friendRequest);
                 success = true;
             }
             else

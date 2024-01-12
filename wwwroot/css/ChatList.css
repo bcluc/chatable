@@ -58,13 +58,13 @@ h4 {
     text-overflow: ellipsis;
 }
 
-.container {
+/*.container {
     flex: 0 0 auto;
     width: 100%;
     height: auto;
     display: flex;
     align-items: flex-start;
-}
+}*/
 
 .friend-request-card {
     display: flex;

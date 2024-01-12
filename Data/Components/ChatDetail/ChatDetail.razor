@@ -15,6 +15,7 @@
 @inject HttpClient Client
 @inject HttpClient _http
 @inject NavigationManager _navigationManager
+@inject IDialogService DialogService
 @inject IJSRuntime JSRuntime
 
 <link rel="stylesheet" href="/css/ChatDetail.css">
@@ -32,7 +33,8 @@ Chi tiết chat gồm 3 phần
         </MudIconButton>
         @if (SelectedConversation != null)
             {
-            <img class="coversation-img mr-3" src="@((SelectedConversation.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + SelectedConversation.conversationAvatar)" />
+            <img class="coversation-img mr-3" src="@((SelectedConversation.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + SelectedConversation.conversationAvatar)"
+                 @onclick="OpenOtherProfileDialog" />
             <div class="d-flex flex-column justify-start align-start" style="width: 160px">
 
                 <p class="receiver-name">@SelectedConversation.conversationName</p>
@@ -181,6 +183,7 @@ Chi tiết chat gồm 3 phần
 
     /* Code của Cường */
     private User currentUser;
+    private User selectedUser;
 
     [Parameter]
     public Conversation? SelectedConversation { get; set; } 
@@ -455,6 +458,50 @@ Chi tiết chat gồm 3 phần
         }
 
     }
+    // Get user by ID
+    private async Task<bool> GetUserById(string userName)
+    {
+        selectedUser = new User();
+        bool success;
+        string erroMessage;
+        try
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/" + userName);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        selectedUser = respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        finally
+        {
+            permitScroll = "smooth";
+        }
+        return await Task.FromResult(true);
+    }
 
     private async Task SendMessage()
     {
@@ -571,7 +618,7 @@ Chi tiết chat gồm 3 phần
 
         string callerAvatar = CurrentUser.currentUser!.avatarUrl.Split('?')[0];
         string receiverAvatar = SelectedConversation!.conversationAvatar.Split('?')[0];
-        
+
         Console.WriteLine("receiverAvatar: " + receiverAvatar);
 
         await JSRuntime.InvokeVoidAsync(
@@ -595,5 +642,16 @@ Chi tiết chat gồm 3 phần
     {
         // Console.WriteLine("setIdleToTrue");
         CallHubManager.isIdle = true;
+    }
+    private async void OpenOtherProfileDialog()
+    {
+        if(SelectedConversation.conversationType == "Peer")
+        {
+            await GetUserById(SelectedConversation.conversationId);
+            var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+            var parameter = new DialogParameters { { "user", selectedUser } };
+            DialogService.Show<Dialog.Profile.DialogOtherProfile>("Thông tin tài khoản", parameter, options);
+        }
+        
     }
 }
