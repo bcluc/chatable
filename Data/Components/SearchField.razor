@@ -48,7 +48,8 @@
         </ItemTemplate>
     </MudAutocomplete> *@
 
-        <input type="text" placeholder="Tìm kiếm" @bind-value="searchText" @bind-value:event="oninput" @onclick="() => OnClickSearchField()">
+        <input type="text" id="search-input" placeholder="Tìm kiếm" @bind-value="searchText" @oninput="HandleInputChange"
+        @onclick="() => OnClickSearchField()">
         
 
     @if(IsSearch)
@@ -71,15 +72,22 @@
 </div>
 @if(IsSearch)
     {
-        <div class="list-conversations-search">
+        @if (_loading)
+        {
+            <div class="d-flex justify-center align-center" style="height: 100%">
+                <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+            </div>
+        }
+        else
+        {
+        <div class="list-conversations-search" id="">
         @foreach (var item in items)
         {
-            if (item.conversationName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase))
-            {
+            //if (item.conversationName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase))
+            //{
                     string avatarUrl = (item.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + item.conversationAvatar;
                     <div class="coversation-container-search"
                     @onclick="() => OnUserSelected(item)">
-
                         <img class="coversation-img mr-3" src="@avatarUrl" />
                         <div class="d-flex justify-start flex-column" style="flex: 1">
                             <div class="d-flex mb-1">
@@ -87,13 +95,19 @@
                             </div>
                         </div>
                     </div>
-            }
+            //}
         }
         </div>
+        }
     }
 </div>
 
-
+@code{
+    public class SearchRequest
+    {
+        public string Keyword { get; set; }
+    }
+}
 @inject CurrentUser CurrentUser
 
 @code {
@@ -104,26 +118,26 @@
 
 
     private string searchText="";
-
+    private bool _loading= false;
     private Conversation selectedConversation;
     private List<Conversation> items = new List<Conversation>();
+
     protected override async Task OnInitializedAsync()
     {
         //await GetAllFakeConversation();
     }
-    private async Task<IEnumerable<Conversation>> Search(string value)
-    {
-        await Task.Delay(5);
 
-        if (string.IsNullOrWhiteSpace(value))
-            return Enumerable.Empty<Conversation>();
-        return items.Where(x => x.conversationName.Contains(value, StringComparison.InvariantCultureIgnoreCase));//.Select(x => x.Name);
+    //Search của Như
+    private async void HandleInputChange()
+    {
+        // Update the input value
+        await GetInputConversations();
     }
     private async Task OnClickSearchField()
     {
         IsSearch = true;
         await UpdateIsSearch();
-        await GetAllConversations();
+        //await GetAllConversations();
     }
     private async Task CloseSearchField()
     {
@@ -144,6 +158,61 @@
         };
         return await Task.FromResult(true);
     }
+    // Task get conversation
+    private async Task<bool> GetInputConversations()
+    {
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.Keyword = searchText;
+        bool success;
+        _loading = true;
+        string erroMessage;
+        try
+        {
+            string requestInitialize = JsonConvert.SerializeObject(searchRequest);
+
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Conversation/Search");
+            httpRequestMessage.Content = new StringContent(requestInitialize);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+            var response = await _http.SendAsync(httpRequestMessage);
+
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<Conversation>>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        items = respond.Data;
+                        _loading = false;
+                        base.OnAfterRender(false);
+
+                        await JSRuntime.InvokeAsync<string>("console.log", "key search", searchText);
+                        await JSRuntime.InvokeAsync<string>("console.log", "search res", respond.Data);
+                        await JSRuntime.InvokeAsync<string>("console.log", "search list", items);
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        return await Task.FromResult(true);
+    }
+
     private async Task<bool> GetAllConversations()
     {
         bool success;
@@ -184,7 +253,7 @@
 
     private void OpenAddGroupDialog()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var options = new DialogOptions() { CloseOnEscapeKey = true, CloseButton = true};
         DialogService.Show<Dialog.Add.AddGroup>("Tạo nhóm", options);
     }
 

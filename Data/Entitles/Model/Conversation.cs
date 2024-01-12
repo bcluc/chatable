@@ -2,18 +2,17 @@
 {
     public class Conversation
     {
+		public string? conversationId { get; set; }
+		public string conversationType { get; set; }
 
-        public string conversationName { get; set; }
+		public string conversationName { get; set; }
 
         public string conversationAvatar { get; set; }
 
-        public string? conversationId { get; set; }
-
         public LastMessageDTO? lastMessage { get; set; }
 
-        public string conversationType { get; set; }
-      
-        public bool IsSelected { get; set; }
+        public bool IsSelected { get; set; } = false;
+
 
         public bool isFriend { get; set; }
 
@@ -46,6 +45,8 @@
         public string? groupId { get; set; }
 		public bool isSeen { get; set; } = true;
 		public int unreadMsgCount { get; set; } = 0;
+
+        public LastMessageDTO() { }
 
 		public LastMessageDTO(string senderId, string messageType, string content, DateTime sentAt, string? groupId, bool? isSeen, int unreadMsgCount = 0)
 		{

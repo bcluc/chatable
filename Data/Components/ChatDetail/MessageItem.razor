@@ -29,7 +29,7 @@
         <img class="coversation-img mr-3 align-self-start" src="@(Constant.uriBaseUserAvt + Msg.SenderAvatar)" />
     }
 
-    <div class="single-msg @(isMyMessage ? "me" : "other") @(Msg.MessageType)-msg @(Msg.Reactions.Count > 0 ? "has-reaction" : "")"
+    <div class="single-msg @(isMyMessage ? "me" : "other") @(Msg.MessageType)-msg @(Msg.Reactions != null && Msg.Reactions.Count > 0 ? "has-reaction" : "")"
          style="@(!isMyMessage && !IsFirstMsg ? "margin-left: 62px" : ""); position: relative">
         <p>
             @if (!isMyMessage && IsFirstMsg && ConversationType == "Group")
@@ -62,7 +62,7 @@
                 }
             </small>
 
-            @if (Msg.Reactions.Count > 0)
+            @if (Msg.Reactions != null && Msg.Reactions.Count > 0)
             {
                 // Console.WriteLine("Msg.Reactions.Count: " + Msg.Reactions.Count);
                 <div class="d-flex justify-center align-center reactions"
@@ -90,8 +90,6 @@
         </p>
 
     </div>
-
-    
 
     @if (!isMyMessage)
     {
@@ -143,6 +141,9 @@
     [Parameter]
     public string ConversationType { get; set; }
 
+    [Parameter]
+    public EventCallback<Dictionary<String, Object>> UpdateUIChat { get; set; }
+
     public bool isMyMessage;
     public bool isToday;
     public string cls;
@@ -171,6 +172,7 @@
 
         DialogParameters keyValues = new DialogParameters();
         keyValues.Add("Msg", Msg);
+        keyValues.Add("UpdateUIChat", UpdateUIChat);
 
         dialogReference = DialogService.Show<ForwardMessageDialog>("", keyValues, options);
         var result = await dialogReference.Result;
@@ -222,7 +224,9 @@
                 Msg.Reactions.Add(new ReactionMessage
                     {
                         Type = (int)result.Data,
-                        SenderId = CurrentUser.currentUser!.userName
+                        SenderId = CurrentUser.currentUser!.userName,
+                        SenderName = CurrentUser.currentUser!.fullName,
+                        SenderAvatar = CurrentUser.currentUser!.avatarUrl,
                     });
             }
             StateHasChanged();

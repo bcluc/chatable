@@ -4,11 +4,14 @@
 @using System.Globalization;
 @using System.Net.Http;
 @using Chatable.Data.Entitles.Respond
+@using Microsoft.AspNetCore.SignalR.Client;
 @using Newtonsoft.Json;
 @using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Headers;
 
 @inject IDialogService DialogService
 @inject HttpClient _http
+@inject NavigationManager _navigationManager
 @inject IJSRuntime jsRuntime
 @inject IDialogService Dialog
 
@@ -28,51 +31,83 @@
                 <div Class="photos">
                     <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
                     <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
-                        <MudImage Src="@currentUser.avatarUrl"></MudImage>
+                        <MudImage Src="@(Constant.uriBaseUserAvt + user.avatarUrl)"></MudImage>
                     </MudAvatar>
-                    
-                    <MudText style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</MudText>
 
-
+                    <MudText style=" position: absolute;  left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;font-family: SVN-Poppins;">
+                        @user.fullName</MudText>
                 </div>
-
+                
                 <div class="infor" style="margin-top: 70px;">
-                    <MudText style=" font-size: 18px; font-weight: 500;"> Thông tin cá nhân </MudText>
+                    <MudDivider Style="height:3px"></MudDivider>
+                    <MudText style=" font-size: 18px; font-weight: 500;font-family: SVN-Poppins;"> 
+                        Thông tin cá nhân </MudText>
 
                     <div class="horizental">
-                        <MudText Style="width: 170px; margin-top: 20px; ">Email</MudText>
-                        <MudText Style="margin-top: 20px">@(currentUser.email != null ? currentUser.email : "Chưa cập nhập")</MudText>
+                        <MudText Style="width: 170px; margin-top: 20px; font-family: SVN-Poppins;">Email</MudText>
+                        <MudText Style="margin-top: 20px; font-family: SVN-Poppins;">
+                            @(user.email != null ? user.email : "Chưa cập nhập")</MudText>
                     </div>
                     <div class="horizental">
-                        <MudText Style="width: 170px; margin-top: 20px; ">Giới tính</MudText>
-                        <MudText Style="margin-top: 20px" >@currentUser.gender</MudText>
+                        <MudText Style="width: 170px; margin-top: 20px; font-family: SVN-Poppins;">Giới tính</MudText>
+                        <MudText Style="margin-top: 20px; font-family: SVN-Poppins;">@user.gender</MudText>
                     </div>
                     <div class="horizental">
-                        <MudText Style="width: 170px; margin-top: 20px; ">Ngày sinh</MudText>
-                        <MudText Style="margin-top: 20px">@(currentUser.dob.HasValue ? currentUser.dob.Value.ToString("dd / MM / yyyy") : "N/A")</MudText>
+                        <MudText Style="width: 170px; margin-top: 20px; font-family: SVN-Poppins;">Ngày sinh</MudText>
+                        <MudText Style="margin-top: 20px; font-family: SVN-Poppins;">@(user.dob.HasValue ? user.dob.Value.ToString("dd / MM / yyyy") : "N/A")</MudText>
                     </div>
                 </div>
             </div>
+           
         }
     </DialogContent>
     <DialogActions >
-        <div class="toEdit">
-            <MudButton StartIcon="@Icons.Material.Filled.Edit" OnClick="OpenEditDialog" Class="btn-save" FullWidth ="true" >
-                Chỉnh sửa thông tin
+        @if (!user.isFriend)
+        {
+            <div class="otherDialog">
+                <MudButton OnClick="OpenChat" Class="btn-save" FullWidth="true">
+                    Nhắn tin
+                </MudButton>
+                <MudButton OnClick="SendFriendRequest" Class="btn-unfriend" FullWidth="true"
+                           Style="margin-left:20px">
+                    Gửi lời mời kết bạn
+                </MudButton>
+            </div>
+        }
+        else
+        {
+        <div class="otherDialog">
+                <MudButton OnClick="OpenChat" Class="btn-save" FullWidth="true">
+                Nhắn tin
             </MudButton>
+            @*Thêm điều kiện đã chấp nhận lời mời hay chưa*@                    
+            <MudButton OnClick="UnFriend" Class="btn-addfr" FullWidth="true" 
+                    Style="margin-left:20px">
+                    Hủy kết bạn
+            </MudButton>
+                
         </div>
+        }
     </DialogActions>
 </MudDialog>
 
 @inject CurrentUser CurrentUser
+@inject MessageHubManager MessageHubManager
 
+@code{
+    public class FriendRequest
+    {
+        public string ReceiverId { get; set; }
+    }
+}
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     // Truyen vao nguoi dung
     [Parameter]
-    public User otherUser { get; set; }
+    public User user { get; set; }
 
+    private bool success = false;
     User currentUser;
     String avatar;
 
@@ -81,17 +116,76 @@
         currentUser = CurrentUser.currentUser!;
     }
 
-    private void OpenEditDialog()
-
-    //jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
+    private void OpenChat()
     {
-        MudDialog.Close(DialogResult.Ok(true));
-        DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân");
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+        _navigationManager.NavigateTo("/chat/Peer/" + user.userName);
     }
 
-    
+    private async void SendFriendRequest()
+    {
+        FriendRequest request = new FriendRequest();
+        request.ReceiverId = user.userName;
+        await SendRequest(request);
+        Console.WriteLine("send rq "+request);
+    }
+
+    private async void UnFriend()
+    {
+        // FriendRequest request = new FriendRequest();
+        // request.ReceiverId = user.userName;
+        // await SendRequest(request);
+        // Console.WriteLine("send rq " + request);
+    }
+
+
     private void NotifyStateChanged() => StateHasChanged();
-   
+
+    private async Task SendRequest(FriendRequest friendRequest)
+    {
+        try
+        {
+            string requestInitialize = JsonConvert.SerializeObject(friendRequest);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request");
+            httpRequestMessage.Content = new StringContent(requestInitialize);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                await DialogService.ShowMessageBox("Thông báo", "  Bạn đã gửi lời mời thành công!  ");
+
+                // var user = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+                await MessageHubManager.HubConnection!.SendAsync("SendRequest", friendRequest);
+                success = true;
+            }
+            else
+            {
+                success = false;
+                string resBody = await response.Content.ReadAsStringAsync();
+                
+            }
+            Console.WriteLine(friendRequest.ReceiverId + " " + success);
+            if (success)
+            {
+                _navigationManager.NavigateTo("/chat");
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+        }
+
+        //await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
+    }
     private async Task OpenErroDialog()
     {
         var dialog = DialogService.Show<ErroUpImage>("Thông báo");

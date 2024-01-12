@@ -58,13 +58,13 @@ h4 {
     text-overflow: ellipsis;
 }
 
-.container {
+/*.container {
     flex: 0 0 auto;
     width: 100%;
     height: auto;
     display: flex;
     align-items: flex-start;
-}
+}*/
 
 .friend-request-card {
     display: flex;
@@ -87,24 +87,41 @@ h4 {
 
 .friend-request-actions {
     margin-left: auto;
-    width: 180px;
+    width: 230px;
+    text-align: end;
+    margin-right: 20px;
+    flex-direction:row;
+    display:flex;
+    justify-content: space-between;
 }
 
-.button:first-child
-{
-    margin-bottom: 14px;
+
+.button-primary {
+    border: none;
+    color: white;
+    width:110px;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 6px;
+    background-color: var(--bg-color);
 }
-
-    .button .button-primary {
-        background: var(--bg-color);
+    .button-primary:hover {
+        background-color: #87CBFF;
     }
-        .button .button-primary:hover {
-            filter: brightness(85%);
-        }
 
-    .button .button-secondary {
-        background: var(--bg-color);
+.button-secondary {
+    border: none;
+    width: 110px;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 6px;
+    color: #3B5BD7;
+    background-color: #E8EFFD;
+}
+    .button-secondary:hover {
+        background-color: #A3C2FF;
     }
-        .button .button-secondary:hover {
-            filter: brightness(85%);
-        }

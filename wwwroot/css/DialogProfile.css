@@ -1,5 +1,7 @@
 ﻿@import url('Theme.css');
-
+*{
+    font-family: SVN-Poppins;
+}
 * {
     margin: 0;
     padding: 0;
@@ -64,19 +66,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
+    margin-bottom:10px;
 }
-
+.otherDialog {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
 .btn-save {
     color: white;
-    background-color: #3559E0;
+    background-color: var(--bg-color);
 }
 
-.btn-save-hover:hover {
-    background-color: #4876FF;
+.btn-save:hover {
+    background-color: #87CBFF;
 }
 
-.btn-save-disable:disabled {
+.btn-save:disabled {
     background-color: #63B8FF;
 }
 
@@ -91,4 +100,26 @@
     color: red;
     font-size: 14px;
 }
+
+.btn-addfr {
+    color: #3B5BD7;
+    background-color: #E8EFFD;
+}
+
+    .btn-addfr:hover {
+        background-color: #A3C2FF;
+    }
+
+    .btn-addfr:disabled {
+        background-color: #63B8FF;
+    }
+
+.btn-unfriend {
+    color: black;
+    background-color: #EBEDF0;
+}
+
+    .btn-unfriend:hover {
+        background-color: #D7D7D7;
+    }
 
