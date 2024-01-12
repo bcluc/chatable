@@ -225,6 +225,10 @@ input[type=text] {
     .coversation-container-search:hover {
         background-color: #F4F5F7;
     }
+    .coversation-container-search.selected {
+        background-color: #0091ff;
+        color: white;
+    }
 .coversation-img {
     height: 50px;
     width: 50px;
@@ -235,6 +239,8 @@ input[type=text] {
     font-family: SVN-Poppins;
     font-size: 16px;
     font-weight: 400;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .friend-container {
@@ -249,3 +255,31 @@ input[type=text] {
     .friend-container:hover {
         background-color: #F4F5F7;
     }
+
+.coversation-container-addGroup {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 14px;
+    color: black;
+    padding: 10px 5px 10px 5px;
+    margin: 5px 5px 5px 5px;
+    border-radius: 5px;
+}
+
+    .coversation-container-addGroup:hover {
+        background-color: #F4F5F7;
+    }
+
+    .coversation-container-addGroup.selected {
+        background-color: #0091ff;
+        color: white;
+        
+    }
+.action-addGroup {
+    position: fixed;
+    bottom: 10px;
+    width: 100%;
+    flex-direction: column;
+}

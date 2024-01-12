@@ -20,14 +20,17 @@
 
 <link rel="stylesheet" href="/css/AddGroupDialog.css">
 
-<MudDialog class="custom-dialog-content" >
+<MudDialog class="custom-dialog-content" Style="min-height:650px" ClassActions="action-addGroup">
 
     <DialogContent>
         <div>
             <div class="app-component-container">
                 <div class="app-component-container1">
                     <div class="app-component-container3">
-                        <img src="@Constant.defaultImgGroup" class="group-img" />
+                        @* <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
+
+                        </MudFileUpload>
+                        <img src="@Constant.defaultImgGroup" class="group-img" /> *@
                         <input type="text"
                                style="background-image:none; padding-left: 8px; margin:auto; margin-left: 8px"
                             @bind="@_groupName"
@@ -38,22 +41,62 @@
                 </div>
                 <MudDivider Style="margin-top:10px; margin-bottom:8px"></MudDivider>
                 <div class="app-component-container2" style="margin-top:10px">
-                <MudItem>
-                    <MudAutocomplete T="string" Placeholder="Tìm kiếm" @bind-Value="value2" SearchFunc="@Search2"
-                                         AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" Variant="Variant.Outlined" />
-                </MudItem>
+                    <input type="text" id="search-input" placeholder="Tìm kiếm" @bind-value="searchText" @bind-value:event="oninput">
 
-                    <FriendList Loading="_loadingList" Chats="_friendList" OnUserSelected="OnUserSelected" />
+                    @* <MudAutocomplete Placeholder="Tìm kiếm" T="UserDTO" @bind-Value="selectedUser" SearchFunc="@Search2"
+                                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" ShowProgressIndicator="true"
+                                      ToStringFunc="@(e=> e==null?null : $"{e.FullName}")">
+                        <ProgressIndicatorTemplate>
+                            <MudProgressLinear Size="Size.Small" Indeterminate="true" Color="Color.Primary" />
+                        </ProgressIndicatorTemplate>
+
+                        <ItemTemplate>
+                            <div class="list-group-item">
+                                <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+                                    <MudAvatar>
+                                        <MudImage Src=@((context.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + context.conversationAvatar)></MudImage>
+                                    </MudAvatar>
+                                    <h4 class="user-name">@context.conversationName</h4>
+                                </div>
+                            </div>
+                        </ItemTemplate>
+                    </MudAutocomplete> *@
+
+                    @foreach (var item in _friendList)
+                    {
+                        if (item.FullName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                        string avatarUrl = Constant.uriBaseUserAvt + item.AvatarUrl;
+                            <div class="coversation-container-addGroup @(item.IsSelected ? "selected" : "")"
+                        @onclick="() => OnUserSelected(item)">
+                            <img class="coversation-img mr-3" src="@avatarUrl" />
+                            <div class="d-flex justify-start flex-column" style="flex: 1">
+                                <div class="d-flex mb-1">
+                                    <p class="coversation-name">@item.FullName</p>
+                                </div>
+                            </div>
+                        </div>
+                        }
+                    }
+
+
+
+                    @* <FriendList Loading="_loadingList" Chats="_friendList" OnUserSelected="OnUserSelected" /> *@
+
+
+
+
                  </div>
-                <div class="app-component-container4" >
-                    <span class="app-component-text3">Đã chọn</span>
-                    <span class="app-component-text4">@count /100</span>
-                </div>
+               
 
             </div>
         </div>
     </DialogContent>
-    <DialogActions>
+    <DialogActions >
+        <div class="app-component-container4">
+            <span class="app-component-text3">Đã chọn</span>
+            <span class="app-component-text4">@count /100</span>
+        </div>
         <div class="app-component-container5" style="height:auto; margin-bottom:10px">
             <button type="button" class="app-component-button1 button" @onclick="() => Close()" >Hủy</button>
             <button type="button" disabled="@isDisable" class="button @(count > 1 ? "app-component-button2-activate" :"app-component-button2" )" @onclick="() => CreateGroup(_selectedUsers)">
@@ -69,7 +112,6 @@
     // test
     private User currentUser;
     public List<UserDTO> _friendList = new List<UserDTO>();
-    private IList<String> states = Constant.states;
 
     // variable
     bool success;
@@ -77,9 +119,13 @@
     private string _groupName = "";
     private int count = 0;
     private bool isDisable = true;
+    private UserDTO selectedUser;
+    private string searchText = "";
     private bool _loadingList = false;
     private bool _processing = false;
     string erroMessage;
+    List<IBrowserFile> selectedFiles = new List<IBrowserFile>();
+
 
     private List<UserDTO> _selectedUsers = new List<UserDTO>();
 
@@ -144,17 +190,7 @@
         }
         return await Task.FromResult(true);
     }
-    private async Task<IEnumerable<string>> Search2(string value)
-    {
-        // In real life use an asynchronous function for fetching data from an api.
-        await Task.Delay(5);
-
-        // if text is null or empty, don't return values (drop-down will not open)
-        if (string.IsNullOrEmpty(value))
-            return new string[0];
-        // return chat room
-        return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    }
+    
     
     private async Task OnUserSelected(UserDTO user)
     {
@@ -243,6 +279,5 @@
         Close();
         return await Task.FromResult(true);
     }
-
     
 }

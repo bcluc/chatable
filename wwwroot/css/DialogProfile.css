@@ -114,4 +114,12 @@
         background-color: #63B8FF;
     }
 
+.btn-unfriend {
+    color: black;
+    background-color: #EBEDF0;
+}
+
+    .btn-unfriend:hover {
+        background-color: #D7D7D7;
+    }
 
