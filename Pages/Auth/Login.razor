@@ -142,125 +142,131 @@ LeBaoNhu71!
             isShow = true;
             PasswordInputIcon = Icons.Material.Filled.Visibility;
             PasswordInput = InputType.Text;
+            }
         }
-    }
 
-    LoginForm model = new LoginForm();
-    bool success;
-    private bool _processing = false;
-    String erroMessage;
+        LoginForm model = new LoginForm();
+        bool success;
+        private bool _processing = false;
+        String erroMessage;
 
-    // lần đầu
-    private async Task<bool> LoginUser(EditContext context)
-    {
-        _processing = true;
-        try
+        // lần đầu
+        private async Task<bool> LoginUser(EditContext context)
         {
-            string serializedUser = JsonConvert.SerializeObject(model);
-            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-            httpRequestMessage.Method = new HttpMethod("POST");
-            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/login");
-            // httpRequestMessage.RequestUri = new Uri("http://localhost:5275/api/v1/Auth/login");
-
-            httpRequestMessage.Content = new StringContent(serializedUser);
-            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-            var response = await _http.SendAsync(httpRequestMessage);
-
-            if (response.IsSuccessStatusCode)
+            _processing = true;
+            try
             {
-                success = true;
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<ApiResponse<Token>>(responseContent);
-                try
-                {
-                    if (user.Data != null)
-                    {
-                        await _localStorageService.SetItemAsync("access_token", user.Data.accessToken);
-                        await _localStorageService.SetItemAsync("refresh_token", user.Data.refreshToken);
+                string serializedUser = JsonConvert.SerializeObject(model);
+                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+                httpRequestMessage.Method = new HttpMethod("POST");
+                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Auth/login");
+                // httpRequestMessage.RequestUri = new Uri("http://localhost:5275/api/v1/Auth/login");
 
-                        CurrentUser.token = user.Data;
+                httpRequestMessage.Content = new StringContent(serializedUser);
+                httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                var response = await _http.SendAsync(httpRequestMessage);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    success = true;
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var user = JsonConvert.DeserializeObject<ApiResponse<Token>>(responseContent);
+                    try
+                    {
+                        if (user.Data != null)
+                        {
+                            await _localStorageService.SetItemAsync("access_token", user.Data.accessToken);
+                            await _localStorageService.SetItemAsync("refresh_token", user.Data.refreshToken);
+
+                            CurrentUser.token = user.Data;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        erroMessage = e.Message;
                     }
                 }
-                catch (Exception e)
+                else
                 {
-                    erroMessage = e.Message;
+                    success = false;
+                    string resBody = await response.Content.ReadAsStringAsync();
+                    dynamic result = JsonConvert.DeserializeObject(resBody);
+                    erroMessage = result.message;
                 }
+                _processing = false;
+
+                if (success)
+                {
+                    usr = await GetCurUser();
+                    if (usr.avatarUrl == null) setNullAvt(usr.gender);
+                    CurrentUser.currentUser = usr;
+
+                    // await jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
+                    _navigationManager.NavigateTo("/chat");
+                }
+            }
+            catch (Exception ex)
+            {
+                success = false;
+                erroMessage = ex.Message;
+            }
+            return await Task.FromResult(true);
+        }
+
+        private async Task<User> GetCurUser()
+        {
+            User curUser = new User();
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/CurrentUser");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+            try
+            {
+                var response = await _http.SendAsync(httpRequestMessage);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    if (responseContent != null)
+                    {
+                        ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+                        curUser = apiResponse.Data;
+                        return curUser;
+                    }
+                    return null;
+
+                }
+                return null;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        private void setNullAvt(string gender)
+        {
+            if (gender == "Nữ")
+            {
+                usr.avatarUrl = Constant.defaultImgFemale;
+                CurrentUser.currentUser.avatarUrl = Constant.defaultImgFemale;
+
             }
             else
             {
-                success = false;
-                string resBody = await response.Content.ReadAsStringAsync();
-                dynamic result = JsonConvert.DeserializeObject(resBody);
-                erroMessage = result.message;
-            }
-            _processing = false;
-
-            if (success)
-            {
-                usr = await GetCurUser();
-                if (usr.avatarUrl == null) setNullAvt(usr.gender);
-                CurrentUser.currentUser = usr;
-
-                // await jsRuntime.InvokeAsync<string>("console.log", "avatar", Constant.currentUser.avatarUrl);
-                _navigationManager.NavigateTo("/chat");
+                usr.avatarUrl = Constant.defaultImgMale;
+                CurrentUser.currentUser.avatarUrl = Constant.defaultImgMale;
+       
             }
         }
-        catch (Exception ex)
+
+        private void ShowDialogInsertEmail()
         {
-            success = false;
-            erroMessage = ex.Message;
-        }
-        return await Task.FromResult(true);
-    }
-
-    private async Task<User> GetCurUser()
-    {
-        User curUser = new User();
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-        httpRequestMessage.Method = new HttpMethod("GET");
-        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/CurrentUser");
-        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
-
-        try
-        {
-            var response = await _http.SendAsync(httpRequestMessage);
-
-            if (response.IsSuccessStatusCode)
-            {
-
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (responseContent != null)
-                {
-                    ApiResponse<User> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
-                    curUser = apiResponse.Data;
-                    return curUser;
-                }
-                return null;
-
-            }
-            return null;
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-    }
-
-    private void setNullAvt(string gender)
-    {
-        if (gender == "Nữ")
-        {
-            usr.avatarUrl = Constant.defaultImgFemale;
+            var options = new DialogOptions { CloseOnEscapeKey = true };
+            DialogService.Show<DialogInsertEmail>("Xác nhận", options);
 
         }
-        else usr.avatarUrl = Constant.defaultImgMale;
-    }
-
-    private void ShowDialogInsertEmail()
-    {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<DialogInsertEmail>("Xác nhận", options);
-
-    }
 
 }

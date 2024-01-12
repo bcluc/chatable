@@ -28,9 +28,18 @@
                         <div Class="photos">
                             <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
                             <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
+                            @if (currentUser.avatarUrl != null)
+                            {
                             <MudImage Src="@(Constant.uriBaseUserAvt +currentUser.avatarUrl)"></MudImage>
+
+                            }
+                            else
+                            {
+                                <MudImage Src="@Constant.defaultImgMale"></MudImage>
+
+                            }
                             </MudAvatar>
-                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
+                            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
                                 <ButtonTemplate>
                                     <MudIconButton HtmlTag="label"
                                                    Color="Color.Info"
@@ -185,10 +194,18 @@
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
 
-    void Cancel()
+    private  async void Cancel()
     {
         MudDialog.Close(DialogResult.Ok(true));
-        DialogService.Show<DialogProfile>("Thông tin cá nhân");
+
+        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = false };
+        var dialog = DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+        await dialog.Result;
+        if (CurrentUser.currentUser.avatarUrl != null)
+        {
+            CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
+            StateHasChanged();
+        }
     }
 
     private void OnGenderChanged(string selectedgender)
@@ -422,11 +439,16 @@
         var dialog = DialogService.Show<ErroUpImage>("Thông báo");
         var result = await dialog.Result;
     }
-    private void OpenProfileDialog()
+    private async void OpenProfileDialog()
     {
-        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = true };
-        DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
-
+        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = false };
+        var dialog = DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+        await dialog.Result;
+        if (CurrentUser.currentUser.avatarUrl != null)
+        {
+            CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
+            StateHasChanged();
+        }
 
     }
 }

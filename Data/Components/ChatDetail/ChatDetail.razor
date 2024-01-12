@@ -11,6 +11,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Newtonsoft.Json;
 @using System.Net.Http.Headers
+@using System.ComponentModel.DataAnnotations
 
 @inject HttpClient Client
 @inject HttpClient _http
@@ -150,11 +151,15 @@ Chi tiết chat gồm 3 phần
     Không được xóa id="message-input",
     nó dùng để phân biệt với các MudTextField khác để style
     *@
+
     <div id="message-input">
-        <MudTextField Placeholder="Nhập tin nhắn" @bind-Value="_newMessage" Variant="Variant.Text" DisableUnderLine="true"></MudTextField>
+        <MudTextField Placeholder="Nhập tin nhắn"
+                      @bind-Value="_newMessage"
+                    Variant="Variant.Text" 
+                    DisableUnderLine="true" 
+                    OnKeyUp="HandleKeyUp"></MudTextField>
         <button class="btn-send mx-4" @onclick="SendMessage">Gửi</button>
     </div>
-
 </div>
 
 <style>
@@ -166,7 +171,6 @@ Chi tiết chat gồm 3 phần
 @inject CurrentUser CurrentUser
 
 @code {
-
     /* Code của Lâm */
     [Parameter]
     public EventCallback BackToConversationList { get; set; }
@@ -273,7 +277,7 @@ Chi tiết chat gồm 3 phần
         if (permitScroll != "")
         {
             await Task.Delay(permitScroll == "instant" ? 0 : 300); // Độ trễ 1 giây
-            // Không được thêm await trước lệnh dưới này
+                                                                   // Không được thêm await trước lệnh dưới này
             JSRuntime.InvokeVoidAsync("scrollMessagesListToBottom", permitScroll);
             permitScroll = "";
         } 
@@ -486,6 +490,7 @@ Chi tiết chat gồm 3 phần
 
     private async Task SendMessage()
     {
+
         if (!string.IsNullOrWhiteSpace(_newMessage))
         {
             // Console.WriteLine("_newMessage: " + _newMessage);
@@ -502,7 +507,7 @@ Chi tiết chat gồm 3 phần
 
 
             _messages.Add(new MessageDTO("", currentUser.userName, "", "text", _newMessage, DateTime.UtcNow, "", "", false));
-            
+
             await UpdateUIChat.InvokeAsync(new Dictionary<string, Object>
             {
                 {"conversation_id", SelectedConversation.conversationId!},
@@ -521,6 +526,13 @@ Chi tiết chat gồm 3 phần
 
             _newMessage = "";
 
+        }
+    }
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            _newMessage = "";
         }
     }
 

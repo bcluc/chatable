@@ -32,7 +32,16 @@
                 <div Class="photos">
                     <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
                     <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
-                        <MudImage Src="@(Constant.uriBaseUserAvt +currentUser.avatarUrl)"></MudImage>
+                    @if(currentUser.avatarUrl!= null)
+                    {
+                            <MudImage Src="@(Constant.uriBaseUserAvt +currentUser.avatarUrl)"></MudImage>
+
+                        }
+                        else
+                        {
+                            <MudImage Src="@Constant.defaultImgMale"></MudImage>
+
+                        }
                     </MudAvatar>
                     <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
                         <ButtonTemplate>
@@ -112,7 +121,7 @@
 
     {
         MudDialog.Close(DialogResult.Ok(true));
-        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = true };
+        var options = new DialogOptions { DisableBackdropClick = true };
         var dialog = DialogService.Show<DialogEditProfile>("Chỉnh sửa thông tin cá nhân", options);
         StateHasChanged();
     }
