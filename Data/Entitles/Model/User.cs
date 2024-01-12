@@ -15,13 +15,13 @@ namespace Chatable.Data.Entitles.Model
         public DateTime? dob { get; set; }
         public bool isFriend { get; set; }
         public User() { }
-        public User(string userName, string fullName, string email, string? avatar, DateTime? dateOfBirth, string? gender, bool isFriend)
+
+        public User(string userName, string fullName, string email, DateTime? dateOfBirth, string? gender, string? avatar, bool isFriend)
         {
             this.userName = userName;
             this.fullName = fullName;
             this.email = email;
-            if (avatar == null) { this.avatarUrl = getDefaultAvt(gender); }
-            else { this.avatarUrl = avatar; }
+            this.avatarUrl = avatar;
             this.gender = gender;
             dob = dateOfBirth;
             this.isFriend = isFriend;

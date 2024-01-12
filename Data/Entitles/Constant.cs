@@ -39,8 +39,8 @@ namespace Chatable.Data.Entitles
 
         public static readonly IList<User> usersList = new List<User>
         {
-        new User("nhubaole", "Trần Lê Hoàng Lâm","", "",DateTime.Now,"Nam",false),
-        new User("nhihuynh", "Công chúa Elsa","", "", DateTime.Now,"Nữ", true),
+        new User("nhubaole", "Trần Lê Hoàng Lâm", "",DateTime.Now,"Nam","",false),
+        new User("nhihuynh", "Công chúa Elsa", "", DateTime.Now,"Nữ","", true),
         };
 
         public static readonly Message visibleMessage = new("0", "BC", "1", DateTime.Now, "Text", "Say hi");
@@ -48,7 +48,7 @@ namespace Chatable.Data.Entitles
         //public static readonly Group currentGroup = new Group("123", "Group Local Test", "BC", "2023-12-04 17:03:22.2+00");
 
 
-        public static readonly User oppositeUser = new User("nhubaole", "Trần Lê Hoàng Lâm", "", Constant.defaultImgMale, DateTime.Now, "Nam", false);
+        public static readonly User oppositeUser = new User("nhubaole", "Trần Lê Hoàng Lâm",  Constant.defaultImgMale, DateTime.Now, "Nam", "", false);
 
     }
 }
