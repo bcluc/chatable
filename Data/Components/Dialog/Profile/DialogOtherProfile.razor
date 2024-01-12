@@ -62,7 +62,7 @@
         }
     </DialogContent>
     <DialogActions >
-        @if (user.isFriend)
+        @if (!user.isFriend)
         {
             <div class="otherDialog">
                 <MudButton OnClick="OpenChat" Class="btn-save" FullWidth="true">
@@ -70,7 +70,7 @@
                 </MudButton>
                 <MudButton OnClick="SendFriendRequest" Class="btn-unfriend" FullWidth="true"
                            Style="margin-left:20px">
-                    Hủy kết bạn
+                    Gửi lời mời kết bạn
                 </MudButton>
             </div>
         }
@@ -83,7 +83,7 @@
             @*Thêm điều kiện đã chấp nhận lời mời hay chưa*@                    
             <MudButton OnClick="UnFriend" Class="btn-addfr" FullWidth="true" 
                     Style="margin-left:20px">
-                Gửi lời mời kết bạn
+                    Hủy kết bạn
             </MudButton>
                 
         </div>

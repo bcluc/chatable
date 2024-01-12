@@ -244,8 +244,9 @@
 			InvokeAsync(StateHasChanged);
 		});
                                       
-		MessageHubManager.HubConnection!.
-		On<Conversation>("NewConversationReceived", newConversation =>
+
+    MessageHubManager.HubConnection!.On<Conversation>("NewConversationReceived", newConversation =>
+
 		{
 			Console.WriteLine("Page CHAT NewConversationReceived: " + CurrentUser.currentUser.userName);
 			// Console.WriteLine("newConversation.ConversationId: " + newConversation.ConversationId);
@@ -254,14 +255,6 @@
 			InvokeAsync(StateHasChanged);
 		});
 
-		MessageHubManager.HubConnection!.On<RequestDTO>("FriendRequestReceived", request =>
-		{
-			Console.WriteLine("id send: " + request.UserId);
-			Snackbar.Add(
-				"Sale Table has changed", Severity.Success
-			);
-			InvokeAsync(StateHasChanged);
-		});
 	}
 
 	protected override async Task OnParametersSetAsync()
