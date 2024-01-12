@@ -65,8 +65,8 @@
 
 							<img class="coversation-img mr-3" src="@avatarUrl" />
 							<div class="d-flex justify-start flex-column" style="flex: 1">
-								<div class="d-flex mb-1" style="max-width: 180px;">
-									<p class="coversation-name">@chat.conversationName</p>
+								<div class="d-flex mb-1" >
+									<p class="coversation-name" style="max-width: 160px;">@chat.conversationName</p>
 									<MudSpacer />
 									@if (chat.lastMessage != null && chat.lastMessage.content != null)
 									{
@@ -219,8 +219,8 @@
 
 		MessageHubManager.HubConnection!.On<MessageDTO>("MessageReceivedFromGroup", message =>
 		{
-			// Console.WriteLine("Page CHAT MessageReceivedFromGroup: " + message.Content);
-			// Console.WriteLine("message.ConversationId: " + message.GroupId);
+			Console.WriteLine("Page CHAT MessageReceivedFromGroup: " + message.Content);
+			Console.WriteLine("message.ConversationId: " + message.GroupId);
 			for (int i = 0; i < Chats.Count; ++i)
 			{
 				if (Chats[i].conversationId == message.GroupId)
@@ -246,14 +246,13 @@
                                       
 
     MessageHubManager.HubConnection!.On<Conversation>("NewConversationReceived", newConversation =>
-
-		{
-			Console.WriteLine("Page CHAT NewConversationReceived: " + CurrentUser.currentUser.userName);
-			// Console.WriteLine("newConversation.ConversationId: " + newConversation.ConversationId);
-			// Console.WriteLine("newConversation.ConversationName: " + newConversation.ConversationName);
-			Chats.Insert(0, newConversation);
-			InvokeAsync(StateHasChanged);
-		});
+	{
+		Console.WriteLine("Page CHAT NewConversationReceived: " + CurrentUser.currentUser.userName);
+		// Console.WriteLine("newConversation.ConversationId: " + newConversation.ConversationId);
+		// Console.WriteLine("newConversation.ConversationName: " + newConversation.ConversationName);
+		Chats.Insert(0, newConversation);
+		InvokeAsync(StateHasChanged);
+	});
 
 	}
 

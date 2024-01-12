@@ -166,12 +166,24 @@
             //Console.WriteLine("id send: " + request.UserId);
             Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
 
-            Snackbar.Add(request.Name + " đã gửi lời mời cho bạn! ", 
-            Severity.Info);
+            Snackbar.Add(
+                request.Name + " đã gửi lời mời cho bạn! ", 
+                Severity.Info
+            );
             InvokeAsync(StateHasChanged);
         });
+
+        MessageHubManager.HubConnection!.On<RequestDTO>("FriendRequestAccepted", acceptReq =>
+        {
+            //Console.WriteLine("id send: " + request.UserId);
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
+
+            Snackbar.Add(acceptReq.Name + " đã đồng ý lời mời của bạn!",
+            Severity.Info);
+            InvokeAsync(StateHasChanged);
+            });
         // Console.WriteLine($"messageHubConnection = {messageHubConnection.ConnectionId}");
-    }
+        }
 
     public async Task SetUpCallHub()
     {
