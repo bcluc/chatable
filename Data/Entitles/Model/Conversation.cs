@@ -46,6 +46,8 @@
 		public bool isSeen { get; set; } = true;
 		public int unreadMsgCount { get; set; } = 0;
 
+        public LastMessageDTO() { }
+
 		public LastMessageDTO(string senderId, string messageType, string content, DateTime sentAt, string? groupId, bool? isSeen, int unreadMsgCount = 0)
 		{
 			this.senderId = senderId;
