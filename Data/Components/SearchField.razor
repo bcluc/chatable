@@ -46,9 +46,11 @@
                 </div>
             </div>
         </ItemTemplate>
+
+         @oninput="HandleInputChange" 
     </MudAutocomplete> *@
 
-        <input type="text" id="search-input" placeholder="Tìm kiếm" @bind-value="searchText" @oninput="HandleInputChange"
+        <input type="text" id="search-input" placeholder="Tìm kiếm" @bind-value="searchText" @bind-value:event="oninput"
         @onclick="() => OnClickSearchField()">
         
 
@@ -80,22 +82,38 @@
         }
         else
         {
-        <div class="list-conversations-search" id="">
-        @foreach (var item in items)
+        <div class="list-conversations-search">
+        @foreach (var item in itemList)
         {
-            //if (item.conversationName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase))
-            //{
-                    string avatarUrl = (item.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + item.conversationAvatar;
-                    <div class="coversation-container-search"
-                    @onclick="() => OnUserSelected(item)">
-                        <img class="coversation-img mr-3" src="@avatarUrl" />
-                        <div class="d-flex justify-start flex-column" style="flex: 1">
-                            <div class="d-flex mb-1">
-                                <p class="coversation-name">@item.conversationName</p>
+                    if (item.Name.Contains(searchText, StringComparison.InvariantCultureIgnoreCase) && item.isConversation)
+            {
+     
+                            string avatarUrl = (item.TypeConversation == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + item.Avatar;
+                            <div class="coversation-container-search"
+                                @onclick="() => OnConversationSelected(item)">
+                                <img class="coversation-img mr-3" src="@avatarUrl" />
+                                <div class="d-flex justify-start flex-column" style="flex: 1">
+                                    <div class="d-flex mb-1">
+                                        <p class="coversation-name">@item.Name</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-            //}
+            }
+                    else if (item.Id.Equals(searchText) && !item.isConversation)
+                    {
+                       
+                            string avatarUrl = Constant.uriBaseUserAvt + item.Avatar;
+                            <div class="coversation-container-search"
+                            @onclick="() => OnUserSelected(item)">
+                                <img class="coversation-img mr-3" src="@avatarUrl" />
+                                <div class="d-flex justify-start flex-column" style="flex: 1">
+                                    <div class="d-flex mb-1">
+                                        <p class="coversation-name">@item.Name</p>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                    }
         }
         </div>
         }
@@ -108,6 +126,7 @@
         public string Keyword { get; set; }
     }
 }
+
 @inject CurrentUser CurrentUser
 
 @code {
@@ -120,11 +139,18 @@
     private string searchText="";
     private bool _loading= false;
     private Conversation selectedConversation;
-    private List<Conversation> items = new List<Conversation>();
+
+    private List<Conversation> conversationList = new List<Conversation>();
+    private List<User> userList = new List<User>();
+    private List<SearchDTO> itemList = new List<SearchDTO>();
 
     protected override async Task OnInitializedAsync()
     {
         //await GetAllFakeConversation();
+        itemList.Clear();
+        await GetAllConversations();
+        await GetAllOtherUser();
+        GetList();
     }
 
     //Search của Như
@@ -137,7 +163,7 @@
     {
         IsSearch = true;
         await UpdateIsSearch();
-        //await GetAllConversations();
+
     }
     private async Task CloseSearchField()
     {
@@ -150,7 +176,7 @@
     }
     private async Task<bool> GetAllFakeConversation()
     {
-        items = new List<Conversation>
+        conversationList = new List<Conversation>
         {
             new Conversation("test","Peer",null,"name test", Constant.defaultImgMale, true),
             new Conversation("2UHY3794","Peer",null,"name test 2", Constant.defaultImgMale, true),
@@ -158,7 +184,7 @@
         };
         return await Task.FromResult(true);
     }
-    // Task get conversation
+
     private async Task<bool> GetInputConversations()
     {
         SearchRequest searchRequest = new SearchRequest();
@@ -189,13 +215,13 @@
                 {
                     if (respond.Data != null)
                     {
-                        items = respond.Data;
+                        conversationList = respond.Data;
                         _loading = false;
                         base.OnAfterRender(false);
 
                         await JSRuntime.InvokeAsync<string>("console.log", "key search", searchText);
                         await JSRuntime.InvokeAsync<string>("console.log", "search res", respond.Data);
-                        await JSRuntime.InvokeAsync<string>("console.log", "search list", items);
+                        await JSRuntime.InvokeAsync<string>("console.log", "search list", conversationList);
 
                     }
                 }
@@ -212,11 +238,12 @@
         }
         return await Task.FromResult(true);
     }
-
+    // Task get conversation
     private async Task<bool> GetAllConversations()
     {
         bool success;
         string erroMessage;
+        _loading = true;
         try
         {
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
@@ -234,7 +261,8 @@
                 {
                     if (respond.Data != null)
                     {
-                        items = respond.Data;
+                        conversationList = respond.Data;
+                        _loading = false;
                     }
                 }
                 catch (Exception e)
@@ -251,16 +279,92 @@
         return await Task.FromResult(true);
     }
 
+    private async Task<bool> GetAllOtherUser()
+    {
+        _loading = true;
+        bool success;
+        string erroMessage;
+        try
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<User>>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        userList = respond.Data;
+                        _loading = false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        return await Task.FromResult(true);
+    }
+
+    private void GetList()
+    {
+        _loading = true;
+        foreach(var user in userList )
+        {
+            var userSearch = new SearchDTO
+                {
+                    Id = user.userName,
+                    Name = user.fullName,
+                    isConversation = false,
+                    TypeConversation = "Peer",
+                    Avatar = user.avatarUrl,
+                };
+            itemList.Add(userSearch);
+        }
+        foreach(var conversation in conversationList)
+        {
+            var conversationSearch = new SearchDTO
+                {
+                    Id = conversation.conversationId,
+                    Name = conversation.conversationName,
+                    isConversation = true,
+                    TypeConversation = conversation.conversationType,
+                    Avatar = conversation.conversationAvatar,
+                };
+            itemList.Add(conversationSearch);
+        }
+        _loading = false;
+    }
+
     private void OpenAddGroupDialog()
     {
         var options = new DialogOptions() { CloseOnEscapeKey = true, CloseButton = true};
         DialogService.Show<Dialog.Add.AddGroup>("Tạo nhóm", options);
     }
 
-    private async Task OnUserSelected(Conversation user)
+    private async Task OnConversationSelected(SearchDTO conversation)
     {
         /* Code của BC*/
-        _navigationManager.NavigateTo($"/chat/{user.conversationType}/{user.conversationId}");
+        _navigationManager.NavigateTo($"/chat/{conversation.TypeConversation}/{conversation.Id}");
+    }
+
+    private async Task OnUserSelected(SearchDTO user)
+    {
+        User selectedUser = await GetUserById(user.Id);
+        OpenOtherProfileDialog(selectedUser);
     }
 
     private void OpenAddFriendDialog()
@@ -268,4 +372,53 @@
         var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
         DialogService.Show<Dialog.Add.AddFriend>("Thêm bạn", options);
     }
+
+    private async Task<User> GetUserById(string userName)
+    {
+        bool success;
+        string erroMessage;
+        try
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/" + userName);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        return respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        return null; 
+    }
+    private void OpenOtherProfileDialog(User user)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var parameter = new DialogParameters { { "user", user } };
+        DialogService.Show<Dialog.Profile.DialogOtherProfile>("Thông tin tài khoản", parameter, options);
+        
+
+    }
+
 }
+
