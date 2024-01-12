@@ -243,19 +243,14 @@
 			InvokeAsync(StateHasChanged);
 		});
                                       
-                                      		MessageHubManager.HubConnection!.On<Conversation>("NewConversationReceived", newConversation =>
+        MessageHubManager.HubConnection!.On<Conversation>("NewConversationReceived", newConversation =>
 		{
 			Console.WriteLine("Page CHAT NewConversationReceived: " + newConversation.conversationId);
 			Chats.Insert(0, newConversation);
 			InvokeAsync(StateHasChanged);
 		});
 
-MessageHubManager.HubConnection!.On<RequestDTO>("FriendRequestReceived", request =>
-		{
-			Console.WriteLine("id send: " + request.UserId);
-			
-			InvokeAsync(StateHasChanged);
-		});
+
 	}
 
 	protected override async Task OnParametersSetAsync()
