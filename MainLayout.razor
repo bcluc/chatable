@@ -22,10 +22,16 @@
     <source src="assets/audio/nhac_chuong_do_choi_dien_thoai.mp3" type="audio/mp3" />
 </audio>
 
-
 <div class="sidebar">
     <div class="user">
-        <img src=" @(Constant.uriBaseUserAvt + currentUser.avatarUrl)" class="user_img" @onclick="OpenDialog" />
+        @if (String.IsNullOrEmpty(currentUser.avatarUrl))
+        {
+            <MudImage Src="@Constant.defaultImgMale" class="user_img" @onclick="OpenDialog"></MudImage>
+        }
+        else
+        {
+            <MudImage Src="@(Constant.uriBaseUserAvt + currentUser.avatarUrl)" class="user_img" @onclick="OpenDialog" />
+        }
         <p>@currentUser.fullName</p>
     </div>
     <ul>
@@ -122,10 +128,11 @@
 
         var dialog =  DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
         await dialog.Result;
-        Console.WriteLine(CurrentUser.currentUser.avatarUrl);
-        CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
-        StateHasChanged();
-
+        if (CurrentUser.currentUser.avatarUrl != null)
+        {
+            CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
+            StateHasChanged();
+        }
     }
 
 
