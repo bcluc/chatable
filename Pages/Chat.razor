@@ -58,23 +58,23 @@
 
 					@foreach (var chat in Chats)
 					{
-						bool isToday = chat.lastMessage.sentAt.Date == DateTime.Today.Date;
+						bool isToday = chat.lastMessage == null ? false : chat.lastMessage.sentAt.Date == DateTime.Today.Date;
 						string avatarUrl = (chat.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + chat.conversationAvatar;
 						<div class="coversation-container @(chat.IsSelected ? "user-select" : "user-unselect")"
 							 @onclick="() => OnUserSelected(chat)">
 
 							<img class="coversation-img mr-3" src="@avatarUrl" />
 							<div class="d-flex justify-start flex-column" style="flex: 1">
-								<div class="d-flex mb-1">
+								<div class="d-flex mb-1" style="max-width: 180px;">
 									<p class="coversation-name">@chat.conversationName</p>
 									<MudSpacer />
-									@if (chat.lastMessage.content != null)
+									@if (chat.lastMessage != null && chat.lastMessage.content != null)
 									{
 										<p style="color: #AAA; font-weight: 400">@(isToday ? chat.lastMessage.sentAt.ToShortTimeString() : chat.lastMessage.sentAt.ToShortDateString())</p>
 									}
 								</div>
 								<div class="d-flex coversation-last-message">
-									@if (chat.lastMessage.content != null)
+									@if (chat.lastMessage != null && chat.lastMessage.content != null)
 									{
 										<p class="last-msg" style="font-weight: @(chat.lastMessage.isSeen ? "normal" : "600"); color: @(chat.lastMessage.isSeen ? "gray" : "black")">
 											@((chat.lastMessage.senderId == CurrentUser.currentUser!.userName ? "Bạn: " : "") + chat.lastMessage.content)
@@ -87,7 +87,7 @@
 										</p>
 									}
 
-									@if (chat.lastMessage.unreadMsgCount > 0)
+									@if (chat.lastMessage != null && chat.lastMessage.unreadMsgCount > 0)
 									{
 										<MudSpacer />
 										<p class="ml-2 pa-1 unread-count">
@@ -133,6 +133,7 @@
 @implements IAsyncDisposable
 @inject CurrentUser CurrentUser
 @inject MessageHubManager MessageHubManager
+@inject ISnackbar Snackbar
 
 @code {
 
@@ -243,17 +244,22 @@
 			InvokeAsync(StateHasChanged);
 		});
                                       
-                                      		MessageHubManager.HubConnection!.On<Conversation>("NewConversationReceived", newConversation =>
+		MessageHubManager.HubConnection!.
+		On<Conversation>("NewConversationReceived", newConversation =>
 		{
-			Console.WriteLine("Page CHAT NewConversationReceived: " + newConversation.conversationId);
+			Console.WriteLine("Page CHAT NewConversationReceived: " + CurrentUser.currentUser.userName);
+			// Console.WriteLine("newConversation.ConversationId: " + newConversation.ConversationId);
+			// Console.WriteLine("newConversation.ConversationName: " + newConversation.ConversationName);
 			Chats.Insert(0, newConversation);
 			InvokeAsync(StateHasChanged);
 		});
 
-MessageHubManager.HubConnection!.On<RequestDTO>("FriendRequestReceived", request =>
+		MessageHubManager.HubConnection!.On<RequestDTO>("FriendRequestReceived", request =>
 		{
 			Console.WriteLine("id send: " + request.UserId);
-			
+			Snackbar.Add(
+				"Sale Table has changed", Severity.Success
+			);
 			InvokeAsync(StateHasChanged);
 		});
 	}

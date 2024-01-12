@@ -155,7 +155,7 @@
         // return chat room
         return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
-    
+
     private async Task OnUserSelected(UserDTO user)
     {
         if (user is null)
