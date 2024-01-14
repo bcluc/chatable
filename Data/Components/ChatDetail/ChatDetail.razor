@@ -161,7 +161,6 @@ Chi tiết chat gồm 3 phần
         <MudTextField Placeholder="Nhập tin nhắn" @bind-Value="_newMessage" Variant="Variant.Text" DisableUnderLine="true"></MudTextField>
         <button class="btn-send mx-4" @onclick="SendMessage">Gửi</button>
     </div>
-
 </div>
 
 <style>
@@ -173,7 +172,6 @@ Chi tiết chat gồm 3 phần
 @inject CurrentUser CurrentUser
 
 @code {
-
     /* Code của Lâm */
     [Parameter]
     public EventCallback BackToConversationList { get; set; }

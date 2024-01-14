@@ -1,6 +1,7 @@
 ﻿@layout EmptyLayout
 @page "/signup"
 @using System.ComponentModel.DataAnnotations
+@using Chatable.Data.Entitles
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Net.Http
 @using Newtonsoft.Json
@@ -184,6 +185,10 @@
         if (!isMale)
         {
             model.gender = "Nữ";
+        }
+        else
+        {
+            model.gender = "Nam";
         }
         try
         {

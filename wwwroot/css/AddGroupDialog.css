@@ -239,8 +239,9 @@ input[type=text] {
     font-family: SVN-Poppins;
     font-size: 16px;
     font-weight: 400;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .friend-container {
