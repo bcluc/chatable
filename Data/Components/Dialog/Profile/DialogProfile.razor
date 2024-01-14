@@ -31,7 +31,7 @@
             <div class="content" style="height: 420px; overflow-y: unset">
                 <div Class="photos">
                     <MudImage Src="@Constant.defaultBg" Alt="Ảnh nền" Height="150" Style="width: 100%; object-fit: cover;"></MudImage>
-                    <MudAvatar Style="height:74px; width:74px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
+                    <MudAvatar Style="height:90px; width:90px; border: 2px solid #fff; position: absolute; left: 50%; transform: translateX(-50%); margin-top: 110px;">
                     @if(currentUser.avatarUrl!= null)
                     {
                             <MudImage Src="@(Constant.uriBaseUserAvt +currentUser.avatarUrl)"></MudImage>
@@ -48,12 +48,12 @@
                             <MudIconButton HtmlTag="label"
                                            Color="Color.Info"
                                            Icon="@Icons.Material.Filled.PhotoCamera"
-                                           Style="position: absolute; width: 15px; height:12px; left: 55%; margin-top: 6px;"
+                                           Style="position: absolute; width: 15px; height:12px; left: 55%; margin-top: 16px;"
                                            for="@context.Id">
                             </MudIconButton>
                         </ButtonTemplate>
                     </MudFileUpload>
-                    <MudText style=" position: absolute;  font-family: SVN-Poppins;left: 50%; margin-top: 35px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</MudText>
+                    <MudText style=" position: absolute;  font-family: SVN-Poppins;left: 50%; margin-top: 45px; transform: translateX(-50%); font-size: 17px; font-weight: 500;">@currentUser.fullName</MudText>
 
 
                 </div>
