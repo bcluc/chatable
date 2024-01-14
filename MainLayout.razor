@@ -33,7 +33,7 @@
         {
             var currentIndex = i;
             <li class="@(currentPageIndex == i ? "current-page" : "")"
-            @onclick="() => changeCurrentPageIndex(currentIndex)">
+                @onclick="() => changeCurrentPageIndex(currentIndex)">
                 <a href="@menuItems[i].page">
                     <logo class="@menuItems[i].icon"></logo>
                     <p>@menuItems[i].title</p>
@@ -120,7 +120,7 @@
         var options = new DialogOptions { CloseButton = true, DisableBackdropClick = true };
         Console.WriteLine(CurrentUser.currentUser.avatarUrl);
 
-        var dialog =  DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
+        var dialog = DialogService.Show<Data.Components.Dialog.Profile.DialogProfile>("Thông tin cá nhân", options);
         await dialog.Result;
         Console.WriteLine(CurrentUser.currentUser.avatarUrl);
         CurrentUser.currentUser.avatarUrl += "?t=" + DateTime.UtcNow;
@@ -167,7 +167,7 @@
             Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
 
             Snackbar.Add(
-                request.Name + " đã gửi lời mời cho bạn! ", 
+                request.Name + " đã gửi lời mời cho bạn! ",
                 Severity.Info
             );
             InvokeAsync(StateHasChanged);
@@ -178,12 +178,14 @@
             //Console.WriteLine("id send: " + request.UserId);
             Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
 
-            Snackbar.Add(acceptReq.Name + " đã đồng ý lời mời của bạn!",
-            Severity.Info);
+            Snackbar.Add(
+                acceptReq.Name + " đã đồng ý lời mời của bạn!",
+                Severity.Info
+            );
             InvokeAsync(StateHasChanged);
-            });
+        });
         // Console.WriteLine($"messageHubConnection = {messageHubConnection.ConnectionId}");
-        }
+    }
 
     public async Task SetUpCallHub()
     {
@@ -197,7 +199,7 @@
 
         CallHubManager.HubConnection.On<string, PeerInfo, string, string>("inviteCall", (callerConnectionId, callerInfo, typeCall, roomId) =>
         {
-        // Console.WriteLine("CallHubManager.isIdle: " + CallHubManager.isIdle);
+            // Console.WriteLine("CallHubManager.isIdle: " + CallHubManager.isIdle);
             @* Console.WriteLine("Nhận cuộc gọi từ " + callerInfo.Name); *@
             if (CallHubManager.isIdle)
             {
