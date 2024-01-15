@@ -1,5 +1,9 @@
 ﻿@import url('Theme.css');
 
+*{
+    font-family: SVN-Poppins
+}
+
 .app-component-container {
     width: 421px;
     height: fit-content ;
@@ -52,6 +56,17 @@
     overflow: hidden;
     cursor: pointer;
 }
+.group-detail-name {
+    margin-left: 10px;
+    font-family: SVN-Poppins;
+    font-size: 18px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
 .app-component-container4 {
     flex: 0 0 auto;
     width: 100%;
@@ -98,6 +113,19 @@
     border-radius: 5%;
     font-family: SVN-Poppins;
 }
+.button-alert-leave-group {
+    border-width: 0px;
+    color: black;
+    background-color: #EBEDF0;
+    padding: 10px;
+    border-radius: 5%;
+    font-family: SVN-Poppins;
+}
+
+    .button-alert-leave-group:hover {
+        background-color: #D7D7D7;
+    }
+
 .app-component-button2 {
     margin-left: 10px;
     background-color: #abcdff;
@@ -114,7 +142,9 @@
     border-radius: 5%;
     font-family: SVN-Poppins;
 }
-
+    .app-component-button2-activate:hover {
+        background-color: #4CB9E7;
+    }
 .top_bar {
     display: flex;
     flex-direction: row;
@@ -243,7 +273,6 @@ input[type=text] {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
 .friend-container {
     background-color: white;
     padding: 12px;
@@ -256,7 +285,17 @@ input[type=text] {
     .friend-container:hover {
         background-color: #F4F5F7;
     }
+.coversation-last-message {
+    max-width: 220px;
+}
 
+.last-msg {
+    font-family: SVN-Poppins;
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
 .coversation-container-addGroup {
     display: flex;
     flex-direction: row;

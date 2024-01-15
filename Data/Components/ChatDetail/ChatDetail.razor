@@ -58,12 +58,21 @@ Chi tiết chat gồm 3 phần
             <div style="height: 50px"></div>
         }
         <MudSpacer />
+        @if (SelectedConversation != null)
+            {@if (SelectedConversation.conversationType.Equals("Group"))
+        {
+            <MudIconButton Class="mr-2" OnClick=@(() => Call("video")) Style="border-radius: 8px">
+                <i class="fa-solid fa-user-plus fa-xl" style="color: #0091ff;"></i>
+            </MudIconButton>
+        }
+            }
         <MudIconButton Class="mr-2" OnClick=@(() => Call("voice")) Style="border-radius: 8px">
             <i class="fa-solid fa-phone fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
         <MudIconButton OnClick=@(() => Call("video")) Style="border-radius: 8px">
             <i class="fa-solid fa-video fa-xl" style="color: #0091ff;"></i>
         </MudIconButton>
+        
     </div>
 
     <MudDivider></MudDivider>
@@ -182,6 +191,7 @@ Chi tiết chat gồm 3 phần
     /* Code của Cường */
     private User currentUser;
     private User selectedUser;
+    private GroupDTO selectedGroup;
 
     [Parameter]
     public Conversation? SelectedConversation { get; set; } 
@@ -501,6 +511,49 @@ Chi tiết chat gồm 3 phần
         return await Task.FromResult(true);
     }
 
+    private async Task<bool> GetGroupById(string groupID)
+    {
+        bool success;
+        string erroMessage;
+        try
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Group/" + groupID);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<GroupDTO>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        selectedGroup = respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        finally
+        {
+            permitScroll = "smooth";
+        }
+        return await Task.FromResult(true);
+    }
+
     private async Task SendMessage()
     {
         if (!string.IsNullOrWhiteSpace(_newMessage))
@@ -650,6 +703,13 @@ Chi tiết chat gồm 3 phần
             var parameter = new DialogParameters { { "user", selectedUser } };
             DialogService.Show<Dialog.Profile.DialogOtherProfile>("Thông tin tài khoản", parameter, options);
         }
-        
+        else
+        {
+            await GetGroupById(SelectedConversation.conversationId);
+            var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+            var parameter = new DialogParameters { { "group", selectedGroup } };
+            DialogService.Show<Dialog.Profile.DialogGroupProfile>("Thông tin nhóm", parameter, options);
+        }
+
     }
 }

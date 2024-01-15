@@ -1,0 +1,356 @@
+﻿@using Chatable.DI
+@using Chatable.Data.Components;
+@using System.ComponentModel.DataAnnotations;
+@using Chatable.Data.Components.List
+@using Chatable.Data.Entitles.DTO;
+@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles.Request;
+@using Chatable.Data.Entitles.Respond;
+@using Chatable.Data.Entitles;
+@using Microsoft.AspNetCore.Components.Forms;
+@using System.Diagnostics;
+@using System.Net.Http
+@using Newtonsoft.Json
+@using System.Net.Http.Headers;
+
+@inject IJSRuntime jsRuntime
+@inject IDialogService DialogService
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+
+<link rel="stylesheet" href="/css/AddGroupDialog.css">
+
+@if (_processing)
+{
+    <div class="d-flex justify-center align-center" style="height: 30vh;width: 30vh">
+        <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+    </div>
+}
+else
+{
+<MudDialog class="custom-dialog-content" Style="min-height:700px" ClassActions="action-addGroup">
+
+    <DialogContent>
+        <div>
+            <div class="app-component-container">
+                <div class="app-component-container1">
+                    <div class="app-component-container3" style="align-items:center">
+                        
+                        <MudAvatar Class="group-img">
+                            <MudImage Src="@(Constant.uriBaseGroupAvt + group.Avatar)"></MudImage>
+                        </MudAvatar>
+                        <MudText Class="group-detail-name">
+                            @group.GroupName
+                        </MudText>
+                    </div>
+                </div>
+                <MudDivider Style="margin-top:10px; margin-bottom:8px"></MudDivider>
+                <div class="app-component-container2" style="margin-top:10px">
+                    <MudText Class="user-name"> Danh sách thành viên</MudText>
+                    @foreach (var item in group.ListMember)
+                    {
+                        string name = item.FullName;
+                        @if (item.UserName == group.AdminId)
+                        {
+                            name += " (ADMIN)";
+                        }
+                        else if (item.UserName == currentUser.userName)
+                        {
+                            name += " (Bạn)";
+                        }
+                        <div class="coversation-container-addGroup"
+                            @onclick="() =>OnUserSelected(item.UserName)">
+                            <MudAvatar Class="coversation-img mr-3">
+                                <MudImage Src="@item.Avatar"></MudImage>
+                            </MudAvatar>
+                            <div class="d-flex justify-start flex-column" style="flex: 1">
+                                <div class="d-flex mb-1">
+                                    <p class="coversation-name">@name</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+
+
+
+                    @* <FriendList Loading="_loadingList" Chats="_friendList" OnUserSelected="OnUserSelected" /> *@
+
+
+
+
+                </div>
+
+
+            </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        @* <div class="app-component-container4">
+            <span class="app-component-text3">Đã chọn</span>
+            <span class="app-component-text4"> /100</span>
+        </div> *@
+        <div class="app-component-container5" style="height:auto; margin-bottom:10px">
+                <button type="button" class="button-alert-leave-group" @onclick="() => LeaveGroup(group.GroupId)">Rời nhóm</button>
+            <button type="button" class="button app-component-button2-activate" @onclick="() => {}">
+                Thêm thành viên
+            </button>
+        </div>
+    </DialogActions>
+</MudDialog>
+}
+
+@inject CurrentUser CurrentUser
+
+@code{
+    public class AddMemberRequest
+    {
+        public string GroupId { get; set; }
+        public List<string> MemberList { get; set; }
+    }
+}
+
+@code {
+    // test
+    private User currentUser;
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    // Truyen vao nguoi dung
+    [Parameter]
+    public GroupDTO group { get; set; }
+
+    public List<UserDTO> _friendList = new List<UserDTO>();
+
+    // variable
+    bool success;
+    private bool isAdmin = false;
+    private bool isDisable = true;
+    private UserDTO selectedUser;
+    private string searchText = "";
+    private bool _loadingList = false;
+    private bool _processing = false;
+    string erroMessage;
+    List<IBrowserFile> selectedFiles = new List<IBrowserFile>();
+
+
+    private List<UserDTO> _selectedUsers = new List<UserDTO>();
+
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    // reset list khi mở dialog
+    // có thể không cần khi lấy được list từ server
+    protected override void OnInitialized()
+    {
+        currentUser = CurrentUser.currentUser!;
+        isAdmin = (group.AdminId == currentUser.userName);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await GetFriendList();
+    }
+    private async Task<bool> GetFriendList()
+    {
+        _processing = true;
+        bool success;
+        string erroMessage;
+        try
+        {
+            _loadingList = true;
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Friend");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<UserDTO>>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        _friendList = respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        finally
+        {
+            _processing = false;
+        }
+        return await Task.FromResult(true);
+    }
+    private async Task OnUserSelected(string userName)
+    {
+        if (userName != currentUser.userName)
+        {
+            User selectedUser = await GetUserById(userName);
+            OpenOtherProfileDialog(selectedUser);
+        }
+    }
+
+    private async Task<bool> AddNewMember(List<string> memberList)
+    {
+        //await jsRuntime.InvokeAsync<string>("console.log","This is group member", memberList.ToString());
+        AddMemberRequest request = new AddMemberRequest
+            {
+                GroupId = group.GroupId,
+                MemberList = memberList,
+            };
+
+        // with the server
+        try
+        {
+            string groupInitialize = JsonConvert.SerializeObject(request);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Group/Member");
+            httpRequestMessage.Content = new StringContent(groupInitialize);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                // var user = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+                success = true;
+            }
+            else
+            {
+                success = false;
+                string resBody = await response.Content.ReadAsStringAsync();
+                dynamic result = JsonConvert.DeserializeObject(resBody);
+                erroMessage = result.message;
+            }
+            _processing = false;
+
+            if (success)
+            {
+                Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+
+        //await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
+        Close();
+        return await Task.FromResult(true);
+    }
+
+    private async Task<User> GetUserById(string userName)
+    {
+        bool success;
+        string erroMessage;
+        try
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "User/" + userName);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<User>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        return respond.Data;
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        return null;
+    }
+
+    private async Task<bool> LeaveGroup(string groupID)
+    {
+        // with the server
+        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Bạn có muốn rời khỏi nhóm?");
+        if (confirmed)
+        {
+            // Delete!
+            try
+            {
+                string groupInitialize = JsonConvert.SerializeObject(groupID);
+                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+                httpRequestMessage.Method = new HttpMethod("DELETE");
+                httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Group/" + groupID + "/Leave");
+                httpRequestMessage.Content = new StringContent(groupInitialize);
+                httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+                httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                var response = await _http.SendAsync(httpRequestMessage);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    // var user = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+                    success = true;
+                }
+                else
+                {
+                    success = false;
+                    string resBody = await response.Content.ReadAsStringAsync();
+                    dynamic result = JsonConvert.DeserializeObject(resBody);
+                    erroMessage = result.message;
+                }
+                _processing = false;
+
+                if (success)
+                {
+                    Close();
+                    _navigationManager.NavigateTo("chat");
+                }
+            }
+            catch (Exception ex)
+            {
+                success = false;
+                erroMessage = ex.Message;
+            }
+        }
+        //await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
+        return await Task.FromResult(true);
+    }
+
+    private void OpenOtherProfileDialog(User user)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var parameter = new DialogParameters { { "user", user } };
+        DialogService.Show<Dialog.Profile.DialogOtherProfile>("Thông tin tài khoản", parameter, options);
+
+
+    }
+}
