@@ -4,6 +4,7 @@
 @using Chatable.Data.Entitles.Model;
 @using System.Net.Http.Headers;
 @using Chatable.Data.Entitles.Respond;
+@using Microsoft.AspNetCore.SignalR.Client
 @using Newtonsoft.Json;
 
 @inject HttpClient _http
@@ -29,15 +30,11 @@
             {
             <li class="list-group-item " @onclick="() => HandleUserClick(request)">
                 <div class="friend-request-card">
-                    <div class="profile-picture">
-                            <MudAvatar>
-                                <MudImage Src=@(Constant.uriBaseUserAvt + request.avatar)></MudImage>
-                            </MudAvatar>
-@*                             <img src=@(Constant.uriBaseUserAvt + request.avatar)>
- *@                        </div>
-                    <div class="user-details">
-                            <h4>@request.name</h4>
-                    </div>
+                    <img class="mr-3" style="height: 50px; width: 50px; border-radius: 50%" src="@(Constant.uriBaseUserAvt + request.avatar)">
+                    <p style="font-weight: 500; font-size: 16px">
+                        @request.name
+                    </p>
+                    <MudSpacer></MudSpacer>
                     <div class="friend-request-actions">
                             <button class="button-primary" @onclick="() => HandleAccept(request)">Chấp nhận</button>
                             <button class="button-secondary" @onclick="() => HandleDecline(request)">Từ chối</button>
@@ -53,14 +50,11 @@
             {
                 <li class="list-group-item " @onclick="() => HandleUserClick(request)">
                     <div class="friend-request-card">
-                        <div class="profile-picture">
-                            <MudAvatar>
-                                <MudImage Src=@(Constant.uriBaseUserAvt + request.avatar)></MudImage>
-                            </MudAvatar>
-                        </div>
-                        <div class="user-details">
-                            <h4>@request.name</h4>
-                        </div>
+                        <img class="mr-3" style="height: 50px; width: 50px; border-radius: 50%" src="@(Constant.uriBaseUserAvt + request.avatar)">
+                        <p style="font-weight: 500; font-size: 16px">
+                            @request.name
+                        </p>
+                        <MudSpacer></MudSpacer>
                         <div class="friend-request-actions" style="justify-content:flex-end">
                             <button class="button-secondary" @onclick="() => HandleCancel(request)">Hủy lời mời</button>
                         </div>
@@ -72,6 +66,7 @@
 </div>
 
 @inject CurrentUser CurrentUser
+@inject MessageHubManager MessageHubManager
 
 @code {
     [Parameter]
@@ -89,6 +84,18 @@
 
     private int _countReceived = 0;
     private int _countSent = 0;
+
+    protected override void OnInitialized()
+    {
+        MessageHubManager.HubConnection!.On<RequestDTO>("FriendRequestReceived", request =>
+        {
+            Console.WriteLine("FriendRequestReceived: " + request.Name + " " + request.SentAt);
+            RequestList.Add(
+                new FriendRequestDTO(request.UserId, request.Status, request.SentAt, request.Avatar, request.Name)
+            );
+            InvokeAsync(StateHasChanged);
+        });
+    }
 
     private async Task AcceptRequest(string senderID)
     {
