@@ -92,7 +92,7 @@ else
         </div> *@
         <div class="app-component-container5" style="height:auto; margin-bottom:10px">
                 <button type="button" class="button-alert-leave-group" @onclick="() => LeaveGroup(group.GroupId)">Rời nhóm</button>
-            <button type="button" class="button app-component-button2-activate" @onclick="() => {}">
+                <button type="button" class="button app-component-button2-activate" @onclick="() => OpenAddMemberDialog()">
                 Thêm thành viên
             </button>
         </div>
@@ -144,6 +144,12 @@ else
     {
         currentUser = CurrentUser.currentUser!;
         isAdmin = (group.AdminId == currentUser.userName);
+    }
+
+    void DoneTask()
+    {
+        StateHasChanged();
+        Close();
     }
 
     protected override async Task OnInitializedAsync()
@@ -203,57 +209,12 @@ else
         }
     }
 
-    private async Task<bool> AddNewMember(List<string> memberList)
+    private void OpenAddMemberDialog()
     {
-        //await jsRuntime.InvokeAsync<string>("console.log","This is group member", memberList.ToString());
-        AddMemberRequest request = new AddMemberRequest
-            {
-                GroupId = group.GroupId,
-                MemberList = memberList,
-            };
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var parameter = new DialogParameters { { "group", group } };
+        DialogService.Show<Dialog.Profile.DialogAddMemberInGroup>("Thêm thành viên", parameter, options);
 
-        // with the server
-        try
-        {
-            string groupInitialize = JsonConvert.SerializeObject(request);
-            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-            httpRequestMessage.Method = new HttpMethod("POST");
-            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Group/Member");
-            httpRequestMessage.Content = new StringContent(groupInitialize);
-            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
-
-            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-            var response = await _http.SendAsync(httpRequestMessage);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                // var user = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
-                success = true;
-            }
-            else
-            {
-                success = false;
-                string resBody = await response.Content.ReadAsStringAsync();
-                dynamic result = JsonConvert.DeserializeObject(resBody);
-                erroMessage = result.message;
-            }
-            _processing = false;
-
-            if (success)
-            {
-                Close();
-            }
-        }
-        catch (Exception ex)
-        {
-            success = false;
-            erroMessage = ex.Message;
-        }
-
-        //await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
-        Close();
-        return await Task.FromResult(true);
     }
 
     private async Task<User> GetUserById(string userName)
@@ -332,7 +293,7 @@ else
                 if (success)
                 {
                     Close();
-                    _navigationManager.NavigateTo("chat");
+                    _navigationManager.NavigateTo("", forceLoad: true);
                 }
             }
             catch (Exception ex)

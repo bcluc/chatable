@@ -311,12 +311,15 @@ input[type=text] {
     .coversation-container-addGroup:hover {
         background-color: #F4F5F7;
     }
-
     .coversation-container-addGroup.selected {
         background-color: #0091ff;
         color: white;
-        
     }
+    .coversation-container-addGroup.disable {
+        background-color: #dddddd;
+    }
+    
+
 .action-addGroup {
     position: fixed;
     bottom: 10px;
