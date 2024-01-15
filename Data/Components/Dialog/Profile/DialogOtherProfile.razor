@@ -185,6 +185,7 @@ else
 
     private async Task SendRequest(FriendRequest friendRequest)
     {
+        statusResponse = new StatusResponse();
         try
         {
             string requestInitialize = JsonConvert.SerializeObject(friendRequest);

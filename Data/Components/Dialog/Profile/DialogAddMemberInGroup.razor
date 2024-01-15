@@ -1,0 +1,304 @@
+﻿@using Chatable.DI
+@using Chatable.Data.Components;
+@using System.ComponentModel.DataAnnotations;
+@using Chatable.Data.Components.List
+@using Chatable.Data.Entitles.DTO;
+@using Chatable.Data.Entitles.Model;
+@using Chatable.Data.Entitles.Request;
+@using Chatable.Data.Entitles.Respond;
+@using Chatable.Data.Entitles;
+@using Microsoft.AspNetCore.Components.Forms;
+@using System.Diagnostics;
+@using System.Net.Http
+@using Newtonsoft.Json
+@using System.Net.Http.Headers;
+
+@inject IJSRuntime jsRuntime
+@inject IDialogService DialogService
+@inject HttpClient _http
+@inject NavigationManager _navigationManager
+
+<link rel="stylesheet" href="/css/AddGroupDialog.css">
+
+<MudDialog class="custom-dialog-content" Style="min-height:700px" ClassActions="action-addGroup">
+
+    <DialogContent>
+        <div>
+            <div class="app-component-container">
+               
+                <div class="app-component-container2" style="margin-top:10px">
+                    <input type="text" id="search-input" placeholder="Tìm kiếm" @bind-value="searchText" @bind-value:event="oninput">
+
+                    @* <MudAutocomplete Placeholder="Tìm kiếm" T="UserDTO" @bind-Value="selectedUser" SearchFunc="@Search2"
+                    Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" ShowProgressIndicator="true"
+                    ToStringFunc="@(e=> e==null?null : $"{e.FullName}")">
+                    <ProgressIndicatorTemplate>
+                    <MudProgressLinear Size="Size.Small" Indeterminate="true" Color="Color.Primary" />
+                    </ProgressIndicatorTemplate>
+
+                    <ItemTemplate>
+                    <div class="list-group-item">
+                    <div class="d-flex align-items-center" style="margin-left:0px; border-radius:15px">
+                    <MudAvatar>
+                    <MudImage Src=@((context.conversationType == "Peer" ? Constant.uriBaseUserAvt : Constant.uriBaseGroupAvt) + context.conversationAvatar)></MudImage>
+                    </MudAvatar>
+                    <h4 class="user-name">@context.conversationName</h4>
+                    </div>
+                    </div>
+                    </ItemTemplate>
+                    </MudAutocomplete> *@
+
+                    @foreach (var item in _addMemberList)
+                    {
+                        if (item.UserProfile.FullName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            string avatarUrl = Constant.uriBaseUserAvt + item.UserProfile.AvatarUrl;
+                            <div class="coversation-container-addGroup @(item.UserProfile.IsSelected ? "selected" : "") @(item.isMember ? "disable":"")" 
+                            @onclick="() => OnUserSelected(item)">
+                                <img class="coversation-img mr-3" src="@avatarUrl" />
+                                <div class="d-flex justify-start flex-column" style="flex: 1">
+                                    <div class="d-flex mb-1">
+                                        <p class="coversation-name">@item.UserProfile.FullName</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+
+
+                    @* <FriendList Loading="_loadingList" Chats="_friendList" OnUserSelected="OnUserSelected" /> *@
+
+
+
+
+                </div>
+
+
+            </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <div class="app-component-container4">
+            <span class="app-component-text3">Đã chọn</span>
+            <span class="app-component-text4">@count /100</span>
+        </div>
+        <div class="app-component-container5" style="height:auto; margin-bottom:10px">
+            <button type="button" class="app-component-button1 button" @onclick="() => Close()">Hủy</button>
+            <button type="button" class="button app-component-button2-activate"  @onclick="() => AddNewMember(_selectedUsers)">
+                Thêm
+            </button>
+        </div>
+    </DialogActions>
+</MudDialog>
+
+@inject CurrentUser CurrentUser
+
+@code {
+    public class AddMemberRequest
+    {
+        public string GroupId { get; set; }
+        public List<string> MemberList { get; set; }
+    }
+    public class NewMember
+    {
+        public UserDTO UserProfile { get; set; }
+        public bool isMember { get; set; } = false;
+    }
+}
+
+@code {
+    [Parameter]
+    public GroupDTO group { get; set; }
+
+    // test
+    private User currentUser;
+    public List<UserDTO> _friendList = new List<UserDTO>();
+    public List<NewMember> _addMemberList = new List<NewMember>();
+
+    // variable
+    bool success;
+    private string value2;
+    private int count = 0;
+    private bool isDisable = true;
+    private UserDTO selectedUser;
+    private string searchText = "";
+    private bool _loadingList = false;
+    private bool _processing = false;
+    string erroMessage;
+    List<IBrowserFile> selectedFiles = new List<IBrowserFile>();
+
+
+    private List<UserDTO> _selectedUsers = new List<UserDTO>();
+
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+
+    // reset list khi mở dialog
+    // có thể không cần khi lấy được list từ server
+    protected override void OnInitialized()
+    {
+        currentUser = CurrentUser.currentUser!;
+        count = group.ListMember.Count();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetFriendList();
+    }
+
+    private void GetNewMemberList()
+    {
+        foreach (UserDTO user in _friendList)
+        {
+            NewMember member = new NewMember
+                {
+                    UserProfile = user,
+                    isMember = group.ListMember.Any(item => item.UserName == user.UserName)
+
+                };
+            _addMemberList.Add(member);
+        }
+    }
+
+    private async Task<bool> GetFriendList()
+    {
+        bool success;
+        string erroMessage;
+        try
+        {
+            _loadingList = true;
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Friend");
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<List<UserDTO>>>(responseContent);
+                success = true;
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        _friendList = respond.Data;
+                        GetNewMemberList();
+                    }
+                }
+                catch (Exception e)
+                {
+                    erroMessage = e.Message;
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+        finally
+        {
+            _loadingList = false;
+        }
+        return await Task.FromResult(true);
+    }
+    private async Task OnUserSelected(NewMember member)
+    {
+        if (member.isMember)
+        {
+            return;    
+        }
+        UserDTO user = member.UserProfile;
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        var chatUser = _friendList.FirstOrDefault(c => c.UserName == user.UserName);
+
+        if (chatUser is null)
+        {
+            user.IsSelected = true;
+            _friendList.Add(user);
+        }
+        else
+        {
+            if (chatUser.IsSelected == true)
+            {
+                chatUser.IsSelected = false;
+                var itemToRemove = _selectedUsers.SingleOrDefault(r => r.UserName == chatUser.UserName);
+                if (itemToRemove != null)
+                    _selectedUsers.Remove(itemToRemove);
+            }
+            else
+            {
+                chatUser.IsSelected = true;
+                _selectedUsers.Add(chatUser);
+            }
+        }
+        count = _selectedUsers.Count + group.ListMember.Count();
+        if (count > 1) isDisable = false;
+        else isDisable = true;
+    }
+
+    private async Task<bool> AddNewMember(List<UserDTO> users)
+    {
+        var memberList = users.Select(l => l.UserName).ToList();
+        AddMemberRequest request = new AddMemberRequest
+            {
+                GroupId = group.GroupId,
+                MemberList = memberList,
+            };
+
+        // with the server
+        try
+        {
+            string groupInitialize = JsonConvert.SerializeObject(request);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("POST");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Group/Member");
+            httpRequestMessage.Content = new StringContent(groupInitialize);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                // var user = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+                success = true;
+            }
+            else
+            {
+                success = false;
+                string resBody = await response.Content.ReadAsStringAsync();
+                dynamic result = JsonConvert.DeserializeObject(resBody);
+                erroMessage = result.message;
+            }
+            _processing = false;
+
+            if (success)
+            {
+                Close();
+                _navigationManager.NavigateTo("", forceLoad: true);
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            erroMessage = ex.Message;
+        }
+
+        //await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
+        Close();
+        return await Task.FromResult(true);
+    }
+
+}
