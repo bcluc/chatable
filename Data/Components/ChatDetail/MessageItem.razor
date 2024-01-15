@@ -5,8 +5,9 @@
 @using System.Net.Http.Headers
 @using Chatable.Data.Entitles.Model
 @using Chatable.Data.Entitles.Respond
+
 <li class="d-flex align-center @cls @(IsFirstMsg ? "mt-3" : "")">
-    @if (isMyMessage)
+    @if (isMyMessage && Msg.MessageType != "missingCall")
     {
         <MudIconButton OnClick="() => ForwardMsg(Msg.MessageType)" Class="forward mr-2" Style="border-radius: 8px">
             <i class="fa-solid fa-share fa-xl" style="color: #0091ff;"></i>
@@ -30,68 +31,119 @@
     }
 
     <div class="single-msg @(isMyMessage ? "me" : "other") @(Msg.MessageType)-msg @(Msg.Reactions != null && Msg.Reactions.Count > 0 ? "has-reaction" : "")"
-         style="@(!isMyMessage && !IsFirstMsg ? "margin-left: 62px" : ""); position: relative">
-        <p>
-            @if (!isMyMessage && IsFirstMsg && ConversationType == "Group")
-            {
-                <span class="mb-2" style="font-size: 13px; color: gray">@Msg.SenderName</span>
+         style="@(!isMyMessage && !IsFirstMsg ? "margin-left: 62px" : ""); position: relative; @(Msg.MessageType == "missingCall" ? "background-color: white" : "")">
+        @if (Msg.MessageType != "file" && Msg.MessageType != "missingCall")
+        {
+            <p>
+                @if (!isMyMessage && IsFirstMsg && ConversationType == "Group")
+                {
+                    <span class="mb-2" style="font-size: 13px; color: gray">@Msg.SenderName</span>
+                    <br />
+                }
+                @if (Msg.MessageType == "text")
+                {
+                    @Msg.Content
+                }
+                @if (Msg.MessageType == "image")
+                {
+                    <MudImage Src="@Msg.Content" Fluid="true" Class="rounded-lg" />
+                }
+                @if (Msg.MessageType == "video")
+                {
+                    <video src="@Msg.Content" controls
+                           class="rounded-lg" style="max-width: 100%" />
+                }
                 <br />
-            }
-            @if (Msg.MessageType == "text")
-            {
-                @Msg.Content
-            }
-            @if (Msg.MessageType == "image")
-            {
-                <MudImage Src="@Msg.Content" Fluid="true" Class="rounded-lg" />
-            }
-            @if (Msg.MessageType == "video")
-            {
-                <video src="@Msg.Content" controls
-                       class="rounded-lg" style="max-width: 100%" />
-            }
-            <br />
-            <small class="msg-dt" style="color: @(isMyMessage ? "while" : "gray")">
-                @if (isToday || (IsSameDateWithPreMsg))
-                {
-                    <span>@Msg.SentAt.ToShortTimeString()</span>
-                }
-                else
-                {
-                    <span>@Msg.SentAt.ToShortDateString() | @Msg.SentAt.ToShortTimeString()</span>
-                }
-            </small>
-
-            @if (Msg.Reactions != null && Msg.Reactions.Count > 0)
-            {
-                // Console.WriteLine("Msg.Reactions.Count: " + Msg.Reactions.Count);
-                <div class="d-flex justify-center align-center reactions"
-                     @onclick="OpenDetailReactionDialog">
-                    @{
-                        HashSet<int> typeReactionSet = new HashSet<int>(Msg.Reactions.Select(r => r.Type));
-                        foreach (int typeReaction in typeReactionSet)
-                        {
-                            var reaction = Utils.MapToIcon(typeReaction);
-                            <i class="@reaction.icon mx-1 reaction"
-                               style="color: @reaction.color">
-                            </i>
-                        }
-                    }
-                    @if (@Msg.Reactions.Count > 1) 
+                <small class="msg-dt" style="color: @(isMyMessage ? "while" : "gray")">
+                    @if (isToday || (IsSameDateWithPreMsg))
                     {
-                        <p class="mx-1" style="color: black; font-family: Arial; font-size: 14px; font-weight: bold">
-                            @Msg.Reactions.Count
-                        </p>
+                        <span>@Msg.SentAt.ToShortTimeString()</span>
                     }
+                    else
+                    {
+                        <span>@Msg.SentAt.ToShortDateString() | @Msg.SentAt.ToShortTimeString()</span>
+                    }
+                </small>
+
+                @if (Msg.Reactions != null && Msg.Reactions.Count > 0)
+                {
+                    // Console.WriteLine("Msg.Reactions.Count: " + Msg.Reactions.Count);
+                    <div class="d-flex justify-center align-center reactions"
+                         @onclick="OpenDetailReactionDialog">
+                        @{
+                            HashSet<int> typeReactionSet = new HashSet<int>(Msg.Reactions.Select(r => r.Type));
+                            foreach (int typeReaction in typeReactionSet)
+                            {
+                                var reaction = Utils.MapToIcon(typeReaction);
+                                <i class="@reaction.icon mx-1 reaction"
+                                   style="color: @reaction.color">
+                                </i>
+                            }
+                        }
+                        @if (@Msg.Reactions.Count > 1)
+                        {
+                            <p class="mx-1" style="color: black; font-family: Arial; font-size: 14px; font-weight: bold">
+                                @Msg.Reactions.Count
+                            </p>
+                        }
+
+                    </div>
+                }
+
+            </p>
+        }
+        @if (Msg.MessageType == "missingCall")
+        {
+            if (isMyMessage)
+            {
+                <div class="d-flex justify-center align-center" style="cursor: pointer" @onclick="InvokeCallMethod">
+                    <div class="d-flex justify-center align-center pa-3 mr-2" style="background-color: red; border-radius: 50%" >
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#FFF" d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z" /></svg>
+                    </div>
+                    <div class="d-flex flex-column justify-start">
+                        <p style="font-weight: 600; color: red">Cuộc gọi nhỡ</p>
+                        <p style="color: gray">Nhấn để gọi lại</p>
+                    </div>
 
                 </div>
             }
-
-        </p>
-
+            else
+            {
+                <div class="d-flex justify-center align-center" style="cursor: pointer">
+                    <div class="d-flex justify-center align-center pa-3 mr-2" style="background-color: red; border-radius: 50%" @onclick="InvokeCallMethod">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#FFF" d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z" /></svg>
+                    </div>
+                    <div class="d-flex flex-column justify-start">
+                        <p style="font-weight: 600; color: red">Cuộc gọi nhỡ</p>
+                        <p style="color: gray">Nhấn để gọi lại</p>
+                    </div>
+                    
+                </div>
+                
+            }
+        }
+        @if (Msg.MessageType == "file")
+        {
+            <div class="d-flex justify-center align-center">
+                <i class="fa-solid fa-file fa-2xl mr-2"></i>
+                <div class="d-flex flex-column">
+                    <p>@GetFileName(Msg.Content)</p>
+                    <small class="msg-dt" style="color: @(isMyMessage ? "while" : "gray")">
+                        @if (isToday || (IsSameDateWithPreMsg))
+                        {
+                            <span>@Msg.SentAt.ToShortTimeString()</span>
+                        }
+                        else
+                        {
+                            <span>@Msg.SentAt.ToShortDateString() | @Msg.SentAt.ToShortTimeString()</span>
+                        }
+                    </small>
+                </div>
+            </div>
+        }
     </div>
 
-    @if (!isMyMessage)
+    @if (!isMyMessage && Msg.MessageType != "missingCall")
     {
         <MudIconButton OnClick="() => ForwardMsg(Msg.MessageType)" Class="forward ml-2" Style="border-radius: 8px">
             <i class="fa-solid fa-share fa-xl" style="color: #0091ff;"></i>
@@ -143,6 +195,9 @@
 
     [Parameter]
     public EventCallback<Dictionary<String, Object>> UpdateUIChat { get; set; }
+
+    [Parameter]
+    public Func<string, Task> OnCallMethod { get; set; }
 
     public bool isMyMessage;
     public bool isToday;
@@ -247,6 +302,22 @@
         keyValues.Add("ReactionMessages", Msg.Reactions);
 
         dialogReference = DialogService.Show<DetailReactionDialog>("", keyValues, options);
+    }
+
+    private async Task InvokeCallMethod()
+    {
+        await OnCallMethod?.Invoke("voice");
+    }
+
+    private string GetFileName(string url)
+    {
+        if (url != null)
+        {
+            int lastSlashIndex = url.LastIndexOf('/');
+            string avatarFileName = url.Substring(lastSlashIndex + 1);
+            return avatarFileName;
+        }
+        return null;
     }
 }
 

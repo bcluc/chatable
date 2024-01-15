@@ -202,7 +202,7 @@ else
 
     public bool isVideoOn;
 
-    private int countdownSeconds = 45;
+    private int countdownSeconds = 10;
 
     private Timer? timer;
 
@@ -471,7 +471,6 @@ else
         return new List<string>();
     }
 
-
     private void Countdown(object? state)
     {
         countdownSeconds--;
@@ -515,6 +514,10 @@ else
             // Console.WriteLine("SendMissingCallMessageTo");
             await hubCallConnection!.SendAsync("SendMissingCallMessageTo", remoteId, peerId);
         }
+
+        // Gửi thông báo đến người thực hiện cuộc gọi
+        // Để bên UI của người gọi bắt được sự kiện có cuộc gọi nhỡ
+        await hubCallConnection!.SendAsync("SendMissingCallMessageTo", peerId, peerId);
 
         await JSRuntime.InvokeVoidAsync("tatNhacChuong");
     }
