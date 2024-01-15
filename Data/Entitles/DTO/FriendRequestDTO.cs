@@ -13,6 +13,8 @@ namespace Chatable.Data.Entitles.DTO
         public string status { get; set; }
         public string avatar {  get; set; }
 
+        public FriendRequestDTO() { }
+
         public FriendRequestDTO(string userId, string status, string sendAt, string avatar, string name)
         {
             this.userId = userId;

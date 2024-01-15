@@ -255,8 +255,8 @@ else
                     if (respond.Data != null)
                     {
                         _requestList = respond.Data;
-                        await JSRuntime.InvokeAsync<string>("console.log", "getfriendreq list", _requestList);
-                        await JSRuntime.InvokeAsync<string>("console.log", "getfriendreq data", respond.Data);
+                        // await JSRuntime.InvokeAsync<string>("console.log", "getfriendreq list", _requestList);
+                        // await JSRuntime.InvokeAsync<string>("console.log", "getfriendreq data", respond.Data);
                     }
                 }
                 catch (Exception e)

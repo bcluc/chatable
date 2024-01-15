@@ -245,14 +245,14 @@
 		});
                                       
 
-    MessageHubManager.HubConnection!.On<Conversation>("NewConversationReceived", newConversation =>
-	{
-		Console.WriteLine("Page CHAT NewConversationReceived: " + CurrentUser.currentUser.userName);
-		// Console.WriteLine("newConversation.ConversationId: " + newConversation.ConversationId);
-		// Console.WriteLine("newConversation.ConversationName: " + newConversation.ConversationName);
-		Chats.Insert(0, newConversation);
-		InvokeAsync(StateHasChanged);
-	});
+		MessageHubManager.HubConnection!.On<Conversation>("NewConversationReceived", newConversation =>
+		{
+			Console.WriteLine("Page CHAT NewConversationReceived: " + CurrentUser.currentUser.userName);
+			Console.WriteLine("newConversation.ConversationId: " + newConversation.conversationId);
+			Console.WriteLine("newConversation.ConversationName: " + newConversation.conversationName);
+			Chats.Insert(0, newConversation);
+			InvokeAsync(StateHasChanged);
+		});
 
 	}
 

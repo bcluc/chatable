@@ -81,8 +81,10 @@
 
 .sidebar .user_img {
     margin: 30px 10px;
-    width: 60px;
-    height: 60px;
+    min-width: 60px;
+    min-height: 60px;
+    max-width: 60px;
+    max-height: 60px;
     padding: 2px;
     border-radius: 100%;
     border: 2px solid #fff;

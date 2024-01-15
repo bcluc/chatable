@@ -126,7 +126,7 @@ Chi tiết chat gồm 3 phần
                                         ConversationId="@SelectedConversation.conversationId" 
                                         ConversationType="@SelectedConversation.conversationType" 
                                         UpdateUIChat="UpdateUIChat"
-                            />
+                                        OnCallMethod="Call" />
                         }
 
                 }
@@ -138,7 +138,7 @@ Chi tiết chat gồm 3 phần
     <MudDivider />
 
     <div id="utils-message">
-        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile" Accept=".png, .jpg, .jpeg" Class="mr-1">
+        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile" Accept=".png, .jpg, .jpeg" >
             <ButtonTemplate>
                 <MudIconButton HtmlTag="label"
                                DisableElevation="true"
@@ -148,12 +148,22 @@ Chi tiết chat gồm 3 phần
             </ButtonTemplate>
         </MudFileUpload>
 
-        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile" Accept=".mp4, .avi, .mov">
+        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile" Accept=".mp4, .avi, .mov" Class="mx-1">
             <ButtonTemplate>
                 <MudIconButton HtmlTag="label"
                                DisableElevation="true"
                                for="@context.Id">
                     <i class="fa-solid fa-film fa-xl"></i>
+                </MudIconButton>
+            </ButtonTemplate>
+        </MudFileUpload>
+
+        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
+            <ButtonTemplate>
+                <MudIconButton HtmlTag="label"
+                               DisableElevation="true"
+                               for="@context.Id">
+                    <i class="fa-solid fa-paperclip fa-xl"></i>
                 </MudIconButton>
             </ButtonTemplate>
         </MudFileUpload>
@@ -286,6 +296,27 @@ Chi tiết chat gồm 3 phần
                 InvokeAsync(StateHasChanged);
             }
         });
+
+        CallHubManager.HubConnection!.On<string>("missingCall", callerId =>
+        {
+            if (callerId == SelectedConversation!.conversationId || callerId == CurrentUser.currentUser!.userName)
+            {
+                _messages.Add(new MessageDTO(
+                    "",
+                    callerId,
+                    "",
+                    "missingCall",
+                    "",
+                    DateTime.UtcNow,
+                    SelectedConversation.conversationName,
+                    SelectedConversation.conversationAvatar,
+                    false,
+                    new List<ReactionMessage>()
+                ));
+                permitScroll = "smooth";
+                InvokeAsync(StateHasChanged);
+            }
+        });
     }
 
     string permitScroll = "";
@@ -294,8 +325,9 @@ Chi tiết chat gồm 3 phần
         if (SelectedConversation is null) await GetSelectedConversation();
         if (permitScroll != "")
         {
-            await Task.Delay(permitScroll == "instant" ? 0 : 300); // Độ trễ 1 giây
-                                                                   // Không được thêm await trước lệnh dưới này
+            await Task.Delay(permitScroll == "instant" ? 0 : 300); 
+            // Độ trễ 1 giây
+            // Không được thêm await trước lệnh dưới này
             JSRuntime.InvokeVoidAsync("scrollMessagesListToBottom", permitScroll);
             permitScroll = "";
         } 
@@ -602,6 +634,9 @@ Chi tiết chat gồm 3 phần
 
         string fileType = GetFileType(file);
 
+        // Console.WriteLine("File Name: " + file.Name);
+        // Console.WriteLine("File Type: " + fileType);
+
         using var content = new MultipartFormDataContent();
         content.Add(new StreamContent(file.OpenReadStream()), "file", file.Name);
 
@@ -620,14 +655,17 @@ Chi tiết chat gồm 3 phần
             if (responseContent != null)
             {
                 ApiResponse<String> apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResponse<String>>(responseContent);
-                string imageUrl = apiResponse.Data;
+                string fileUrl = apiResponse.Data;
+
+                Console.WriteLine("fileUrl: " + fileUrl);
+
                 _messages.Add(
                     new MessageDTO(
                         "",
                         currentUser.userName,
                         "",
                         fileType,
-                        imageUrl,
+                        fileUrl,
                         DateTime.UtcNow,
                         "",
                         "",
@@ -655,7 +693,7 @@ Chi tiết chat gồm 3 phần
         {
             return "video";
         }
-        return "unknow";
+        return "file";
     }
 
     private async Task Call(string typeCall)
