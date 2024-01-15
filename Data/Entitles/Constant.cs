@@ -33,8 +33,7 @@ namespace Chatable.Data.Entitles
 
         public static readonly List<Conversation> chats = new List<Conversation>
         {
-            new Peer("nhubaole", "Trần Lê Hoàng Lâm","Nam","2023-11-19 07:58:48.084+00","BC_nhubaole"),
-            new Peer("nhihuynh", "Công chúa Elsa","Nữ", "2023-12-04 17:03:22.2+00","BC_nhihuynh"),
+           
         };
 
         public static readonly IList<User> usersList = new List<User>

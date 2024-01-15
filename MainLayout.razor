@@ -177,7 +177,8 @@
                 request.Name + " đã gửi lời mời cho bạn! ",
                 Severity.Info
             );
-            InvokeAsync(StateHasChanged);
+            StateHasChanged();
+            //InvokeAsync(StateHasChanged);
         });
 
         MessageHubManager.HubConnection!.On<RequestDTO>("FriendRequestAccepted", acceptReq =>

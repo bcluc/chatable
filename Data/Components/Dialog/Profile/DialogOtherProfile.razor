@@ -19,7 +19,15 @@
 
 <link rel="stylesheet" href="/css/DialogProfile.css">
 
-<MudDialog class="custom-dialog-content" Style="height: 580px" >
+@if (_loading)
+{
+    <div class="d-flex justify-center align-center" style="height: 30vh;width: 30vh">
+        <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+    </div>
+}
+else
+{
+<MudDialog class="custom-dialog-content" Style="height: 580px"  >
     <DialogContent>
         @if (currentUser == null)
         {
@@ -68,11 +76,28 @@
                 <MudButton OnClick="OpenChat" Class="btn-save" FullWidth="true">
                     Nhắn tin
                 </MudButton>
-                <MudButton OnClick="SendFriendRequest" Class="btn-unfriend" FullWidth="true"
-                           Style="margin-left:20px">
-                    Gửi lời mời kết bạn
-                </MudButton>
-            </div>
+                @if(statusResponse.SenderID == currentUser.userName && statusResponse.Status == "Pending")
+                    {
+                        <MudButton OnClick="()=>CancelRequest(statusResponse.ReceiverID)" Class="btn-unfriend" FullWidth="true"
+                                   Style="margin-left:20px">
+                            Hủy lời mời
+                        </MudButton>
+                    }
+                    else if (statusResponse.ReceiverID == currentUser.userName && statusResponse.Status == "Pending")
+                    {
+                        <MudButton OnClick="() => AcceptRequest(statusResponse.SenderID)" Class="btn-unfriend" FullWidth="true"
+                                   Style="margin-left:20px">
+                            Chấp nhận
+                        </MudButton>
+                    }
+                    else
+                    {
+                        <MudButton OnClick="SendFriendRequest" Class="btn-unfriend" FullWidth="true"
+                                   Style="margin-left:20px">
+                            Gửi lời mời kết bạn
+                        </MudButton>
+                    }
+                </div>
         }
         else
         {
@@ -90,7 +115,7 @@
         }
     </DialogActions>
 </MudDialog>
-
+}
 @inject CurrentUser CurrentUser
 @inject MessageHubManager MessageHubManager
 
@@ -98,6 +123,13 @@
     public class FriendRequest
     {
         public string ReceiverId { get; set; }
+    }
+
+    public class StatusResponse
+    {
+        public string SenderID { get; set; }
+        public string ReceiverID { get; set; }
+        public string Status { get; set; }
     }
 }
 @code {
@@ -108,12 +140,21 @@
     public User user { get; set; }
 
     private bool success = false;
+    private bool _loading = false;
+    private StatusResponse statusResponse = new StatusResponse();
     User currentUser;
     String avatar;
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         currentUser = CurrentUser.currentUser!;
+        await GetStatus(user.userName);
+    }
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+    void DoneTask()
+    {
+        StateHasChanged();
+        Close();
     }
 
     private void OpenChat()
@@ -135,10 +176,8 @@
 
     private async void UnFriend()
     {
-        // FriendRequest request = new FriendRequest();
-        // request.ReceiverId = user.userName;
-        // await SendRequest(request);
-        // Console.WriteLine("send rq " + request);
+        await Unfriend(user.userName);
+        Console.WriteLine("denied friend " + user.userName);
     }
 
 
@@ -161,8 +200,7 @@
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                await DialogService.ShowMessageBox("Thông báo", "  Bạn đã gửi lời mời thành công!  ");
-
+                await DialogService.ShowMessageBox("Thông báo", "    Bạn đã gửi lời mời thành công!    ");
                 // var user = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
                 await MessageHubManager.HubConnection!.SendAsync("SendRequest", friendRequest);
                 success = true;
@@ -171,12 +209,12 @@
             {
                 success = false;
                 string resBody = await response.Content.ReadAsStringAsync();
-                
+
             }
-            Console.WriteLine(friendRequest.ReceiverId + " " + success);
+            //Console.WriteLine(friendRequest.ReceiverId + " " + success);
             if (success)
             {
-                _navigationManager.NavigateTo("/chat");
+                Close();
             }
         }
         catch (Exception ex)
@@ -186,10 +224,157 @@
 
         //await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
     }
+
+    private async Task AcceptRequest(string senderID)
+    {
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.Method = new HttpMethod("GET");
+        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Accept/" + senderID);
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+        var response = await _http.SendAsync(
+            httpRequestMessage
+        );
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var respond = JsonConvert.DeserializeObject<ApiResponse<object>>(responseContent);
+            try
+            {
+                Console.WriteLine("Accepted friend request");
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something went wrong");
+            }
+            await DialogService.ShowMessageBox("Thông báo", "    Các bạn đã là bạn bè!    ");
+            NotifyStateChanged();
+        }
+        DoneTask();
+    }
+
+    private async Task Unfriend(string userName)
+    {
+        try
+        {
+            string requestInitialize = JsonConvert.SerializeObject(userName);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("DELETE");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Friend/" + userName);
+            httpRequestMessage.Content = new StringContent(requestInitialize);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await _http.SendAsync(httpRequestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                await DialogService.ShowMessageBox("Thông báo", "  Bạn đã hủy kết bạn thành công!  ");
+
+                // var user = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+                //await MessageHubManager.HubConnection!.SendAsync("SendRequest", friendRequest);
+                success = true;
+            }
+            else
+            {
+                success = false;
+                string resBody = await response.Content.ReadAsStringAsync();
+
+            }
+            if (success)
+            {
+                DoneTask();
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+        }
+
+        //await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
+    }
+
+    private async Task CancelRequest(string receiverID)
+    {
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.Method = new HttpMethod("GET");
+        httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Remove/" + receiverID);
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+
+        var response = await _http.SendAsync(
+            httpRequestMessage
+        );
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var respond = JsonConvert.DeserializeObject<ApiResponse<object>>(responseContent);
+            try
+            {
+                Console.WriteLine("Cancel friend request");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something went wrong");
+            }
+            StateHasChanged();
+        }
+        Close();
+    }
+
     private async Task OpenErroDialog()
     {
         var dialog = DialogService.Show<ErroUpImage>("Thông báo");
         var result = await dialog.Result;
+    }
+
+    private async Task<bool> GetStatus(string userName)
+    {
+        _loading = true;
+        bool success;
+        try
+        {
+            statusResponse = new StatusResponse();
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            httpRequestMessage.Method = new HttpMethod("GET");
+            httpRequestMessage.RequestUri = new Uri(Constant.uriHost + "Request/Status/" + userName);
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentUser.token!.accessToken);
+            //Console.WriteLine("Status 1");
+            var response = await _http.SendAsync(httpRequestMessage);
+            //Console.WriteLine("Status 2");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var respond = JsonConvert.DeserializeObject<ApiResponse<StatusResponse>>(responseContent);
+                success = true;
+                Console.WriteLine("Status 3");
+
+                try
+                {
+                    if (respond.Data != null)
+                    {
+                        statusResponse = respond.Data;
+                        Console.WriteLine("Status: " + respond.Data.Status);
+                        _loading = false;
+
+                    }
+                }
+                catch (Exception e)
+                {
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+        }
+        _loading = false;
+        StateHasChanged();
+        return await Task.FromResult(true);
+
+        //await jsRuntime.InvokeAsync<string>("console.log", "error", erroMessage);
     }
 }
 
