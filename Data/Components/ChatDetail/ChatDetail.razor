@@ -307,6 +307,28 @@ Chi tiết chat gồm 3 phần
                 InvokeAsync(StateHasChanged);
             }
         });
+        CallHubManager.HubConnection!.On<string, string, string>("finishCallMessage", (callerId, conversationId, content) =>
+        {
+            
+            if (SelectedConversation.conversationId == conversationId)
+            {
+                Console.WriteLine("finishCallMessage");
+                _messages.Add(new MessageDTO(
+                    "",
+                    callerId,
+                    "",
+                    "finishCall",
+                    content,
+                    DateTime.UtcNow,
+                    callerId == CurrentUser.currentUser.userName ? CurrentUser.currentUser.fullName : SelectedConversation.conversationName,
+                    callerId == CurrentUser.currentUser.userName ? CurrentUser.currentUser.avatarUrl : SelectedConversation.conversationAvatar,
+                    false,
+                    new List<ReactionMessage>()
+                ));
+                permitScroll = "smooth";
+                InvokeAsync(StateHasChanged);
+            }
+        });
     }
 
     string permitScroll = "";
@@ -551,7 +573,7 @@ Chi tiết chat gồm 3 phần
 
 
             _messages.Add(
-                new MessageDTO("", currentUser.userName, "", "text", _newMessage, DateTime.UtcNow, "", "", false, new List<ReactionMessage>())
+                new MessageDTO("", currentUser.userName, "", "text", _newMessage, DateTime.Now, "", "", false, new List<ReactionMessage>())
             );
 
             await UpdateUIChat.InvokeAsync(new Dictionary<string, Object>
@@ -562,7 +584,7 @@ Chi tiết chat gồm 3 phần
                         currentUser.userName,
                         "text",
                         _newMessage,
-                        DateTime.UtcNow,
+                        DateTime.Now,
                         null,
                         true,
                         0

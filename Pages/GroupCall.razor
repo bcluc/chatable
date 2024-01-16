@@ -202,7 +202,7 @@ else
 
     public bool isVideoOn;
 
-    private int countdownSeconds = 10;
+    private int countdownSeconds = 45;
 
     private Timer? timer;
 
@@ -210,6 +210,8 @@ else
     private HubConnection? hubRoomConnection;
 
     private Dictionary<string, PeerInfo> peersInRoom = new();
+
+    private DateTime? startTime;
 
     [JSInvokable]
     public void setIsProcessingToFalse() {
@@ -252,6 +254,8 @@ else
                 {
                     case "acceptCall":
                         status = "Đã kết nối";
+                        startTime = DateTime.Now;
+
                         break;
                     case "rejectCall":
                         status = "Không trả lời";
@@ -278,6 +282,9 @@ else
                         timer = null;
 
                         JSRuntime.InvokeVoidAsync("tatNhacChuong");
+
+                        startTime = DateTime.Now;
+                        // Console.WriteLine("startTime: " + startTime);
                         break;
                     case "rejectCall":
                         rejectionCount++;
@@ -302,7 +309,6 @@ else
                     JSRuntime.InvokeVoidAsync("leaveAndRemoveLocalStream");
                 }
             }
-
 
             InvokeAsync(StateHasChanged);
 
@@ -358,14 +364,33 @@ else
 
         hubRoomConnection.On<string>("PeerLeave", connectionId =>
         {
-            @* Console.WriteLine("Event PeerLeave"); *@
+            Console.WriteLine("Event PeerLeave");
             peersInRoom.Remove(connectionId);
+            Console.WriteLine("peersInRoom.Count = " + peersInRoom.Count);
             if (peersInRoom.Count == 0)
             {
                 status = "Cuộc gọi đã kết thúc";
                 hubRoomConnection!.SendAsync("LeaveRoom", roomId);
                 JSRuntime.InvokeVoidAsync("finishCall");
                 JSRuntime.InvokeVoidAsync("leaveAndRemoveLocalStream");
+
+                // Console.WriteLine("startTime = " + startTime);
+                // Thông báo thời gian gọi điện đến những người tham gia
+                TimeSpan? timeDifference = DateTime.Now - startTime!;
+                // Console.WriteLine($"Calling Time: {timeDifference.Value.Hours} giờ, {timeDifference.Value.Minutes} phút, {timeDifference.Value.Seconds} giây");
+                string callingTimeStr = $"{timeDifference.Value.Minutes} phút, {timeDifference.Value.Seconds} giây";
+                if (conversationType == "Peer")
+                {
+                    hubCallConnection!.SendAsync("SendFinishCallMessageTo", peerId, remoteId, peerId, callingTimeStr);
+                    hubCallConnection!.SendAsync("SendFinishCallMessageTo", peerId, peerId, remoteId, callingTimeStr);
+                } else
+                {
+                    // foreach (var member in memberIds)
+                    // {
+                    //     Console.WriteLine("member = " + member);
+                    //     hubCallConnection!.SendAsync("SendFinishCallMessageTo", peerId, memberIds, remoteId, callingTimeStr);
+                    // }
+                }
             }
             InvokeAsync(StateHasChanged);
         });
@@ -394,6 +419,7 @@ else
             khác với người đi gọi
             */
             status = "Đã kết nối";
+            startTime = DateTime.Now;
         }
     }
 
