@@ -1,0 +1,154 @@
+﻿@import url('Theme.css');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: SVN-Poppins
+}
+
+/*
+    Bố cục tổng quá
+    chat-layout là div cha
+    chứa 2 div con: #left-banner và #right-banner
+*/
+
+.chat-layout {
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+#left-banner {
+    min-width: 310px;
+    width: 310px;
+    height: 100%;
+    background-color: var(--dark-blue-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+#right-banner {
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 800px) {
+
+    .chat-layout {
+        display: block;
+        position: relative;
+    }
+
+    #v-divider {
+        display: none;
+    }
+
+    #left-banner {
+        width: 100%;
+        height: 100%;
+    }
+
+    #right-banner {
+        position: fixed;
+        top: 0px;
+        left: 80px;
+        width: calc(100% - 80px);
+    }
+
+    .wait-chat {
+        display: none !important;
+    }
+}
+
+.list-conversations {
+    display: flex;
+    flex-direction: column;
+}
+
+.coversation-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 14px;
+}
+
+.coversation-img {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+}
+
+.coversation-name {
+    font-family: SVN-Poppins;
+    font-size: 16px;
+    font-weight: 400;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.coversation-last-message {
+    max-width: 220px;
+}
+
+.last-msg {
+    font-family: SVN-Poppins;
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.unread-count {
+    font-family: Arial;
+    font-weight: 600;
+    color: white;
+    background-color: rgb(229, 9, 21);
+    min-width: 20px;
+    min-height: 20px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 0.9;
+}
+
+.user-select {
+    background-color: #0091FE33;
+    color: black;
+}
+
+.user-unselect {
+    background-color: white;
+    color: black;
+}
+
+    .user-unselect:hover {
+        background-color: #F4F5F7;
+    }
+
+/* Layout cho màn hình đợi */
+.wait-chat {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+    background-color: var(--dark-blue-color);
+    color: var(--white-color);
+}
+
+.wait-chat-title {
+    font-family: SVN-Poppins;
+    font-size: 20px;
+    text-align: center
+}
+
+.wait-chat-img {
+    width: 70%;
+    min-width: 300px;
+    max-width: max(600px, 40%);
+}

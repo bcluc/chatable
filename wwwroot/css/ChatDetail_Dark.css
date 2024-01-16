@@ -1,0 +1,332 @@
+﻿@import url('Theme.css');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Layout cho màn hình Chat */
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+   
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: var(--dark-blue-color);
+}
+
+#back-btn {
+    display: none;
+    padding: 10px;
+    border-radius: 8px;
+    width: 40px;
+    color:white;
+}
+
+@media (max-width: 800px) {
+
+    #back-btn {
+        display: block;
+    }
+}
+
+.receiver-name {
+    font-family: SVN-Poppins;
+    font-size: 18px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+    color: var(--white-color);
+}
+
+.receiver-status {
+    font-family: SVN-Poppins;
+
+    font-size: 14px;
+    color: gray;
+}
+.list-group-item {
+    font-family: SVN-Poppins;
+    font-size: 18px;
+    justify-content: center;
+}
+
+.chat-container {
+    flex: 1; /* expanded */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: var(--dark-blue-color);
+}
+
+.water-mark-img {
+    position: absolute;
+    max-width: 70%;
+    max-height: 70%;
+    object-fit: contain;
+}
+
+.messages-list {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    overflow-y: scroll;
+    padding: 20px;
+}
+
+#utils-message {
+    display: flex;
+    padding: 4px;
+    background-color: var(--dark-blue-color);
+}
+
+#utils-message > button {
+    padding: 10px;
+    border-radius: 4px;
+    background-color: var(--white-color);
+}
+
+/*-------------------------------------------------------------------------------------*/
+#message-input {
+    font-family: SVN-Poppins;
+    background-color: var(--dark-blue-color);
+    color: var(--white-color);
+    display: flex;
+    align-items: center;
+}
+.mud-input {
+    background-color: var(--dark-blue-color);
+    color: var(--white-color);
+}
+.mud-divider{
+    border-color: var(--dark-light-color);
+}
+.mud-input-control-input-container{
+    background-color: var(--glass-color);
+}
+.mud-input-control > .mud-input-control-input-container > div.mud-input.mud-input-text {
+    margin-top: 0;
+}
+
+#message-input .mud-input > input.mud-input-root, div.mud-input-slot.mud-input-root {
+    padding: 20px 14px;
+}
+
+#message-input > .mud-input-control > .mud-input-control-input-container {
+    background-color: white !important;
+    border-radius: 0px !important;
+}
+
+.btn-send {
+    border-radius: 6px;
+    background: var(--glass-color);
+    padding: 6px 15px;
+    color: var(--white-color);
+    font-family: SVN-Poppins;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Message Style */
+
+.message-ul {
+    padding: 6px;
+    margin-bottom: 1rem;
+}
+
+.justify-content-end {
+    display: flex;
+    justify-content: end;
+}
+.justify-content-start {
+    display: flex;
+    justify-content: start;
+}
+
+.single-msg {
+    background: var(--glass-color);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: SVN-Poppins;
+    margin-bottom: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    word-wrap: break-word;
+    min-width: 110px;
+}
+
+.has-reaction {
+    margin-bottom: 16px;
+}
+
+.text-msg {
+    max-width: calc(100% - 170px);
+}
+
+.image-msg, .video-msg {
+    max-width: calc(100% - 225px);
+}
+
+.d-flex > .forward {
+    display: none;
+    margin-bottom: 6px;
+}
+
+/* Show the button when hovering over the <li> element */
+.d-flex:hover > .forward {
+    display: block;
+}
+
+.me {
+    color: var(--white-color);
+}
+/*linear-gradient(298deg, var(--red), var(--yellow));*/
+.other {
+    color: var(--white-color);
+}
+
+.me .reactions {
+    position: absolute;
+    bottom: -12px;
+    left: 12px;
+    border-radius: 20px;
+    background-color: white;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1), 0 2px rgba(0, 0, 0, 0.1);
+    height: 24px;
+    padding: 0 2px;
+    cursor: pointer;
+}
+
+.other .reactions {
+    position: absolute;
+    bottom: -12px;
+    right: 12px;
+    border-radius: 20px;
+    background-color: white;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1), 0 2px rgba(0, 0, 0, 0.1);
+    height: 24px;
+    padding: 0 2px;
+    cursor: pointer;
+}
+
+.msg-dt {
+    font-family: SVN-Poppins;
+    font-size: 11px;
+}
+
+.me .msg-dt {
+    display: block;
+    width: 100%;
+    text-align: right;
+    color: gray;
+}
+.other .msg-dt{
+    color: black;
+}
+
+/*
+
+.home-image {
+    height: 300px;
+    align-self: center;
+    object-fit: cover;
+}
+
+
+.user-p {
+    font-size: 17px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: black;
+    align-items: center;
+    margin-left: 15px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width:100%;
+}
+.btn-send {
+    border-radius: 5px;
+    background-color: var(--bg-color);
+    padding: 4px 15px;
+    color: white;
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 5px;
+}
+
+.chat-container {*/
+    /*flex: 0 0 auto;
+    padding-right: 0!important;
+    padding-left: 0!important;
+    display: flex!important;
+    width:100%;*/
+    /*flex: 1;
+    width: auto;
+    height: auto;
+    display: flex!;
+    position: relative;
+    align-self: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+.chat-page-cont{
+    flex-grow: 1!important;
+    flex-direction: column!important;
+    display: flex!important;
+}
+.chat-header-container {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-self: stretch;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-bottom: 5px;
+}
+
+    .chat-user-container {
+        flex: 1;
+        width: auto;
+        height: auto;
+        display: flex;
+        align-items: center;
+    }
+.chat-btn-container {
+    flex: 0 0 auto;
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    justify-content: flex-end;
+}
+.home-textinput1 {
+    flex: 1;
+    margin-left: 10px;
+}
+
+.home-button5 {
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 5px;
+}
+
+
+    .message-textinput:focus {
+    outline: none !important;
+
+ }*/

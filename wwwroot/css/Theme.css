@@ -4,6 +4,18 @@
     --bg-conversation-color: #eef0f1;
     --main-font: 'SVN-Poppins',sans-serif;
     --alert-color: #F7574C;
+    --pink-yellow-color: linear-gradient(243deg, rgb(255, 253, 221) 13.4%, rgb(248, 215, 215) 82.1%);
+    --blue-pink-color: linear-gradient(105.4deg, rgb(216, 176, 216) 23.9%, rgb(53, 169, 215) 86.5%);
+    --glass-color: rgba(255, 255, 255, 0.15);
+    --white-color: #ffffff;
+    --light-color: #f0eff3;
+    --black-color: #000000;
+    --dark-blue-color: #1f2029;
+    --dark-light-color: #353746;
+    --red-color: #da2c4d;
+    --yellow-color: #f8ab37;
+    --grey-color: #ecedf3;
+    --yellow-red-color: linear-gradient(298deg, var(--red-color), var(--yellow-color));
 }
 @font-face {
     font-family: 'SVN-Poppins';
